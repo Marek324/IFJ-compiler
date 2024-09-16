@@ -1,9 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -pedantic -fsanitize=address
-SRCS = main.c
-OBJS = $(SRCS:.c=.o)
 TARGET = main
-PHONY = all clean
+PHONY = all clean zip
 
 all: $(TARGET)
 
@@ -14,4 +12,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f *.o $(TARGET)
+
+zip:
+	zip xhricma00.zip *.c *.h Makefile rozdeleni
