@@ -16,6 +16,6 @@ union TokenValue {
 
 typedef struct {
     TokenType type;
-    char* value;
+    TokenValue value;
     int line;
 } Token;
