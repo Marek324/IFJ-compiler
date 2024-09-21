@@ -6,15 +6,9 @@ dyn_str* dyn_str_init() {
         return NULL; 
     }
     
-    ds->s = malloc(0);
-    if (ds->s == NULL) {
-        free(ds);  
-        return NULL;
-    }
-
     ds->length = 0;
     ds->capacity = 0;
-    ds->s[0] = '\0';
+    ds->s = NULL;
 
     return ds;
 }
