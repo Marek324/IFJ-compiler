@@ -9,7 +9,7 @@ typedef struct {
     char* s;
     int length;
     int capacity;
-}dyn_str;
+} dyn_str;
 
 //dynamic string initialization
 dyn_str* dyn_str_init();
