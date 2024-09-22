@@ -1,7 +1,7 @@
-#include "dyn_str.h"
+#include "../include/dyn_str.h"
 
 dyn_str* dyn_str_init() {
-    dyn_str *ds = malloc(sizeof(dyn_str));
+    dyn_str* ds = malloc(sizeof(dyn_str));
     if (ds == NULL) {
         return NULL; 
     }
@@ -13,7 +13,7 @@ dyn_str* dyn_str_init() {
     return ds;
 }
 
-dyn_str* dyn_str_grow(dyn_str *ds) {
+dyn_str* dyn_str_grow(dyn_str* ds) {
     if (ds == NULL) {
         return NULL;
     }
@@ -29,7 +29,7 @@ dyn_str* dyn_str_grow(dyn_str *ds) {
     return ds;
 }
 
-dyn_str* dyn_str_append(dyn_str *ds, char c) {
+dyn_str* dyn_str_append(dyn_str* ds, char c) {
     if (ds->length >= ds->capacity - 1) {
         ds = dyn_str_grow(ds);
         if (ds == NULL) {
@@ -43,7 +43,7 @@ dyn_str* dyn_str_append(dyn_str *ds, char c) {
     return ds;
 }
 
-void dyn_str_free(dyn_str *ds) {
+void dyn_str_free(dyn_str* ds) {
     if (ds != NULL) {
         free(ds->s);
         free(ds);
