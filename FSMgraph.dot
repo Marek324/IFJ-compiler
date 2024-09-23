@@ -1,7 +1,5 @@
 digraph G {
-    // layout=neato
-    // overlap=false
-    graph [nodesep=0.7]
+    graph [nodesep=0.5]
     node [shape=circle]
 
     INVISIBLE_NODE [style=invis]
@@ -11,7 +9,7 @@ digraph G {
     subgraph final_nodes{
         node [shape=doublecircle]
         S_ASGN; S_EQ; S_BANG; S_NOT_TRUE; S_LESS; S_LESS_EQUAL; S_MORE; S_MORE_EQUAL;
-        S_PLUS; S_MINUS; S_TIMES; S_SLASH; S_MODULO; S_PLUS_ASGN; S_MINUS_ASGN; S_TIMES_ASGN; S_SLASH_ASGN; S_MODULO_ASGN;
+        S_PLUS; S_MINUS; S_TIMES; S_SLASH; S_PLUS_ASGN; S_MINUS_ASGN; S_TIMES_ASGN; S_SLASH_ASGN; 
         S_STR_LITERAL; S_STR_LITERAL_ESCAPE;
         S_ID; S_KEYWORD;
         S_INT; S_FLOAT; S_FLOAT_EXP;
@@ -21,8 +19,7 @@ digraph G {
     S_START -> S_SLASH [label="/"]
     S_SLASH -> S_COMM [label="/"]
     S_COMM -> S_COMM [label="char"]
-    S_COMM -> S_POS_MULTILINE_COMM [label="\\"]
-    S_POS_MULTILINE_COMM -> S_COMM [label="char"]
+    S_COMM -> S_START [label="\\n"]
 
     S_START -> S_ASGN [label="="]
     S_ASGN -> S_EQ [label="="]
@@ -44,9 +41,6 @@ digraph G {
 
     S_START -> S_TIMES [label="*"] 
     S_TIMES -> S_TIMES_ASGN [label="="]
-
-    S_START -> S_MODULO [label="%"]
-    S_MODULO -> S_MODULO_ASGN [label="="]
 
     S_SLASH -> S_SLASH_ASGN [label="="]
 
