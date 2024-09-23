@@ -1,4 +1,5 @@
 *.txt
 *.o
 .vscode/
+build/
 *.svg

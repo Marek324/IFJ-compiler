@@ -1,3 +1,11 @@
+/**
+ * \file scanner.h
+ * 
+ * \author Marek Hric
+ * 
+ * \brief Header file for the scanner.
+ */
+
 enum State {
     S_START,
 
@@ -25,3 +33,5 @@ enum State {
     S_COMM,
     S_POS_MULTILINE_COMM,    
 };
+
+/*** End of file scanner.h ***/
