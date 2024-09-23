@@ -19,7 +19,7 @@ enum State {
     S_BANG, S_NEQ,
     S_LESS, S_LEQ,
     S_MORE, S_MEQ,
-    
+
     S_PLUS, S_PASGN,
     S_MINUS, S_MASGN,
     S_MUL, S_MULASGN,
@@ -47,7 +47,7 @@ enum State {
 typedef struct Token;
 
 // Function prototypes
-Token* get_token();
+Token* get_token(FILE* file, int *line);
 void free_token(Token* token);
 
 /*** End of file scanner.h ***/
