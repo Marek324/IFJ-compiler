@@ -15,19 +15,15 @@ enum State {
     S_KW,
 
     //OPERATORS
-    S_ASN,
-    S_EQ, 
-    S_BANG,
-    S_NEQ,
-    S_LESS,
-    S_LEQ,
-    S_MORE,
-    S_MEQ,
-    S_PLUS,
-    S_PASGN,
-    S_MINUS,
-    S_TIMES,
-    S_SLASH,
+    S_ASGN, S_EQ, 
+    S_BANG, S_NEQ,
+    S_LESS, S_LEQ,
+    S_MORE, S_MEQ,
+    
+    S_PLUS, S_PASGN,
+    S_MINUS, S_MASGN,
+    S_MUL, S_MULASGN,
+    S_SLASH, S_DASGN,
 
     //NUMBERS
     S_INT,
@@ -45,9 +41,7 @@ enum State {
     S_STR, S_STR_ESC,
 
     //COMMENTS
-    S_POS_COMM,
-    S_COMM,
-    S_POS_MULTILINE_COMM,    
+    S_COMM   
 };
 
 typedef struct Token;
