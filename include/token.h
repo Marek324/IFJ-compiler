@@ -1,10 +1,10 @@
 /**
- * \file token.h
+ * @file token.h
  * 
- * \author Marek Hric
- * \author Adam Veselý
+ * @author Marek Hric
+ * @author Adam Veselý
  * 
- * \brief Header file for tokens.
+ * @brief Header file for tokens.
  */
 
 typedef struct dyn_str;
@@ -16,12 +16,12 @@ enum KeyWordType {
 };
 
 /**
- * \brief Token value structure.
+ * @brief Token value structure.
  * 
- * \param int_value Integer value of token value.
- * \param float_value Float value of token value.
- * \param string_value Dynamic string value of token value.
- * \param keyword Keyword type of token value.
+ * @param int_value Integer value of token value.
+ * @param float_value Float value of token value.
+ * @param string_value Dynamic string value of token value.
+ * @param keyword Keyword type of token value.
  */
 union TokenValue {
     int int_value;
@@ -31,11 +31,11 @@ union TokenValue {
 };
 
 /**
- * \brief Token structure.
+ * @brief Token structure.
  * 
- * \param type Token type of the token.
- * \param value Token value of the token.
- * \param line Line where the token is located.
+ * @param type Token type of the token.
+ * @param value Token value of the token.
+ * @param line Line where the token is located.
  */
 typedef struct {
     TokenType type;
