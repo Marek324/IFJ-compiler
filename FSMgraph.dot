@@ -11,7 +11,7 @@ digraph G {
     subgraph final_nodes{
         node [shape=doublecircle]
         S_ASGN; S_EQ; S_BANG; S_NEQ; S_LESS; S_LEQ; S_MORE; S_MEQ;
-        S_PLUS; S_PASGN; S_MINUS; S_MASGN; S_TIMES; S_TASGN; S_SLASH; S_DASGN;
+        S_PLUS; S_PASGN; S_MINUS; S_MASGN; S_MUL; S_MULASGN; S_SLASH; S_DASGN;
         S_STR; S_STR_ESC;
         S_ID; S_KW;
         S_INT; S_F64; S_F64_E;
@@ -42,8 +42,8 @@ digraph G {
     S_START -> S_MINUS [label="-"]
     S_MINUS -> S_MASGN [label="="]
 
-    S_START -> S_TIMES [label="*"] 
-    S_TIMES -> S_TASGN [label="="]
+    S_START -> S_MUL [label="*"] 
+    S_MUL -> S_MULASGN [label="="]
 
     S_SLASH -> S_DASGN [label="="]
 
