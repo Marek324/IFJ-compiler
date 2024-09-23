@@ -72,5 +72,9 @@ digraph G {
     S_FLOAT_EXP_2 -> S_FLOAT_EXP [label="0-9"]
     S_FLOAT_EXP -> S_FLOAT_EXP [label="0-9"]
 
+    S_START -> S_AT [label="@"]
+    S_START -> S_COMMA [label=","]
+    S_START -> S_DOT [label="."]
+
     S_START -> S_END [label="EOF"]
 }
