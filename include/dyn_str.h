@@ -46,7 +46,7 @@ dyn_str* dyn_str_init();
  * Updates the capacity of the dynamic string structure to 2 or double the capacity respectively.
  * 
  * @param[in, out] ds Pointer to dynamic string that will be enlarged.
- * @return Pointer to the newly enlarged dynamic string.
+ * @return Pointer to the enlarged dynamic string structure.
  */
 dyn_str* dyn_str_grow(dyn_str* ds);
 
@@ -59,7 +59,7 @@ dyn_str* dyn_str_grow(dyn_str* ds);
  * 
  * @param[in, out] ds Pointer to dynamic string we want to add to.
  * @param[in] c Character that will be appended to the dynamic string.
- * @return Pointer to the expanded dynamic string.
+ * @return Pointer to the lengthened dynamic string structure.
  */
 dyn_str* dyn_str_append(dyn_str* ds, char c);
 
