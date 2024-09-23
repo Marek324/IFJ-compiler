@@ -1,9 +1,9 @@
 /**
- * \file dyn_str.c
+ * @file dyn_str.c
  * 
- * \author Mikuláš Lešiga
+ * @author Mikuláš Lešiga
  * 
- * \brief Implementation of dynamic string functions from dyn_str.h.
+ * @brief Implementation of dynamic string functions from dyn_str.h.
  */
 
 #include "../include/dyn_str.h"

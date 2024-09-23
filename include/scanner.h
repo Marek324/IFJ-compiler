@@ -1,9 +1,9 @@
 /**
- * \file scanner.h
+ * @file scanner.h
  * 
- * \author Marek Hric
+ * @author Marek Hric
  * 
- * \brief Header file for the scanner.
+ * @brief Header file for the scanner.
  */
 
 enum State {
