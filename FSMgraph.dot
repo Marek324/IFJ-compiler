@@ -65,6 +65,8 @@ digraph G {
     S_FLOAT_DOT -> S_FLOAT [label="0-9"]
     S_FLOAT -> S_FLOAT [label="0-9"]
     S_FLOAT -> S_FLOAT_EXP_1 [label="Ee"]
+    S_FLOAT_EXP_1 -> S_FLOAT_EXP [label="0-9"]
     S_FLOAT_EXP_1 -> S_FLOAT_EXP_2 [label="+-"]
     S_FLOAT_EXP_2 -> S_FLOAT_EXP [label="0-9"]
+    S_FLOAT_EXP -> S_FLOAT_EXP [label="0-9"]
 }
