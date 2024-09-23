@@ -1,0 +1,59 @@
+digraph G {
+    // layout=neato
+    // overlap=false
+    node [shape=circle]
+
+    INVISIBLE_NODE [style=invis]
+    S_START [shape="doublecircle"]
+    INVISIBLE_NODE->S_START
+
+    subgraph final_nodes{
+        node [shape=doublecircle]
+        S_ASGN; S_EQ; S_BANG; S_NOT_TRUE; S_LESS; S_LESS_EQUAL; S_MORE; S_MORE_EQUAL;
+        S_PLUS; S_MINUS; S_TIMES; S_SLASH; S_MODULO; S_PLUS_ASGN; S_MINUS_ASGN; S_TIMES_ASGN; S_SLASH_ASGN; S_MODULO_ASGN;
+        S_STR_LITERAL; S_STR_LITERAL_ESCAPE;
+        S_ID; S_KEYWORD;
+    }
+       
+    S_START -> S_START [label="whitespace"]
+    S_START -> S_SLASH [label="/"]
+    S_SLASH -> S_COMM [label="/"]
+    S_COMM -> S_COMM [label="char"]
+    S_COMM -> S_POS_MULTILINE_COMM [label="\\"]
+    S_POS_MULTILINE_COMM -> S_COMM [label="char"]
+
+    S_START -> S_ASGN [label="="]
+    S_ASGN -> S_EQ [label="="]
+
+    S_START -> S_BANG [label="!"]
+    S_BANG -> S_NOT_TRUE [label="="]
+
+    S_START -> S_LESS [label="<"]
+    S_LESS -> S_LESS_EQUAL [label="="]
+
+    S_START -> S_MORE [label=">"]
+    S_MORE -> S_MORE_EQUAL [label="="]
+
+    S_START -> S_PLUS [label="+"]
+    S_PLUS -> S_PLUS_ASGN [label="="]
+
+    S_START -> S_MINUS [label="-"]
+    S_MINUS -> S_MINUS_ASGN [label="="]
+
+    S_START -> S_TIMES [label="*"] 
+    S_TIMES -> S_TIMES_ASGN [label="="]
+
+    S_START -> S_MODULO [label="%"]
+    S_MODULO -> S_MODULO_ASGN [label="="]
+
+    S_SLASH -> S_SLASH_ASGN [label="="]
+
+    S_START -> S_STR_LITERAL [label="\""]
+    S_STR_LITERAL -> S_STR_LITERAL [label="char"]
+    S_STR_LITERAL -> S_STR_LITERAL_ESCAPE [label="\\"]
+    S_STR_LITERAL_ESCAPE -> S_STR_LITERAL [label="char"]
+
+    S_START -> S_ID [label="A-Za-z_"]
+    S_ID -> S_ID [label="A-Za-z0-9_"]
+    S_ID -> S_KEYWORD [label="match"]
+}
