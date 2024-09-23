@@ -14,7 +14,7 @@ digraph G {
         S_PLUS; S_PASGN; S_MINUS; S_MASGN; S_TIMES; S_TASGN; S_SLASH; S_DASGN;
         S_STR; S_STR_ESC;
         S_ID; S_KW;
-        S_INT; S_F64; S_F64_EXP;
+        S_INT; S_F64; E;
         S_AT; S_COMMA; S_DOT;
         S_END;
     }
@@ -62,10 +62,10 @@ digraph G {
     S_F64_DOT -> S_F64 [label="0-9"]
     S_F64 -> S_F64 [label="0-9"]
     S_F64 -> S_F64_E1 [label="Ee"]
-    S_F64_E1 -> S_F64_EXP [label="0-9"]
+    S_F64_E1 -> E [label="0-9"]
     S_F64_E1 -> S_F64_E2 [label="+-"]
-    S_F64_E2 -> S_F64_EXP [label="0-9"]
-    S_F64_EXP -> S_F64_EXP [label="0-9"]
+    S_F64_E2 -> E [label="0-9"]
+    E -> E [label="0-9"]
 
     S_START -> S_AT [label="@"]
     S_START -> S_COMMA [label=","]
