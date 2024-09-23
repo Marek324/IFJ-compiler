@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -pedantic -fsanitize=address
 TARGET = main
-PHONY = all clean zip
+PHONY = all clean doxygen zip
 
 all: $(TARGET)
 
@@ -13,6 +13,9 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm -f *.o $(TARGET)
+
+doxygen:
+	doxygen Doxyfile
 
 zip:
 	zip xhricma00.zip *.c *.h Makefile rozdeleni
