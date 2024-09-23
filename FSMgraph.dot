@@ -15,6 +15,8 @@ digraph G {
         S_STR_LITERAL; S_STR_LITERAL_ESCAPE;
         S_ID; S_KEYWORD;
         S_INT; S_FLOAT; S_FLOAT_EXP;
+        S_AT; S_COMMA; S_DOT;
+        S_END;
     }
        
     S_START -> S_START [label="whitespace"]
@@ -69,4 +71,6 @@ digraph G {
     S_FLOAT_EXP_1 -> S_FLOAT_EXP_2 [label="+-"]
     S_FLOAT_EXP_2 -> S_FLOAT_EXP [label="0-9"]
     S_FLOAT_EXP -> S_FLOAT_EXP [label="0-9"]
+
+    S_START -> S_END [label="EOF"]
 }

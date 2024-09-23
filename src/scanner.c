@@ -6,6 +6,6 @@
  * \brief Implementation of scanner.
  */
 
-// Keywords: const, else, fn, if, i32, f64, null, pub, return, u8, var, void, while
+// Keywords: const, else, fn, if, i32, f64, null, pub, return, u8, var, void, while, import
 
 /*** End of file scanner.c */
