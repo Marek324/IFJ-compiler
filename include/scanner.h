@@ -8,25 +8,41 @@
 
 enum State {
     S_START,
+    S_END,
+    S_ERROR,
+    
+    S_ID,
+    S_KW,
 
     //OPERATORS
+    S_ASN,
     S_EQ, 
     S_BANG,
+    S_NEQ,
     S_LESS,
+    S_LEQ,
     S_MORE,
+    S_MEQ,
+    S_PLUS,
+    S_PASGN,
+    S_MINUS,
+    S_TIMES,
+    S_SLASH,
 
-    //KEYWORDS
-    S_POS_KW_I, S_POS_KW_IF,
-                S_POS_KW_IN, S_POS_KW_INC, S_POS_KW_INCL, S_POS_KW_INCLU, S_POS_KW_INCLUD, S_POS_KW_INCLUDE,
-    S_POS_KW_E, S_POS_KW_EL, S_POS_KW_ELS, S_POS_KW_ELSE,
-    S_POS_KW_W, S_POS_KW_WH, S_POS_KW_WHI, S_POS_KW_WHIL, S_POS_KW_WHILE,
+    //NUMBERS
+    S_INT,
+    S_F64, S_F64_DOT, S_F64_E, S_F64_E1, S_F64_E2,
 
-    //IDENTIFIERS
-    S_IDENTIFIER,
+    //DELIMITERS
+    S_DOT,
+    S_COMMA,
+    S_SEMICOL,
+    S_LPAREN, S_RPAREN,
+    S_LBRACE, S_RBRACE,
+    S_LBRACKET, S_RBRACKET,
 
     //LITERALS
-    S_STR_LITERAL, S_STR_LITERAL_BSLASH,
-    S_CHAR_LITERAL, S_CHAR_LITERAL_BSLASH,
+    S_STR, S_STR_ESC,
 
     //COMMENTS
     S_POS_COMM,
