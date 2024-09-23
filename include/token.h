@@ -1,7 +1,8 @@
 /**
  * \file token.h
  * 
- * \authors Marek Hric, Adam Veselý
+ * \author Marek Hric
+ * \author Adam Veselý
  * 
  * \brief Header file for tokens.
  */

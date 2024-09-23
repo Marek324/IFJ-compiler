@@ -1,7 +1,9 @@
 /**
  * \file dyn_str.h
  * 
- * \authors Mikuláš Lešiga, Marek Hric, Adam Veselý
+ * \author Mikuláš Lešiga
+ * \author Marek Hric
+ * \author Adam Veselý
  * 
  * \brief Header file for the dynamic string structures and its functions.
  */
