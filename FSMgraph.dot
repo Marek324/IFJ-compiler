@@ -62,10 +62,10 @@ digraph G {
     S_F64_DOT -> S_F64 [label="0-9"]
     S_F64 -> S_F64 [label="0-9"]
     S_F64 -> S_F64_E1 [label="Ee"]
-    S_F64_E1 -> E [label="0-9"]
+    S_F64_E1 -> S_F64_E [label="0-9"]
     S_F64_E1 -> S_F64_E2 [label="+-"]
-    S_F64_E2 -> E [label="0-9"]
-    E -> E [label="0-9"]
+    S_F64_E2 -> S_F64_E [label="0-9"]
+    S_F64_E -> S_F64_E [label="0-9"]
 
     S_START -> S_AT [label="@"]
     S_START -> S_COMMA [label=","]
