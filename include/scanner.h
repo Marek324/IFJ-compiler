@@ -1,5 +1,5 @@
 /**
- * \file dyn_str.h
+ * \file scanner.h
  * 
  * \author Marek Hric
  * 
