@@ -15,7 +15,7 @@ digraph G {
         S_STR; S_STR_ESC;
         S_ID; S_KW;
         S_INT; S_F64; S_F64_E;
-        S_AT; S_COMMA; S_DOT; S_LPAREN; S_RPAREN; S_LBRACE; S_RBRACE; S_LBRACKET; S_RBRACKET;
+        S_AT; S_COMMA; S_DOT; S_SEMICOL; S_LPAREN; S_RPAREN; S_LBRACE; S_RBRACE; S_LBRACKET; S_RBRACKET; 
         S_END;
     }
        
@@ -70,6 +70,7 @@ digraph G {
     S_START -> S_AT [label="@"]
     S_START -> S_COMMA [label=","]
     S_START -> S_DOT [label="."]
+    S_START -> S_SEMICOL [label=";"]
     S_START -> S_LPAREN [label="("]
     S_START -> S_RPAREN [label=")"]
     S_START -> S_LBRACE [label="{"]
