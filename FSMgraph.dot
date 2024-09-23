@@ -1,6 +1,7 @@
 digraph G {
     // layout=neato
     // overlap=false
+    graph [nodesep=0.7]
     node [shape=circle]
 
     INVISIBLE_NODE [style=invis]
@@ -13,6 +14,7 @@ digraph G {
         S_PLUS; S_MINUS; S_TIMES; S_SLASH; S_MODULO; S_PLUS_ASGN; S_MINUS_ASGN; S_TIMES_ASGN; S_SLASH_ASGN; S_MODULO_ASGN;
         S_STR_LITERAL; S_STR_LITERAL_ESCAPE;
         S_ID; S_KEYWORD;
+        S_INT; S_FLOAT; S_FLOAT_EXP;
     }
        
     S_START -> S_START [label="whitespace"]
@@ -51,9 +53,18 @@ digraph G {
     S_START -> S_STR_LITERAL [label="\""]
     S_STR_LITERAL -> S_STR_LITERAL [label="char"]
     S_STR_LITERAL -> S_STR_LITERAL_ESCAPE [label="\\"]
-    S_STR_LITERAL_ESCAPE -> S_STR_LITERAL [label="char"]
+    S_STR_LITERAL_ESCAPE -> S_STR_LITERAL [label="\"nrt\\"]
 
     S_START -> S_ID [label="A-Za-z_"]
     S_ID -> S_ID [label="A-Za-z0-9_"]
     S_ID -> S_KEYWORD [label="match"]
+
+    S_START -> S_INT [label="0-9"]
+    S_INT -> S_INT [label="0-9"]
+    S_INT -> S_FLOAT_DOT [label="."]
+    S_FLOAT_DOT -> S_FLOAT [label="0-9"]
+    S_FLOAT -> S_FLOAT [label="0-9"]
+    S_FLOAT -> S_FLOAT_EXP_1 [label="Ee"]
+    S_FLOAT_EXP_1 -> S_FLOAT_EXP_2 [label="+-"]
+    S_FLOAT_EXP_2 -> S_FLOAT_EXP [label="0-9"]
 }
