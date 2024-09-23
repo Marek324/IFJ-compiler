@@ -1,3 +1,11 @@
+/**
+ * \file token.h
+ * 
+ * \authors Marek Hric, Adam Veselý
+ * 
+ * \brief Header file for tokens.
+ */
+
 typedef struct dyn_str;
 
 enum TokenType {
@@ -20,7 +28,7 @@ union TokenValue {
     dyn_str* string_value;
     KeyWordType keyword;
 };
-    
+
 /**
  * \brief Token structure.
  * 
@@ -33,3 +41,5 @@ typedef struct {
     TokenValue value;
     int line;
 } Token;
+
+/*** End of file token.h ***/

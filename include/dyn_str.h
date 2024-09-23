@@ -1,3 +1,11 @@
+/**
+ * \file dyn_str.h
+ * 
+ * \authors Mikuláš Lešiga, Marek Hric, Adam Veselý
+ * 
+ * \brief Header file for the dynamic string structures and its functions.
+ */
+
 #ifndef DYN_STR_H
 #define DYN_STR_H
 
@@ -64,3 +72,5 @@ void dyn_str_free(dyn_str* ds);
 
 
 #endif  // DYN_STR_H
+
+/*** End of file dyn_str.h ***/

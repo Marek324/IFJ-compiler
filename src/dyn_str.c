@@ -1,3 +1,11 @@
+/**
+ * \file dyn_str.c
+ * 
+ * \author Mikuláš Lešiga
+ * 
+ * \brief Implementation of dynamic string functions from dyn_str.h.
+ */
+
 #include "../include/dyn_str.h"
 
 dyn_str* dyn_str_init() {
@@ -51,3 +59,4 @@ void dyn_str_free(dyn_str* ds) {
     }
 }
 
+/*** End of file dyn_str.c ***/
