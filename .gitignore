@@ -2,4 +2,4 @@
 *.o
 .vscode/
 build/
-*.svg
+*.png
