@@ -1,6 +1,4 @@
 digraph G {
-    // layout=neato
-    // overlap=false
     graph [nodesep=0.7]
     node [shape=circle]
 
