@@ -34,4 +34,10 @@ enum State {
     S_POS_MULTILINE_COMM,    
 };
 
+typedef struct Token;
+
+// Function prototypes
+Token* get_token();
+void free_token(Token* token);
+
 /*** End of file scanner.h ***/
