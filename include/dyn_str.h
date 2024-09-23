@@ -53,13 +53,14 @@ dyn_str* dyn_str_grow(dyn_str* ds);
 /**
  * @brief Adds a character to the end of the string.
  * 
- * If the dynamic string length is bigger than the capacity - 2 this function calls the dyn_str_grow function to increase the capacity.
  * Puts the new character at the end of the string, replacing the null terminator.
  * The null terminator is added after the new character and the dynamic string length is incremented by 1.
  * 
  * @param[in, out] ds Pointer to dynamic string we want to add to.
  * @param[in] c Character that will be appended to the dynamic string.
  * @return Pointer to the lengthened dynamic string structure.
+ * 
+ * @note If the dynamic string length is bigger than the capacity - 2 this function calls the dyn_str_grow function to increase the capacity.
  */
 dyn_str* dyn_str_append(dyn_str* ds, char c);
 
