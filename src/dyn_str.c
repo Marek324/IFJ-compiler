@@ -1,10 +1,8 @@
-/**
- * @file dyn_str.c
- * 
- * @author Mikuláš Lešiga
- * 
- * @brief Implementation of dynamic string functions from dyn_str.h.
- */
+/*
+file: dyn_str.c
+author: Mikuláš Lešiga
+Implementation of dynamic string functions from dyn_str.h.
+*/
 
 #include "../include/dyn_str.h"
 
@@ -58,5 +56,3 @@ void dyn_str_free(dyn_str* ds) {
         free(ds);
     }
 }
-
-/*** End of file dyn_str.c ***/

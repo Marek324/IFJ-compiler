@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -pedantic -fsanitize=address
 TARGET = main
-PHONY = all clean zip
+PHONY = all clean graph zip
 
 all: $(TARGET)
 
@@ -10,6 +10,9 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
+
+graph: FSMgraph.dot
+	dot -Tpng FSMgraph.dot -o FSMgraph.png
 
 clean:
 	rm -f *.o $(TARGET)
