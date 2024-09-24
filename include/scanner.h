@@ -4,6 +4,10 @@ author: Marek Hric
 Header file for the scanner.
 */
 
+#ifndef SCANNER_H
+#define SCANNER_H
+
+
 enum State {
     S_START,
     S_END,
@@ -47,3 +51,5 @@ typedef struct Token;
 // Function prototypes
 Token* get_token(FILE* file, int *line);
 void free_token(Token* token);
+
+#endif // SCANNER_H

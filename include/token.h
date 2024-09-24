@@ -3,6 +3,10 @@ file: token.h
 authors: Marek Hric, Adam Veselý
 Header file for tokens.
 */
+
+#ifndef TOKEN_H
+#define TOKEN
+
 typedef struct dyn_str;
 
 typedef enum {
@@ -65,3 +69,5 @@ typedef struct {
     TokenValue value;
     int line;
 } Token;
+
+#endif // TOKEN_H
