@@ -55,6 +55,8 @@ digraph G {
     S_STR -> S_STR [label="char"]
     S_STR -> S_STR_ESC [label="\\"]
     S_STR_ESC -> S_STR [label="\"nrt\\"]
+    S_STR_ESC -> S_ERROR [label="^\"nrt\\"]
+    S_STR -> S_ERROR [label="\n"]
 
     S_START -> S_ID [label="A-Za-z"]
     S_ID -> S_ID [label="A-Za-z0-9_"]
@@ -83,6 +85,7 @@ digraph G {
     S_START -> S_COLON [label=":"]
     S_START -> S_UNDERSCORE [label="_"]
     S_UNDERSCORE -> S_ID [label="A-Za-z0-9_"]
+    S_UNDERSCORE -> S_ERROR [label="^A-Za-z0-9_"]
 
     S_START -> S_PIPE [label="|"]
     S_START -> S_LPAREN [label="("]
