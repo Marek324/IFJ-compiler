@@ -1,13 +1,8 @@
-/**
- * @file scanner.c
- * 
- * @author Marek Hric
- * 
- * @brief Implementation of scanner.
- */
-
-// Keywords: const, else, fn, if, i32, f64, null, pub, return, u8, var, void, while, import
-
+/*
+file: scanner.c
+author: Marek Hric
+Implementation of scanner.
+*/
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -16,38 +11,16 @@
 #include "../include/scanner.h"
 #include "../include/token.h"
 
-/**
- * @brief Helper function for checking if the character is a letter.
- * 
- * @param c Character to check.
- * 
- * @return bool True if the character is a letter, false otherwise.
- */
 bool isAlpha(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-/**
- * @brief Helper function for checking if the character is a number.
- * 
- * @param c Character to check.
- * 
- * @return bool True if the character is a number, false otherwise.
- */
 bool isNumber(char c){
     return c >= '0' && c <= '9';
 }
 
-/**
- * @brief Function for getting the next token from the file.
- * 
- * @param file File to get the token from.
- * file should be opened in the calling function.
- * @param line Pointer to the line number.
- * line should be initialized to 1 in the calling function.
- * 
- * @return Token* Pointer to the token.
- */
+// parameter file should be opened in the calling function.
+// parameter line should be initialized to 1 in the calling function.
 Token *get_token(FILE* file, int *line) {
     Token *token = (Token *)malloc(sizeof(Token));
     
@@ -140,4 +113,3 @@ Token *get_token(FILE* file, int *line) {
 
     return token;
 }
-/*** End of file scanner.c */

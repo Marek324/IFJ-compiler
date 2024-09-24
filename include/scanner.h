@@ -1,10 +1,8 @@
-/**
- * @file scanner.h
- * 
- * @author Marek Hric
- * 
- * @brief Header file for the scanner.
- */
+/*
+file: scanner.h
+author: Marek Hric
+Header file for the scanner.
+*/
 
 enum State {
     S_START,
@@ -49,5 +47,3 @@ typedef struct Token;
 // Function prototypes
 Token* get_token(FILE* file, int *line);
 void free_token(Token* token);
-
-/*** End of file scanner.h ***/
