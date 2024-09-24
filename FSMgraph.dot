@@ -12,16 +12,21 @@ digraph G {
         S_PLUS; S_PASGN; S_MINUS; S_MASGN; S_MUL; S_MULASGN; S_SLASH; S_DASGN;
         S_STR; S_STR_ESC;
         S_ID; S_KW;
-        S_INT; S_F64; S_F64_E;
+        S_INT; S_F64; S_F64_EXP; S_ZERO;
         S_LPAREN; S_RPAREN; S_LBRACE; S_RBRACE; S_LBRACKET; S_RBRACKET; S_PIPE; 
-        S_QMARK; S_COLON; S_AT; S_COMMA; S_DOT; S_SEMICOL; 
-        S_END;
+        S_QMARK; S_COLON; S_AT; S_COMMA; S_DOT; S_SEMICOL; S_UNDERSCORE;
+        S_ERROR; S_END;
     }
        
     S_START -> S_START [label="whitespace"]
     S_START -> S_SLASH [label="/"]
     S_SLASH -> S_COMM [label="/"]
     S_COMM -> S_COMM [label="char"]
+
+    S_START -> S_ERROR [label="0"]
+    S_F64_DOT -> S_ERROR [label="^0-9Ee"]
+    S_F64_E -> S_ERROR [label="^0-9+-"]
+    S_F64_E_SIGN -> S_ERROR [label="^0-9"]
 
     S_START -> S_ASGN [label="="]
     S_ASGN -> S_EQ [label="="]
@@ -51,20 +56,24 @@ digraph G {
     S_STR -> S_STR_ESC [label="\\"]
     S_STR_ESC -> S_STR [label="\"nrt\\"]
 
-    S_START -> S_ID [label="A-Za-z_"]
+    S_START -> S_ID [label="A-Za-z"]
     S_ID -> S_ID [label="A-Za-z0-9_"]
     S_ID -> S_KW [label="match"]
 
-    S_START -> S_INT [label="0-9"]
+    S_START -> S_ZERO [label="0"]
+    S_ZERO -> S_F64_DOT [label="."]
+    S_ZERO -> S_ERROR [label="^."]
+    S_START -> S_INT [label="1-9"]
     S_INT -> S_INT [label="0-9"]
     S_INT -> S_F64_DOT [label="."]
     S_F64_DOT -> S_F64 [label="0-9"]
     S_F64 -> S_F64 [label="0-9"]
-    S_F64 -> S_F64_E1 [label="Ee"]
-    S_F64_E1 -> S_F64_E [label="0-9"]
-    S_F64_E1 -> S_F64_E2 [label="+-"]
-    S_F64_E2 -> S_F64_E [label="0-9"]
-    S_F64_E -> S_F64_E [label="0-9"]
+    S_F64 -> S_F64_E [label="Ee"]
+    S_F64_E -> S_F64_EXP [label="0-9"]
+    S_F64_E -> S_F64_E_SIGN [label="+-"]
+    S_F64_E_SIGN -> S_F64_EXP [label="0-9"]
+    S_F64_EXP -> S_F64_EXP [label="0-9"]
+    S_INT -> S_F64_E [label="Ee"]
 
     S_START -> S_AT [label="@"]
     S_START -> S_COMMA [label=","]
@@ -72,6 +81,8 @@ digraph G {
     S_START -> S_SEMICOL [label=";"]
     S_START -> S_QMARK [label="?"]
     S_START -> S_COLON [label=":"]
+    S_START -> S_UNDERSCORE [label="_"]
+    S_UNDERSCORE -> S_ID [label="A-Za-z0-9_"]
 
     S_START -> S_PIPE [label="|"]
     S_START -> S_LPAREN [label="("]
