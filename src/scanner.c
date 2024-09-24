@@ -19,6 +19,13 @@ bool isNumber(char c){
     return c >= '0' && c <= '9';
 }
 
+int peek(file){
+    int c = fgetc(file);
+    if (c == EOF) return EOF;
+    ungetc(c, file);
+    return c;
+}
+
 // parameter file should be opened in the calling function.
 // parameter line should be initialized to 1 in the calling function.
 Token *get_token(FILE* file, int *line) {
@@ -26,7 +33,7 @@ Token *get_token(FILE* file, int *line) {
     
     int state = S_START;
     int c;
-    while ((c = fgetc(file)) != EOF && c != '@n') {
+    while ((c = fgetc(file)) != EOF && c != '\n') {
         switch (state)
         {
         case S_START:
