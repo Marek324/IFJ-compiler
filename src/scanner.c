@@ -6,6 +6,7 @@ Implementation of scanner.
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "../include/dyn_str.h"
 #include "../include/scanner.h"
@@ -26,6 +27,24 @@ int peek(file){
     return c;
 }
 
+int str_to_float(char *str, float *f) {
+    char *endptr;
+    *f = strtof(str, &endptr);
+    if (*endptr != '\0') {
+        return 1;
+    }
+    return 0;
+}
+
+int str_to_int(char *str, int *i) {
+    char *endptr;
+    *i = strtol(str, &endptr, 10);
+    if (*endptr != '\0') {
+        return 1;
+    }
+    return 0;
+}
+
 // parameter file should be opened in the calling function.
 // parameter line should be initialized to 1 in the calling function.
 Token *get_token(FILE* file, int *line) {
@@ -39,80 +58,11 @@ Token *get_token(FILE* file, int *line) {
         case S_START:
             if (c == ' ' || c == '\t') {
                 continue;
-            } else if (c == '\n') {
-                (*line)++;
-                continue;
-            } else if (isAlpha(c)) {
-                state = S_ID;
-                dyn_str_add_char(token->value.string_value, c);
-            } else if (isNumber(c)) {
-                state = S_INT;
-                dyn_str_add_char(token->value.string_value, c);
-            } else {
-                switch (c)
-                {
-                case '=':
-                    state = S_ASGN;
-                    break;
-                case '!':
-                    state = S_BANG;
-                    break;
-                case '<':
-                    state = S_LESS;
-                    break;
-                case '>':
-                    state = S_MORE;
-                    break;
-                case '+':
-                    state = S_PLUS;
-                    break;
-                case '-':
-                    state = S_MINUS;
-                    break;
-                case '*':
-                    state = S_MUL;
-                    break;
-                case '/':
-                    state = S_SLASH;
-                    break;
-                case '.':
-                    state = S_DOT;
-                    break;
-                case ',':
-                    state = S_COMMA;
-                    break;
-                case ';':
-                    state = S_SEMICOL;
-                    break;
-                case '(':
-                    state = S_LPAREN;
-                    break;
-                case ')':
-                    state = S_RPAREN;
-                    break;
-                case '{':
-                    state = S_LBRACE;
-                    break;
-                case '}':
-                    state = S_RBRACE;
-                    break;
-                case '[':
-                    state = S_LBRACKET;
-                    break;
-                case ']':
-                    state = S_RBRACKET;
-                    break;
-                case '"':
-                    state = S_STR;
-                    break;
-                default:
-                    state = S_ERROR;
-                    break;
-                }
             }
-            break;
-        
-        default:
+            switch (c){
+                case '=':
+                
+            }
             break;
         }
     }
