@@ -14,7 +14,7 @@ digraph G {
         S_ID; S_KW;
         S_INT; S_F64; S_F64_EXP; S_ZERO;
         S_LPAREN; S_RPAREN; S_LBRACE; S_RBRACE; S_LBRACKET; S_RBRACKET; S_PIPE; 
-        S_QMARK; S_COLON; S_AT; S_COMMA; S_DOT; S_SEMICOL; S_UNDERSCORE;
+        S_QMARK; S_COLON; S_AT_IMPORT; S_COMMA; S_DOT; S_SEMICOL; S_UNDERSCORE;
         S_ERROR; S_END;
     }
        
@@ -55,7 +55,11 @@ digraph G {
     S_STR -> S_STR [label="char"]
     S_STR -> S_STR_ESC [label="\\"]
     S_STR_ESC -> S_STR [label="\"nrt\\"]
-    S_STR_ESC -> S_ERROR [label="^\"nrt\\"]
+    S_STR_ESC -> S_ERROR [label="^\"nrt\\x"]
+    S_STR_ESC -> S_STR_HEX [label="x"]
+    S_STR_HEX -> S_STR_HEX_1 [label="0-9A-Fa-f"]
+    S_STR_HEX_1 -> S_STR_HEX_2 [label="0-9A-Fa-f"]
+    S_STR_HEX_2 -> S_STR
     S_STR -> S_ERROR [label="\n"]
 
     S_START -> S_ID [label="A-Za-z"]
@@ -78,7 +82,9 @@ digraph G {
     S_F64_EXP -> S_F64_EXP [label="0-9"]
     S_INT -> S_F64_E [label="Ee"]
 
-    S_START -> S_AT [label="@"]
+    S_START -> S_AT_IMPORT [label="@"]
+    S_AT_IMPORT -> S_AT_IMPORT [label="A-Za-z0-9_"]
+
     S_START -> S_COMMA [label=","]
     S_START -> S_DOT [label="."]
     S_START -> S_SEMICOL [label=";"]
