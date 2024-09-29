@@ -12,7 +12,7 @@ Header file for the dynamic string structures and its functions.
 #include <string.h>
 
 typedef struct dyn_str{
-    char* s;
+    char* str;
     int length;
     int capacity;
 } dyn_str;
