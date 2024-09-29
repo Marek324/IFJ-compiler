@@ -20,8 +20,6 @@ digraph G {
        
     S_START -> S_START [label="whitespace"]
     S_START -> S_SLASH [label="/"]
-    S_SLASH -> S_COMM [label="/"]
-    S_COMM -> S_COMM [label="char"]
 
     S_START -> S_ERROR [label="0"]
     S_F64_DOT -> S_ERROR [label="^0-9Ee"]
