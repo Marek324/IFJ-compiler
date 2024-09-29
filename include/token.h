@@ -12,7 +12,7 @@ typedef struct dyn_str;
 typedef enum {
     T_KW,
     T_ID,
-    T_AT,
+    T_AT_IMPORT,
     
     T_INT,
     T_F64,
@@ -36,6 +36,9 @@ typedef enum {
     T_COMMA,
     T_DOT,
     T_SEMICOL,
+    T_COLON,
+    T_PIPE,
+    T_QMARK,
 
     T_EOF
 } TokenType;
@@ -54,7 +57,7 @@ typedef enum {
     KW_VAR,
     KW_VOID,
     KW_WHILE,
-    KW_IMPORT
+    NO_KW
 } KeyWordType;
 
 typedef union {

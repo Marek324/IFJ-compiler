@@ -16,6 +16,9 @@ enum State {
     S_ID,
     S_KW,
 
+    S_UNDERSCORE,
+    S_AT_IMPORT,
+
     //OPERATORS
     S_ASGN, S_EQ, 
     S_BANG, S_NEQ,
@@ -28,6 +31,7 @@ enum State {
     S_SLASH, S_DASGN,
 
     //NUMBERS
+    S_ZERO,
     S_INT,
     S_F64, S_F64_DOT, S_F64_E, S_F64_E1, S_F64_E2,
 
