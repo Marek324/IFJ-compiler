@@ -154,7 +154,7 @@ Token *get_token(FILE* file, int *line) {
                         token->type = T_EOF;
                         return token;
                     } else {
-                        error_exit("Unknown character\n");
+                        error_exit(1,"Unknown character\n");
                     }
                     break;
             }
@@ -258,7 +258,7 @@ Token *get_token(FILE* file, int *line) {
                 dyn_str_append_char(token->value.string_value, '_');
                 state = S_ID;
             } else {
-                error_exit("Invalid identifier\n");
+                error_exit(1,"Invalid identifier\n");
             }
             break; // S_UNDERSCORE
 
@@ -271,7 +271,7 @@ Token *get_token(FILE* file, int *line) {
                 token->type = T_AT_IMPORT;
                 return token;
             } else {
-                error_exit("Unknown keyword\n");
+                error_exit(1,"Unknown keyword\n");
             }
             break; // S_AT_IMPORT
 

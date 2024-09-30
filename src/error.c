@@ -10,10 +10,10 @@ Implementation of error messages.
 
 #include "../include/error.h"
 
-void error_exit(const char *fmt, ...) {
+void error_exit(int exit_code, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
     va_end(args);
-    exit(1);
+    exit(exit_code);
 }
