@@ -1,5 +1,5 @@
 /**
- * @file parser.h
+ * @file parser.c
  * 
  * @author Adam Veselý
  * 
@@ -8,4 +8,4 @@
 
 #include "../include/parser.h"
 
-/*** End of file parser.h ***/
+/*** End of file parser.c ***/

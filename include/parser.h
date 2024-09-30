@@ -9,7 +9,13 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-typedef enum return_values {
+#include <stdlib.h>
+#include <stdbool.h>
+
+#include "scanner.h"
+#include "token.h"
+
+enum return_values {
     SUCCESS,
     LEXICAL_ERROR,
     SYNTAX_ERROR,
@@ -22,7 +28,7 @@ typedef enum return_values {
     SEMANTIC_ERROR_VARIABLE,
     SEMANTIC_ERROR_OTHER,
     INTERNAL_ERROR = 99
-} return_values;
+};
 
 
 #endif
