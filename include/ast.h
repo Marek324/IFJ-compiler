@@ -17,6 +17,15 @@ typedef enum {
     AST_NODE_IDENTIFIER
 } ASTNodeType;
 
+typedef struct ASTNode {
+    ASTNodeType type;
+    // TODO
+} ASTNode;
+
+ASTNode* create_node(ASTNodeType type); // TODO
+
+void destroy_ast(ASTNode* root);
+
 #endif
 
 /*** End of file parser.h ***/
