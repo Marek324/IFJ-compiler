@@ -9,7 +9,13 @@
 #ifndef AST_H
 #define AST_H
 
+#include "token.h"
 
+typedef enum {
+    AST_NODE_NUMBER,
+    AST_NODE_OPERATION,
+    AST_NODE_IDENTIFIER
+} ASTNodeType;
 
 #endif
 

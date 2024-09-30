@@ -14,8 +14,9 @@
 
 #include "scanner.h"
 #include "token.h"
+#include "ast.h"
 
-enum return_values {
+enum ReturnValues {
     SUCCESS,
     LEXICAL_ERROR,
     SYNTAX_ERROR,
