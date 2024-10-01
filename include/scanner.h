@@ -7,6 +7,7 @@ Header file for the scanner.
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include "token.h"
 
 enum State {
     S_START,

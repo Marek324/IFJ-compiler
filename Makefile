@@ -11,6 +11,12 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
+scanner.o:
+	$(CC) -c -o scanner.o src/scanner.c
+
+test: scanner.o
+	$(CC)  scanner.o src/ScannerTests.c -o test
+
 graph: FSMgraph.dot
 	dot -Tpng FSMgraph.dot -o FSMgraph.png
 

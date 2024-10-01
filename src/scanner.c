@@ -8,9 +8,7 @@ Implementation of scanner.
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../include/dyn_str.h"
 #include "../include/scanner.h"
-#include "../include/token.h"
 #include "../include/error.h"
 
 #define NOT_END_OF_ID (c = fgetc(file)) != EOF && c != '\n' && c != ' ' && c != '\t' && (isAlpha(c) || isNumber(c))
@@ -24,7 +22,7 @@ bool isNumber(char c){
     return c >= '0' && c <= '9';
 }
 
-int peek(file){
+int peek(FILE *file){
     int c = fgetc(file);
     if (c == EOF) return EOF;
     ungetc(c, file);
@@ -255,7 +253,7 @@ Token *get_token(FILE* file, int *line) {
                 // put the character back, so it can be consumed in the next state
                 ungetc(c, file);
                 token->value.string_value = dyn_str_init();
-                dyn_str_append_char(token->value.string_value, '_');
+                dyn_str_append(token->value.string_value, '_');
                 state = S_ID;
             } else {
                 error_exit("Invalid identifier\n");
@@ -265,7 +263,7 @@ Token *get_token(FILE* file, int *line) {
         case S_AT_IMPORT:
             dyn_str* at_import = dyn_str_init();
             while(NOT_END_OF_ID) {
-                dyn_str_append_char(at_import, c);
+                dyn_str_append(at_import, c);
             }
             if (!strcmp(at_import->str, "@import")) {
                 token->type = T_AT_IMPORT;
@@ -278,7 +276,7 @@ Token *get_token(FILE* file, int *line) {
         case S_ID:
             token->value.string_value = dyn_str_init();
             while(NOT_END_OF_ID) {
-                dyn_str_append_char(token->value.string_value, c);
+                dyn_str_append(token->value.string_value, c);
             }
             KeyWordType kw = check_keyword(token->value.string_value->str);
             if (kw != NO_KW) {
