@@ -10,21 +10,15 @@ digraph G {
         node [shape=doublecircle]
         S_ASGN; S_EQ; S_BANG; S_NEQ; S_LESS; S_LEQ; S_MORE; S_MEQ;
         S_PLUS; S_PASGN; S_MINUS; S_MASGN; S_MUL; S_MULASGN; S_SLASH; S_DASGN;
-        S_STR;
+        S_STR; S_STR_MLINE;
         S_ID; S_KW;
         S_INT; S_F64; S_F64_EXP; S_ZERO;
         S_LPAREN; S_RPAREN; S_LBRACE; S_RBRACE; S_LBRACKET; S_RBRACKET; S_PIPE; 
-        S_QMARK; S_COLON; S_AT_IMPORT; S_COMMA; S_DOT; S_SEMICOL; S_UNDERSCORE;
-        S_ERROR; S_END;
+        S_QMARK; S_COLON; S_AT_IMPORT; S_COMMA; S_DOT; S_SEMICOL;
     }
        
     S_START -> S_START [label="whitespace"]
     S_START -> S_SLASH [label="/"]
-
-    S_START -> S_ERROR [label="0"]
-    S_F64_DOT -> S_ERROR [label="^0-9Ee"]
-    S_F64_E -> S_ERROR [label="^0-9+-"]
-    S_F64_E_SIGN -> S_ERROR [label="^0-9"]
 
     S_START -> S_ASGN [label="="]
     S_ASGN -> S_EQ [label="="]
@@ -53,12 +47,9 @@ digraph G {
     S_STR -> S_STR [label="char"]
     S_STR -> S_STR_ESC [label="\\"]
     S_STR_ESC -> S_STR [label="\"nrt\\"]
-    S_STR_ESC -> S_ERROR [label="^\"nrt\\x"]
     S_STR_ESC -> S_STR_HEX [label="x"]
-    S_STR_HEX -> S_STR_HEX_1 [label="0-9A-Fa-f"]
-    S_STR_HEX_1 -> S_STR_HEX_2 [label="0-9A-Fa-f"]
-    S_STR_HEX_2 -> S_STR
-    S_STR -> S_ERROR [label="\n"]
+    S_STR_HEX -> S_STR_HEX [label="0-9A-Fa-f"]
+    S_STR_HEX -> S_STR
 
     S_START -> S_ID [label="A-Za-z"]
     S_ID -> S_ID [label="A-Za-z0-9_"]
@@ -66,7 +57,6 @@ digraph G {
 
     S_START -> S_ZERO [label="0"]
     S_ZERO -> S_F64_DOT [label="."]
-    S_ZERO -> S_ERROR [label="^."]
     S_START -> S_INT [label="1-9"]
     S_INT -> S_INT [label="0-9"]
     S_INT -> S_F64_DOT [label="."]
@@ -88,9 +78,6 @@ digraph G {
     S_START -> S_SEMICOL [label=";"]
     S_START -> S_QMARK [label="?"]
     S_START -> S_COLON [label=":"]
-    S_START -> S_UNDERSCORE [label="_"]
-    S_UNDERSCORE -> S_ID [label="A-Za-z0-9_"]
-    S_UNDERSCORE -> S_ERROR [label="^A-Za-z0-9_"]
 
     S_START -> S_PIPE [label="|"]
     S_START -> S_LPAREN [label="("]
@@ -99,6 +86,4 @@ digraph G {
     S_START -> S_RBRACE [label="}"]
     S_START -> S_LBRACKET [label="["]
     S_START -> S_RBRACKET [label="]"]
-
-    S_START -> S_END [label="EOF"]
 }
