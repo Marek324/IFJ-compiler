@@ -50,10 +50,10 @@ enum State {
     S_COMM   
 };
 
-typedef struct Token;
+#include "token.h"
 
 // Function prototypes
-Token* get_token(FILE* file, int *line);
+Token *get_token(FILE* file, int *line);
 void free_token(Token* token);
 
 #endif // SCANNER_H

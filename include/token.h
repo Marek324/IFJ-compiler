@@ -7,8 +7,7 @@ Header file for tokens.
 #ifndef TOKEN_H
 #define TOKEN
 
-typedef struct dyn_str;
-
+#include "dyn_str.h"
 typedef enum {
     T_KW,
     T_ID,
