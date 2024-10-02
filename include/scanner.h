@@ -48,7 +48,8 @@ enum State {
     S_LBRACKET, S_RBRACKET,
 
     //LITERALS
-    S_STR, S_STR_ESC,
+    S_STR, S_STR_MLINE,
+    S_STR_ESC, S_STR_HEX,
 
     //COMMENTS
     S_COMM   
