@@ -51,8 +51,7 @@ void consume_comment(FILE* file);
 KeyWordType check_keyword(char *str);
 
 // parameter file should be opened in the calling function.
-// parameter line should be initialized to 1 in the calling function.
-Token *get_token(FILE* file, int *line) {
+Token *get_token(FILE* file) {
     Token *token = (Token *)malloc(sizeof(Token));
     
     int state = S_START;
@@ -264,7 +263,9 @@ Token *get_token(FILE* file, int *line) {
             while(NOT_END_OF_ID) {
                 dyn_str_append(at_import, c);
             }
-            if (!strcmp(at_import->str, "@import")) {
+            int match = !strcmp(at_import->str, "@import");
+            dyn_str_free(at_import); 
+            if (match) {
                 token->type = T_AT_IMPORT;
                 return token;
             } else {
@@ -298,6 +299,15 @@ void consume_comment(FILE* file){
     while ((c = fgetc(file)) != EOF && c != '\n') {
         continue;
     }
+}
+
+void error(Token *token, char *msg){
+    if (token->value.string_value != NULL) {
+        dyn_str_free(token->value.string_value);
+    }
+    free(token);
+
+    error_exit(1, msg);
 }
 
 KeyWordType check_keyword(char *str){
