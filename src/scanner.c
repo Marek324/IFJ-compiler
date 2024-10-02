@@ -10,7 +10,22 @@ Implementation of scanner.
 
 #include "../include/scanner.h"
 
+// Macros
 #define NOT_END_OF_ID (c = fgetc(file)) != EOF && c != '\n' && c != ' ' && c != '\t' && (isAlpha(c) || isNumber(c))
+
+#define CHECK_FOLLOW_EQ(T_IF_EQ, T_IF_NEQ) \
+    if (peek(file) == '=') { \
+        getc(file); /*consume character*/ \ 
+        token->type = T_IF_EQ; \
+    } else { \
+        token->type = T_IF_NEQ; \
+    } \
+        return token; \
+    break
+
+#define SINGLE_CHAR_TOKEN(T) \
+    token->type = T; \
+    return token
 
 // Helper functions
 bool isAlpha(char c) {
@@ -56,7 +71,7 @@ Token *get_token(FILE* file) {
     
     int state = S_START;
     int c;
-    while ((c = fgetc(file)) != EOF && c != '\n') {
+    while ((c = fgetc(file)) != EOF) {
         switch (state)
         {
         case S_START:
@@ -64,65 +79,27 @@ Token *get_token(FILE* file) {
                 continue;
             }
             switch (c){
-                case '(':
-                    token->type = T_LPAREN;
-                    return token;
-                case ')':
-                    token->type = T_RPAREN;
-                    return token;
-                case '{':
-                    token->type = T_LBRACE;
-                    return token;
-                case '}':
-                    token->type = T_RBRACE;
-                    return token;
-                case '[':
-                    token->type = T_LBRACKET;
-                    return token;
-                case ']':
-                    token->type = T_RBRACKET;
-                    return token;
-                case '|':
-                    token->type = T_PIPE;
-                    break;
-                case '?':
-                    token->type = T_QMARK;
-                    return token;
-                case ':':
-                    token->type = T_COLON;
-                    return token;
-                case ',':
-                    token->type = T_COMMA;
-                    return token;
-                case '.':
-                    token->type = T_DOT;
-                    return token;
-                case ';':
-                    token->type = T_SEMICOL;
-                    return token;
-                case '_':
-                    state = S_UNDERSCORE;
-                case '=':
-                    state = S_ASGN;
-                    break;
-                case '!':
-                    state = S_BANG;
-                    break;
-                case '<':
-                    state = S_LESS;
-                    break;
-                case '>':
-                    state = S_MORE;
-                    break;
-                case '+':
-                    state = S_PLUS;
-                    break;
-                case '-':
-                    state = S_MINUS;
-                    break;
-                case '*':
-                    state = S_MUL;
-                    break;
+                case '(': SINGLE_CHAR_TOKEN(T_LPAREN);
+                case ')': SINGLE_CHAR_TOKEN(T_RPAREN);
+                case '{': SINGLE_CHAR_TOKEN(T_LBRACE);
+                case '}': SINGLE_CHAR_TOKEN(T_RBRACE);
+                case '[': SINGLE_CHAR_TOKEN(T_LBRACKET);
+                case ']': SINGLE_CHAR_TOKEN(T_RBRACKET);
+                case '|': SINGLE_CHAR_TOKEN(T_PIPE);
+                case '?': SINGLE_CHAR_TOKEN(T_QMARK);
+                case ':': SINGLE_CHAR_TOKEN(T_COLON);
+                case ',': SINGLE_CHAR_TOKEN(T_COMMA);
+                case '.': SINGLE_CHAR_TOKEN(T_DOT);
+                case ';': SINGLE_CHAR_TOKEN(T_SEMICOL);
+                
+                case '=': CHECK_FOLLOW_EQ(T_EQ, T_ASGN);
+                case '!': CHECK_FOLLOW_EQ(T_NEQ, T_BANG);
+                case '<': CHECK_FOLLOW_EQ(T_LEQ, T_LESS);
+                case '>': CHECK_FOLLOW_EQ(T_MEQ, T_MORE);
+                case '+': CHECK_FOLLOW_EQ(T_PASGN, T_PLUS);
+                case '-': CHECK_FOLLOW_EQ(T_MASGN, T_MINUS);
+                case '*': CHECK_FOLLOW_EQ(T_MULASGN, T_MUL);
+                
                 case '/':
                     state = S_SLASH;
                     break;
@@ -138,7 +115,7 @@ Token *get_token(FILE* file) {
                     state = S_AT_IMPORT;
                     break;
                 default:
-                    if (isAlpha(c)) {
+                    if (isAlpha(c) || c == '_') {
                         // put the character back, so it can be consumed in the next state
                         ungetc(c, file);
                         state = S_ID;
@@ -146,92 +123,12 @@ Token *get_token(FILE* file) {
                         // put the character back, so it can be consumed in the next state
                         ungetc(c, file); 
                         state = S_INT;
-                    } else if (c == EOF) {
-                        token->type = T_EOF;
-                        return token;
                     } else {
                         error_exit(1,"Unknown character\n");
                     }
                     break;
             }
             break; // S_START
-
-        case S_ASGN:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_EQ;
-                return token;
-            } else {
-                token->type = T_ASGN;
-                return token;
-            }
-            break; // S_ASGN
-
-        case S_BANG:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_NEQ;
-                return token;
-            } else {
-                token->type = T_BANG;
-                return token;
-            }
-            break; // S_BANG
-
-        case S_LESS:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_LEQ;
-                return token;
-            } else {
-                token->type = T_LESS;
-                return token;
-            }
-            break; // S_LESS
-
-        case S_MORE:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_MEQ;
-                return token;
-            } else {
-                token->type = T_MORE;
-                return token;
-            }
-            break; // S_MORE
-
-        case S_PLUS:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_PASGN;
-                return token;
-            } else {
-                token->type = T_PLUS;
-                return token;
-            }
-            break; // S_PLUS
-
-        case S_MINUS:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_MASGN;
-                return token;
-            } else {
-                token->type = T_MINUS;
-                return token;
-            }
-            break; // S_MINUS
-
-        case S_MUL:
-            if (peek(file) == '=') {
-                getc(file); // consume the character
-                token->type = T_MULASGN;
-                return token;
-            } else {
-                token->type = T_MUL;
-                return token;
-            }
-            break; // S_MUL
 
         case S_SLASH:
             if (peek(file) == '=') {
@@ -245,18 +142,6 @@ Token *get_token(FILE* file) {
                 return token;
             }
             break; // S_SLASH
-        
-        case S_UNDERSCORE:
-            if (isAlpha(c) || isNumber(c)) {
-                // put the character back, so it can be consumed in the next state
-                ungetc(c, file);
-                token->value.string_value = dyn_str_init();
-                dyn_str_append(token->value.string_value, '_');
-                state = S_ID;
-            } else {
-                error_exit(1,"Invalid identifier\n");
-            }
-            break; // S_UNDERSCORE
 
         case S_AT_IMPORT:
             dyn_str* at_import = dyn_str_init();
