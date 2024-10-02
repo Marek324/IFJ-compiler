@@ -15,7 +15,7 @@ Implementation of scanner.
 
 #define CHECK_FOLLOW_EQ(T_IF_EQ, T_IF_NEQ) \
     if (peek(file) == '=') { \
-        getc(file); /*consume character*/ \ 
+        getc(file); /*consume character*/ \
         token->type = T_IF_EQ; \
     } else { \
         token->type = T_IF_NEQ; \
