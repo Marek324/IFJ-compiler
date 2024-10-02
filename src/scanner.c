@@ -9,7 +9,6 @@ Implementation of scanner.
 #include <stdlib.h>
 
 #include "../include/scanner.h"
-#include "../include/error.h"
 
 #define NOT_END_OF_ID (c = fgetc(file)) != EOF && c != '\n' && c != ' ' && c != '\t' && (isAlpha(c) || isNumber(c))
 

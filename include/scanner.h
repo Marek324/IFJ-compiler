@@ -8,6 +8,10 @@ Header file for the scanner.
 #define SCANNER_H
 
 
+#include "token.h"
+#include "error.h"
+
+
 enum State {
     S_START,
     S_END,
@@ -49,8 +53,6 @@ enum State {
     //COMMENTS
     S_COMM   
 };
-
-#include "token.h"
 
 // Function prototypes
 Token *get_token(FILE* file, int *line);
