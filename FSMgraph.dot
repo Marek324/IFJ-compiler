@@ -50,6 +50,8 @@ digraph G {
     S_STR_ESC -> S_STR_HEX [label="x"]
     S_STR_HEX -> S_STR_HEX [label="0-9A-Fa-f"]
     S_STR_HEX -> S_STR
+    S_START -> S_STR_MLINE [label="\\\\"]
+    S_STR_MLINE -> S_STR_MLINE [label="char"]
 
     S_START -> S_ID [label="A-Za-z"]
     S_ID -> S_ID [label="A-Za-z0-9_"]
