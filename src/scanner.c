@@ -27,6 +27,11 @@ Implementation of scanner.
     token->type = T; \
     return token
 
+#define CREATE_STR_FROM_S_ZERO \
+    token->value.string_value = dyn_str_init();\
+    dyn_str_append(token->value.string_value, '0');\
+    dyn_str_append(token->value.string_value, c);
+
 // Helper functions
 bool isAlpha(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -43,22 +48,14 @@ int peek(FILE *file){
     return c;
 }
 
-int str_to_float(char *str, float *f) {
-    char *endptr;
-    *f = strtof(str, &endptr);
-    if (*endptr != '\0') {
-        return 1;
-    }
-    return 0;
+float str_to_float(char *str) {
+    return strtof(str, NULL);
 }
 
-int str_to_int(char *str, int *i) {
+int str_to_int(char *str) {
     char *endptr;
-    *i = strtol(str, &endptr, 10);
-    if (*endptr != '\0') {
-        return 1;
-    }
-    return 0;
+    return strtol(str, NULL, 10);
+    
 }
 
 // Function prototypes
@@ -99,6 +96,15 @@ Token *get_token(FILE* file) {
                 case '+': CHECK_FOLLOW_EQ(T_PASGN, T_PLUS);
                 case '-': CHECK_FOLLOW_EQ(T_MASGN, T_MINUS);
                 case '*': CHECK_FOLLOW_EQ(T_MULASGN, T_MUL);
+
+                case '\\':
+                    if (peek(file) == '\\') {
+                        getc(file); // consume the character
+                        state = S_STR_MLINE;
+                    } else {
+                        error(token, "Invalid \\\n");
+                    }
+                    
                 
                 case '/':
                     state = S_SLASH;
@@ -160,7 +166,12 @@ Token *get_token(FILE* file) {
 
         case S_ID:
             token->value.string_value = dyn_str_init();
-            while(NOT_END_OF_ID) {
+            while(NOT_END_OF_ID) { 
+                if (isAlpha(c) || isNumber(c) || c == '_') {
+                    dyn_str_append(token->value.string_value, c);
+                } else {
+                    error(token, "Invalid character in ID\n");
+                }
                 dyn_str_append(token->value.string_value, c);
             }
             KeyWordType kw = check_keyword(token->value.string_value->str);
@@ -172,6 +183,44 @@ Token *get_token(FILE* file) {
             } else {
                 token->type = T_ID;
             }
+            break; // S_ID
+
+        case S_ZERO:
+            if (c == '.') {
+                state = S_F64_DOT;
+                CREATE_STR_FROM_S_ZERO;
+            } else if (c == 'e' || c == 'E') {
+                state = S_F64_E;
+                CREATE_STR_FROM_S_ZERO;
+            } else {
+                token->value.int_value = 0;
+                token->type = T_INT;
+                return token;
+            }
+            break; // S_ZERO
+
+        case S_INT:
+            token->value.string_value = dyn_str_init();
+            dyn_str_append(token->value.string_value, c);
+            while (isNumber(c = fgetc(file))) {
+                dyn_str_append(token->value.string_value, c);
+            }
+            if (c == '.') {
+                dyn_str_append(token->value.string_value, c);
+                state = S_F64_DOT;
+            } else if (c == 'e' || c == 'E') {
+                dyn_str_append(token->value.string_value, c);
+                state = S_F64_E;
+            } else {
+                ungetc(c, file);
+                token->type = T_INT;
+                char *str = token->value.string_value->str;
+                token->value.int_value = str_to_int(str);
+                free(str);
+                return token;
+            }
+            break; // S_INT
+
         }
     }
     
