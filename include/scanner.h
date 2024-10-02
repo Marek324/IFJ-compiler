@@ -55,7 +55,7 @@ enum State {
 };
 
 // Function prototypes
-Token *get_token(FILE* file, int *line);
+Token *get_token(FILE* file);
 void free_token(Token* token);
 
 #endif // SCANNER_H
