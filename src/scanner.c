@@ -221,6 +221,70 @@ Token *get_token(FILE* file) {
             }
             break; // S_INT
 
+        case S_F64_DOT:
+                if(c == 'e' || c == 'E'){
+                    dyn_str_append(token->value.string_value, c);
+                    state = S_F64_E;
+                } else if(isNumber(c)){
+                    ungetc(c, file);
+                    state = S_F64;
+                } else{
+                    error(token, "Invalid float, no number after \'.\'\n");
+                }
+            break; // S_F64_DOT
+
+        case S_F64:
+            if (isNumber(c)) {
+                dyn_str_append(token->value.string_value, c);
+            } else if (c == 'e' || c == 'E') {
+                dyn_str_append(token->value.string_value, c);
+                state = S_F64_E;
+            } else {
+                ungetc(c, file);
+                token->type = T_F64;
+                char *str = token->value.string_value->str;
+                token->value.float_value = str_to_float(str);
+                free(str);
+                return token;
+            }
+            break; // S_F64
+
+        case S_F64_E:
+            if(c == '+' || c == '-' || isNumber(c)){
+                dyn_str_append(token->value.string_value, c);
+                state = S_F64_EXP;
+            } else{
+                error(token, "Invalid float, exptected number, \'+\' or \'-\' after \'e\'\n");
+            }
+            break; // S_F64_E
+
+        case S_F64_EXP:
+                if(isNumber(peek(file))){
+                    dyn_str_append(token->value.string_value, c);
+                } else {
+                    char *str = token->value.string_value->str;
+                    token->type = T_F64;
+                    token->value.float_value = str_to_float(str);
+                    free(str);
+                    return token;
+                }
+            break; // S_F64_EXP
+
+        case S_STR:
+
+            break; // S_STR
+
+        case S_STR_ESC:
+
+            break; // S_STR_ESC
+
+        case S_STR_HEX:
+
+            break; // S_STR_HEX
+
+        case S_STR_MLINE:
+
+            break; // S_STR_MLINE
         }
     }
     
