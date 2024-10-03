@@ -67,8 +67,6 @@ digraph G {
     S_F64 -> S_F64 [label="0-9"]
     S_F64 -> S_F64_E [label="Ee"]
     S_F64_E -> S_F64_EXP [label="0-9"]
-    S_F64_E -> S_F64_E_SIGN [label="+-"]
-    S_F64_E_SIGN -> S_F64_EXP [label="0-9"]
     S_F64_EXP -> S_F64_EXP [label="0-9"]
     S_INT -> S_F64_E [label="Ee"]
 
