@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Paths
+binary="../main"  # Assuming the script is in the tests/ directory, adjust if needed
+input_dir="./input"
+exp_output_dir="./exp_output"
+output_dir="./output"
+
+# Ensure output directory exists
+mkdir -p "$output_dir"
+
+# Counter for test cases
+total_tests=0
+passed_tests=0
+failed_tests=0
+
+# Loop through each input file
+for input_file in "$input_dir"/*; do
+    # Extract test name (filename without the directory path)
+    test_name=$(basename "$input_file")
+    
+    # Define corresponding output files
+    actual_output="$output_dir/$test_name"
+    expected_output="$exp_output_dir/$test_name"
+    
+    # Run the binary with the input file and store the output
+    "$binary" < "$input_file" > "$actual_output"
+    
+    # Capture exit code of the binary and append it to the output
+    exit_code=$?
+    echo "Exit Code: $exit_code" >> "$actual_output"
+    
+    # Increment total test count
+    total_tests=$((total_tests + 1))
+    
+    # Compare actual output with expected output
+    if diff -q "$actual_output" "$expected_output" >/dev/null; then
+        echo "Test $test_name passed."
+        passed_tests=$((passed_tests + 1))
+    else
+        echo "Test $test_name failed."
+        diff "$actual_output" "$expected_output"
+        failed_tests=$((failed_tests + 1))
+    fi
+done
+
+# Summary of the test results
+echo "======================================="
+echo "Total tests run: $total_tests"
+echo "Passed: $passed_tests"
+echo "Failed: $failed_tests"
+echo "======================================="
