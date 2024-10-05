@@ -53,7 +53,6 @@ float str_to_float(char *str) {
 }
 
 int str_to_int(char *str) {
-    char *endptr;
     return strtol(str, NULL, 10);
     
 }
@@ -61,6 +60,7 @@ int str_to_int(char *str) {
 // Function prototypes
 void consume_comment(FILE* file);
 KeyWordType check_keyword(char *str);
+void error(Token *token, char *msg);
 
 // parameter file should be opened in the calling function.
 Token *get_token(FILE* file) {
@@ -104,6 +104,7 @@ Token *get_token(FILE* file) {
                     } else {
                         error(token, "Invalid \\\n");
                     }
+                    break;
                     
                 
                 case '/':
@@ -150,12 +151,12 @@ Token *get_token(FILE* file) {
             break; // S_SLASH
 
         case S_AT_IMPORT:
-            dyn_str* at_import = dyn_str_init();
+            token->value.string_value = dyn_str_init();
             while(NOT_END_OF_ID) {
-                dyn_str_append(at_import, c);
+                dyn_str_append(token->value.string_value, c);
             }
-            int match = !strcmp(at_import->str, "@import");
-            dyn_str_free(at_import); 
+            int match = !strcmp(token->value.string_value->str, "@import");
+            dyn_str_free(token->value.string_value); 
             if (match) {
                 token->type = T_AT_IMPORT;
                 return token;
@@ -323,4 +324,11 @@ KeyWordType check_keyword(char *str){
     else if(!strcmp(str, "void")) return KW_VOID;
     else if(!strcmp(str, "while")) return KW_WHILE;
     else return NO_KW;
+}
+
+void free_token(Token* token){
+    if(token->value.string_value != NULL){
+        dyn_str_free(token->value.string_value);
+    }
+    free(token);
 }
