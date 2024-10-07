@@ -14,8 +14,14 @@ $(TARGET): $(OBJS)
 scanner.o:
 	$(CC) -c -o scanner.o src/scanner.c
 
-test: scanner.o
-	$(CC)  scanner.o src/ScannerTests.c -o test
+dyn_str.o:
+	$(CC) -c -o dyn_str.o src/dyn_str.c
+
+error.o:
+	$(CC) -c -o error.o src/error.c
+
+test: scanner.o dyn_str.o error.o
+	$(CC)  error.o scanner.o dyn_str.o src/ScannerTests.c -o test -I/usr/local/include -lcmocka
 
 graph: FSMgraph.dot
 	dot -Tpng FSMgraph.dot -o FSMgraph.png

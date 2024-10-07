@@ -13,9 +13,14 @@ dyn_str* dyn_str_init() {
     }
     
     ds->length = 0;
-    ds->capacity = 0;
-    ds->str = NULL;
+    ds->capacity = 2;
+    ds->str = malloc(ds->capacity);
+    if (ds->str == NULL) {
+        free(ds); // Free ds if allocation for str fails
+        return NULL;
+    }
 
+    ds->str[0] = '\0';
     return ds;
 }
 
