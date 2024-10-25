@@ -1,5 +1,7 @@
 *.txt
-*.o
+obj/
+bin/
+tests/output/
 .vscode/
 build/
 *.png
