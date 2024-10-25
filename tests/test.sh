@@ -23,6 +23,7 @@ for input_file in $input_dir/*; do
     
     if diff -q "$actual_output" "$expected_output" >/dev/null; then
         echo "Test $test_name passed."
+        rm "$actual_output"
         passed_tests=$((passed_tests + 1))
     else
         echo "Test $test_name failed."

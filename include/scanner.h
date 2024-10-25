@@ -11,6 +11,10 @@ Header file for the scanner.
 #include "token.h"
 #include "error.h"
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 enum State {
     S_START,
@@ -18,41 +22,24 @@ enum State {
     S_ERROR,
     
     S_ID,
-    S_KW,
 
     S_UNDERSCORE,
     S_AT_IMPORT,
 
     //OPERATORS
-    S_ASGN, S_EQ, 
-    S_BANG, S_NEQ,
-    S_LESS, S_LEQ,
-    S_MORE, S_MEQ,
-
-    S_PLUS, S_PASGN,
-    S_MINUS, S_MASGN,
-    S_MUL, S_MULASGN,
-    S_SLASH, S_DASGN,
+    S_ASGN, 
+    S_BANG,
+    S_LESS,
+    S_MORE,
 
     //NUMBERS
     S_ZERO,
     S_INT,
     S_F64, S_F64_DOT, S_F64_E, S_F64_EXP,
 
-    //DELIMITERS
-    S_DOT,
-    S_COMMA,
-    S_SEMICOL,
-    S_LPAREN, S_RPAREN,
-    S_LBRACE, S_RBRACE,
-    S_LBRACKET, S_RBRACKET,
-
     //LITERALS
     S_STR, S_STR_MLINE,
     S_STR_ESC, S_STR_HEX,
-
-    //COMMENTS
-    S_COMM   
 };
 
 // Function prototypes

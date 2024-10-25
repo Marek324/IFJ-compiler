@@ -22,11 +22,10 @@ typedef enum {
     T_LESS, T_LEQ,
     T_MORE, T_MEQ,
 
-
-    T_PLUS, T_PASGN,
-    T_MINUS, T_MASGN,
-    T_MUL, T_MULASGN,
-    T_DIV, T_DASGN,
+    T_PLUS,
+    T_MINUS,
+    T_MUL,
+    T_DIV,
 
     T_LPAREN, T_RPAREN,
     T_LBRACE, T_RBRACE,
@@ -62,7 +61,7 @@ typedef enum {
 typedef union {
     int int_value;
     float float_value;
-    dyn_str* string_value;
+    char *string_value;
     KeyWordType keyword;
 } TokenValue;
 
