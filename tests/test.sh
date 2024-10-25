@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Paths
-binary="./test" 
-input_dir="./tests/input"
+BINARY="./bin/test_scanner"
+input_dir="tests/input/scanner"
 
 # Counter for test cases
 total_tests=0
@@ -12,12 +12,12 @@ failed_tests=0
 for input_file in $input_dir/*; do
     test_name=$(basename "$input_file")
     
-    actual_output="./tests/output/$test_name"
-    expected_output="./tests/exp_output/$test_name"
+    actual_output="tests/output/scanner/$test_name"
+    expected_output="tests/exp_output/scanner/$test_name"
     
-    "$binary" "$input_file" "$actual_output"
+    $BINARY "$input_file" "$actual_output"
     
-    exit_code=$?
+    echo "Exit code: $?" >> "$actual_output"
     
     total_tests=$((total_tests + 1))
     
