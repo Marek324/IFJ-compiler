@@ -27,7 +27,7 @@ obj/error-debug.o: src/error.c
 obj/dyn_str-debug.o: src/dyn_str.c 
 	$(CC) $(DEBUGFLAGS) -c $< -o $@
 
-obj/scanner-debug.o: src/scanner.c obj/dyn_str.o
+obj/scanner-debug.o: src/scanner.c obj/dyn_str-debug.o
 	$(CC) $(DEBUGFLAGS) -c $< -o $@
 
 bin/test_scanner: obj/scanner-debug.o obj/dyn_str-debug.o obj/error-debug.o tests/test_utils/scanner_unit_tests.c
@@ -45,7 +45,8 @@ clean:
 zip:
 	zip xhricma00.zip *.c *.h Makefile rozdeleni
 
+#usage make debug_scanner test=test_name
 debug_scanner: bin/test_scanner
-	echo "set debuginfod enabled on\nset args tests/input/test1 tests/output/test1\nbreak main\nbreak get_token\nbreak check_keyword\nrun" > debug_options
+	echo "set debuginfod enabled on\nset args tests/input/scanner/$(test) tests/output/scanner/$(test)\nbreak main\nbreak get_token\nbreak check_keyword\nbreak load_id_to_dyn_str\nrun" > debug_options
 	gdb -x debug_options bin/test_scanner
 	@rm -f debug_options bin/test_scanner
