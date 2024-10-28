@@ -15,6 +15,7 @@ circ_buff_ptr circ_buff_init()
         fprintf(stderr, "Malloc failed\n");
         exit(1);
     }
+    for (int i = 0; i < CIRC_BUFF_SIZE; i++) cb->buffer[i] = 0;
     cb->head = 0;
     cb->tail = 0;
     return cb;
@@ -25,7 +26,7 @@ void circ_buff_free(circ_buff_ptr cb)
     free(cb);
 }
 
-void circ_buff_enqueue(circ_buff_ptr cb, char c)
+void circ_buff_enqueue(circ_buff_ptr cb, int c)
 {
     cb->buffer[INC_PTR(cb->head)] = c;
 }

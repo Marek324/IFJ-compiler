@@ -1,0 +1,6 @@
+T_INT, 12
+T_ID, efgh
+T_PLUS,
+T_INT, 3
+T_EOF,
+Exit code: 0
