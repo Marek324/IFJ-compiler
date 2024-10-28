@@ -5,3 +5,4 @@ tests/output/
 .vscode/
 build/
 *.png
+debug_options
