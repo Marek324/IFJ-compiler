@@ -8,7 +8,7 @@ Implementation of error messages.
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "../include/error.h"
+#include "error.h"
 
 void error_exit(int exit_code, const char *fmt, ...) {
     va_list args;
