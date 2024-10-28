@@ -10,10 +10,12 @@ Header file for the scanner.
 
 #include "token.h"
 #include "error.h"
+#include "circ_buff.h"
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 
 enum State {
@@ -43,7 +45,7 @@ enum State {
 };
 
 // Function prototypes
-Token *get_token(FILE* file);
+Token *get_token(circ_buff_ptr buffer);
 void free_token(Token* token);
 
 #endif // SCANNER_H
