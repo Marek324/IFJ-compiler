@@ -27,7 +27,7 @@ void teardown(void)
 
 TestSuite(scanner_tests, .init = scanner_setup, .fini = teardown);
 
-Test(scanner_tests, test_float_with_positive_exponent)
+Test(scanner_tests, float_with_positive_exponent)
 {
     setup_stdin("12.0e+3");
 
@@ -44,7 +44,7 @@ Test(scanner_tests, test_float_with_positive_exponent)
     }
 }
 
-Test(scanner_tests, test_float_with_negative_exponent)
+Test(scanner_tests, float_with_negative_exponent)
 {
     setup_stdin("12.0e-3");
 
@@ -61,7 +61,7 @@ Test(scanner_tests, test_float_with_negative_exponent)
     }
 }
 
-Test(scanner_tests, test_float_with_positive_exponent_no_plus)
+Test(scanner_tests, float_with_positive_exponent_no_plus)
 {
     setup_stdin("12.0e3");
 
@@ -78,7 +78,7 @@ Test(scanner_tests, test_float_with_positive_exponent_no_plus)
     }
 }
 
-Test(scanner_tests, test_float_with_negative_exponent_no_minus)
+Test(scanner_tests, float_with_negative_exponent_no_minus)
 {
     setup_stdin("12.0e3");
 
