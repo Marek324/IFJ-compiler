@@ -1,5 +1,8 @@
 *.txt
-*.o
+obj/
+bin/
+tests/output/
 .vscode/
 build/
-*.svg
+*.png
+debug_options

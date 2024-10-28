@@ -1,43 +1,51 @@
-/**
- * @file scanner.h
- * 
- * @author Marek Hric
- * 
- * @brief Header file for the scanner.
- */
+/*
+file: scanner.h
+author: Marek Hric
+Header file for the scanner.
+*/
+
+#ifndef SCANNER_H
+#define SCANNER_H
+
+
+#include "token.h"
+#include "error.h"
+#include "circ_buff.h"
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
 
 enum State {
     S_START,
+    S_END,
+    S_ERROR,
+    
+    S_ID,
+
+    S_UNDERSCORE,
+    S_AT_IMPORT,
 
     //OPERATORS
-    S_EQ, 
+    S_ASGN, 
     S_BANG,
     S_LESS,
     S_MORE,
 
-    //KEYWORDS
-    S_POS_KW_I, S_POS_KW_IF,
-                S_POS_KW_IN, S_POS_KW_INC, S_POS_KW_INCL, S_POS_KW_INCLU, S_POS_KW_INCLUD, S_POS_KW_INCLUDE,
-    S_POS_KW_E, S_POS_KW_EL, S_POS_KW_ELS, S_POS_KW_ELSE,
-    S_POS_KW_W, S_POS_KW_WH, S_POS_KW_WHI, S_POS_KW_WHIL, S_POS_KW_WHILE,
-
-    //IDENTIFIERS
-    S_IDENTIFIER,
+    //NUMBERS
+    S_ZERO,
+    S_INT,
+    S_FLOAT, S_FLOAT_EXP, S_FLOAT_DEC_EXP, 
 
     //LITERALS
-    S_STR_LITERAL, S_STR_LITERAL_BSLASH,
-    S_CHAR_LITERAL, S_CHAR_LITERAL_BSLASH,
-
-    //COMMENTS
-    S_POS_COMM,
-    S_COMM,
-    S_POS_MULTILINE_COMM,    
+    S_STR, S_STR_MLINE,
+    S_STR_ESC, S_STR_HEX,
 };
 
-typedef struct Token;
-
 // Function prototypes
-Token* get_token();
+Token *get_token(circ_buff_ptr buffer);
 void free_token(Token* token);
 
-/*** End of file scanner.h ***/
+#endif // SCANNER_H

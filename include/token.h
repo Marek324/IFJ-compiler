@@ -1,46 +1,73 @@
-/**
- * @file token.h
- * 
- * @author Marek Hric
- * @author Adam Veselý
- * 
- * @brief Header file for tokens.
- */
+/*
+file: token.h
+authors: Marek Hric, Adam Veselý
+Header file for tokens.
+*/
 
-typedef struct dyn_str;
+#ifndef TOKEN_H
+#define TOKEN
 
-enum TokenType {
-};
+#include "dyn_str.h"
+typedef enum {
+    T_KW,
+    T_ID,
+    T_AT_IMPORT,
+    
+    T_INT,
+    T_FLOAT,
+    T_STR,
 
-enum KeyWordType {
-};
+    T_ASGN, T_EQ,
+    T_BANG, T_NEQ,
+    T_LESS, T_LEQ,
+    T_MORE, T_MEQ,
 
-/**
- * @brief Token value structure.
- * 
- * @param int_value Integer value of token value.
- * @param float_value Float value of token value.
- * @param string_value Dynamic string value of token value.
- * @param keyword Keyword type of token value.
- */
-union TokenValue {
+    T_PLUS,
+    T_MINUS,
+    T_MUL,
+    T_DIV,
+
+    T_LPAREN, T_RPAREN,
+    T_LBRACE, T_RBRACE,
+    T_LBRACKET, T_RBRACKET,
+
+    T_COMMA,
+    T_DOT,
+    T_SEMICOL,
+    T_COLON,
+    T_PIPE,
+    T_QMARK,
+
+    T_EOF
+} TokenType;
+
+typedef enum {
+    KW_CONST,
+    KW_IF,
+    KW_ELSE,
+    KW_FN,
+    KW_I32,
+    KW_F64,
+    KW_NULL,
+    KW_PUB,
+    KW_RETURN,
+    KW_U8,
+    KW_VAR,
+    KW_VOID,
+    KW_WHILE,
+    NO_KW
+} KeyWordType;
+
+typedef union {
     int int_value;
     float float_value;
-    dyn_str* string_value;
+    char *string_value;
     KeyWordType keyword;
-};
+} TokenValue;
 
-/**
- * @brief Token structure.
- * 
- * @param type Token type of the token.
- * @param value Token value of the token.
- * @param line Line where the token is located.
- */
 typedef struct {
     TokenType type;
     TokenValue value;
-    int line;
 } Token;
 
-/*** End of file token.h ***/
+#endif // TOKEN_H
