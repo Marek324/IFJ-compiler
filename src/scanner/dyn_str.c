@@ -4,7 +4,7 @@ author: Mikuláš Lešiga
 Implementation of dynamic string functions from dyn_str.h.
 */
 
-#include "../include/dyn_str.h"
+#include "scanner/dyn_str.h"
 
 dyn_str* dyn_str_init() {
     dyn_str* ds = malloc(sizeof(dyn_str));

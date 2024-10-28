@@ -1,4 +1,4 @@
-#include "../../include/scanner.h"
+#include "scanner/scanner.h"
 
 void print_type(int type);
 void print_kw(int kw);
