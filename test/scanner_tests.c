@@ -27,17 +27,63 @@ void teardown(void)
 
 TestSuite(scanner_tests, .init = scanner_setup, .fini = teardown);
 
-Test(scanner_tests, test_test)
+Test(scanner_tests, test_float_with_positive_exponent)
 {
-    setup_stdin("12.efgh+3");
+    setup_stdin("12.0e+3");
 
     Token expected_tokens[] = {
-        TOKEN(T_INT, 12),
-        TOKEN_N(T_DOT),
-        TOKEN_S(T_ID, "efgh"),
-        TOKEN_N(T_PLUS),
-        TOKEN(T_INT, 3),
-        TOKEN_N(T_EOF)
+        TOKEN(T_FLOAT, 12000.0),
+    };
+    
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+}
+
+Test(scanner_tests, test_float_with_negative_exponent)
+{
+    setup_stdin("12.0e-3");
+
+    Token expected_tokens[] = {
+        TOKEN(T_FLOAT, 0.012),
+    };
+    
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+}
+
+Test(scanner_tests, test_float_with_positive_exponent_no_plus)
+{
+    setup_stdin("12.0e3");
+
+    Token expected_tokens[] = {
+        TOKEN(T_FLOAT, 12000.0),
+    };
+    
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+}
+
+Test(scanner_tests, test_float_with_negative_exponent_no_minus)
+{
+    setup_stdin("12.0e3");
+
+    Token expected_tokens[] = {
+        TOKEN(T_FLOAT, 12000.0),
     };
     
     for (int i = 0; i < N; i++){
