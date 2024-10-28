@@ -35,7 +35,7 @@ void assert_token_eq(Token *compared, Token *expected)
     else if (expected->type == T_FLOAT)
         cr_assert(compared->value.float_value == expected->value.float_value, "Expected float value %f, got %f", expected->value.float_value, compared->value.float_value);
     else if (expected->type == T_ID || expected->type == T_STR)
-        cr_assert(strcmp(compared->value.string_value, expected->value.string_value) == 0, "Expected string value %s, got %s", expected->value.string_value, compared->value.string_value);
+        cr_assert(!strcmp(compared->value.string_value, expected->value.string_value), "Expected string value {%s}, got {%s}", expected->value.string_value, compared->value.string_value);
     else if (expected->type == T_KW)
         cr_assert(compared->value.keyword == expected->value.keyword, "Expected keyword value %d, got %d", expected->value.keyword, compared->value.keyword);
 }

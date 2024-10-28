@@ -17,7 +17,7 @@ Implementation of scanner.
 // Function prototypes
 void consume_comment();
 KeyWordType check_keyword(char *str);
-void error(Token *token, char *msg);
+void error(Token *token, dyn_str *str, char *msg);
 int read_char(circ_buff_ptr buffer);
 
 void load_id_to_dyn_str(dyn_str *str, circ_buff_ptr buffer);
@@ -31,7 +31,7 @@ Token *get_token(circ_buff_ptr buffer)
         error_exit(1, "Malloc failed\n");
     
     dyn_str *str = dyn_str_init();
-    
+
     int state = S_START;
     int c; 
     while ((c = read_char(buffer)) != EOF) {
@@ -112,7 +112,7 @@ Token *get_token(circ_buff_ptr buffer)
                             state = S_STR_MLINE;
                             break;
                         } else {
-                            error(token, "Invalid character after backslash\n");
+                            error(token, str, "Invalid character after backslash\n");
                         }
                         break;
                     
@@ -179,70 +179,67 @@ Token *get_token(circ_buff_ptr buffer)
                 circ_buff_enqueue(buffer, c);
                 while (isdigit(c = read_char(buffer))) 
                     dyn_str_append(str, c);
-                
+
                 if (c == '.') {
-                    c = read_char(buffer);
-                    if (isdigit(c)) {
-                        dyn_str_append(str, '.');
-                        circ_buff_enqueue(buffer, c);
-                        state = S_FLOAT;
-                        break;
-                    }
-                    circ_buff_enqueue(buffer, '.');
+                    state = S_FLOAT_DOT;
+                    break;
                 } else if (c == 'e' || c == 'E') {
-                    c = read_char(buffer);
-                    if (isdigit(c)) {
-                        dyn_str_append(str, 'e');
-                        circ_buff_enqueue(buffer, c);
-                        state = S_FLOAT_EXP;
-                        break;
-                    }
-                    circ_buff_enqueue(buffer, 'e');
-                } 
-                
-                circ_buff_enqueue(buffer, c);
-                token->value.int_value = atoi(str->str);
-                RETURN_TOKEN(T_INT);
+                    state = S_FLOAT_EXP_SIGN;
+                    break;
+                } else {
+                    circ_buff_enqueue(buffer, c);
+                    token->value.int_value = atoi(str->str);
+                    RETURN_TOKEN(T_INT);
+                }
                 break; // S_INT
+
+            case S_FLOAT_DOT:
+                if (isdigit(c)) {
+                    dyn_str_append(str, '.');
+                    circ_buff_enqueue(buffer, c);
+                    state = S_FLOAT;
+                    break;
+                } else {
+                    error(token, str, "Invalid float number\n");
+                }
+                break; // S_FLOAT_DOT
 
             case S_FLOAT:
                 circ_buff_enqueue(buffer, c);
                 while (isdigit(c = read_char(buffer))) 
                     dyn_str_append(str, c);
-                
-                if (c == 'e' || c == 'E') {
-                    c = read_char(buffer);
-                    if (isdigit(c)) {
-                        dyn_str_append(str, 'e');
-                        circ_buff_enqueue(buffer, c);
-                        state = S_FLOAT_EXP;
-                        break;
-                    } else if (c == '+' || c == '-') {
-                        char tmp = c;
-                        c = read_char(buffer);
-                        if (isdigit(c)) {
-                            dyn_str_append(str, 'e');
-                            dyn_str_append(str, tmp);
-                            circ_buff_enqueue(buffer, c);
-                            state = S_FLOAT_EXP;
-                            break;
-                        }
-                        circ_buff_enqueue(buffer, tmp);
-                    }
-                    circ_buff_enqueue(buffer, 'e');
-                } 
 
-                circ_buff_enqueue(buffer, c);
-                token->value.float_value = atof(str->str);
-                RETURN_TOKEN(T_FLOAT);
-                
+                if (c == 'e' || c == 'E') {
+                    state = S_FLOAT_EXP_SIGN;
+                    break;
+                } else {
+                    circ_buff_enqueue(buffer, c);
+                    token->value.float_value = atof(str->str);
+                    RETURN_TOKEN(T_FLOAT);
+                }
                 break; // S_FLOAT
+
+            case S_FLOAT_EXP_SIGN:
+                if (isdigit(c)) {
+                    dyn_str_append(str, 'e');
+                    circ_buff_enqueue(buffer, c);
+                    state = S_FLOAT_EXP;
+                    break;
+                } else if (c == '+' || c == '-') {
+                    dyn_str_append(str, 'e');
+                    dyn_str_append(str, c);
+                    state = S_FLOAT_EXP;
+                    break;
+                } else {
+                    error(token, str, "Invalid float number\n");
+                }
+                break; // S_FLOAT_EXP_SIGN
 
             case S_FLOAT_EXP:
                 circ_buff_enqueue(buffer, c);
                 while (isdigit(c = read_char(buffer))) 
                     dyn_str_append(str, c);
-            
+
                 circ_buff_enqueue(buffer, c);
                 token->value.float_value = atof(str->str);
                 RETURN_TOKEN(T_FLOAT);
@@ -254,7 +251,7 @@ Token *get_token(circ_buff_ptr buffer)
                         state = S_STR_ESC;
                         break;
                     } else if (c == '\n' || c == EOF) {
-                        error(token, "Missing terminating \" character\n");
+                        error(token, str, "Missing terminating \" character\n");
                     } else {
                         dyn_str_append(str, c);
                     }
@@ -289,16 +286,31 @@ Token *get_token(circ_buff_ptr buffer)
                         state = S_STR_HEX;
                         break;
                     default:
-                        error(token, "Invalid escape sequence\n");
+                        error(token, str, "Invalid escape sequence\n");
                         break;
                 }
-                state = S_STR;
+                if (state != S_STR_HEX)
+                    state = S_STR;
                 circ_buff_enqueue(buffer, c);
                 break; // S_STR_ESC
 
-            case S_STR_HEX:
+            case S_STR_HEX: 
+                {
+                int hex = 0;
+                for (int i = 0; i < 2; i++) {
+                    c = read_char(buffer);
+                    if (!isxdigit(c) && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') && c != EOF) {
+                        error(token, str, "Invalid hex escape sequence\n");
+                    }
+                    hex = hex * 16 + (isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
+                }
                 
+                dyn_str_append(str, (char)hex);
+                state = S_STR;           
+                circ_buff_enqueue(buffer, c);     
+                }    
                 break; // S_STR_HEX
+
 
             case S_STR_MLINE:
 
@@ -316,10 +328,10 @@ void consume_comment()
         continue;
 }
 
-void error(Token *token, char *msg)
+void error(Token *token, dyn_str *str, char *msg)
 {
     free_token(token);
-
+    dyn_str_free(str);
     error_exit(1, msg);
 }
 

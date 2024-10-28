@@ -94,3 +94,20 @@ Test(scanner_tests, float_with_negative_exponent_no_minus)
         free_token(token);
     }
 }
+
+Test(scanner_tests, hex_escape)
+{
+    setup_stdin("\"\\x41\"");
+
+    Token expected_tokens[] = {
+        TOKEN_S(T_STR, "\x41")
+    };
+    
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+}
