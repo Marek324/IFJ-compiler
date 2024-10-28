@@ -24,9 +24,9 @@ int main() {
         }else{
             free_token(token);
             break;
-
         }
     }
+    circ_buff_free(buffer);
 
     return 0;
 }

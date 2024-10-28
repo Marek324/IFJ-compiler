@@ -7,7 +7,7 @@ Implementation of scanner.
 #include "../include/scanner.h"
 
 // Macros
-#define NOT_END_OF_ID (c = fgetc(file)) != EOF && c != '\n' && c != ' ' && c != '\t' && (isAlpha(c) || isNumber(c))
+#define INPUT stdin
 
 #define RETURN_TOKEN(T) \
     token->type = T; \
@@ -15,285 +15,266 @@ Implementation of scanner.
     return token
 
 // Function prototypes
-void consume_comment(FILE* file);
+void consume_comment();
 KeyWordType check_keyword(char *str);
 void error(Token *token, char *msg);
+int read_char(circ_buff_ptr buffer);
 
-// Helper functions
-bool isAlpha(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
+void load_id_to_dyn_str(dyn_str *str, circ_buff_ptr buffer);
 
-bool isNumber(char c){
-    return c >= '0' && c <= '9';
-}
-
-float str_to_float(char *str) {
-    return strtof(str, NULL);
-}
-
-int str_to_int(char *str) {
-    return strtol(str, NULL, 10);
-}
-
-// parameter file should be opened in the calling function.
-Token *get_token(FILE* file) {
+//char buffer
+//get_token(&buffer)
+Token *get_token(circ_buff_ptr buffer) 
+{
     Token *token = (Token *)malloc(sizeof(Token));
-    if (token == NULL) {
+    if (token == NULL) 
         error_exit(1, "Malloc failed\n");
-    }
+    
     dyn_str *str = dyn_str_init();
     
     int state = S_START;
-    int c;
-    while ((c = fgetc(file)) != EOF) {
-        switch (state)
-        {
-        case S_START:
-            if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-                continue;
-            }
-            switch (c){
-                case '(': RETURN_TOKEN(T_LPAREN);
-                case ')': RETURN_TOKEN(T_RPAREN);
-                case '{': RETURN_TOKEN(T_LBRACE);
-                case '}': RETURN_TOKEN(T_RBRACE);
-                case '[': RETURN_TOKEN(T_LBRACKET);
-                case ']': RETURN_TOKEN(T_RBRACKET);
-                case '|': RETURN_TOKEN(T_PIPE);
-                case '?': RETURN_TOKEN(T_QMARK);
-                case ':': RETURN_TOKEN(T_COLON);
-                case ',': RETURN_TOKEN(T_COMMA);
-                case '.': RETURN_TOKEN(T_DOT);
-                case ';': RETURN_TOKEN(T_SEMICOL);
-                case '+': RETURN_TOKEN(T_PLUS);
-                case '-': RETURN_TOKEN(T_MINUS);
-                case '*': RETURN_TOKEN(T_MUL);
+    int c; 
+    while ((c = read_char(buffer)) != EOF) {
+        
+        switch (state) {
+            case S_START:
+                if (isspace(c)) 
+                    continue;
+                
+                switch (c) {
+                    case '(': RETURN_TOKEN(T_LPAREN);
+                    case ')': RETURN_TOKEN(T_RPAREN);
+                    case '{': RETURN_TOKEN(T_LBRACE);
+                    case '}': RETURN_TOKEN(T_RBRACE);
+                    case '[': RETURN_TOKEN(T_LBRACKET);
+                    case ']': RETURN_TOKEN(T_RBRACKET);
+                    case '|': RETURN_TOKEN(T_PIPE);
+                    case '?': RETURN_TOKEN(T_QMARK);
+                    case ':': RETURN_TOKEN(T_COLON);
+                    case ',': RETURN_TOKEN(T_COMMA);
+                    case '.': RETURN_TOKEN(T_DOT);
+                    case ';': RETURN_TOKEN(T_SEMICOL);
+                    case '+': RETURN_TOKEN(T_PLUS);
+                    case '-': RETURN_TOKEN(T_MINUS);
+                    case '*': RETURN_TOKEN(T_MUL);
 
-                case '=': 
-                    c = fgetc(file);
-                    if (c == '=') {RETURN_TOKEN(T_EQ);}
-                    else {
-                        ungetc(c, file);
-                        RETURN_TOKEN(T_ASGN);
-                    }
-                        
-                    break;
-                case '!': 
-                    c = fgetc(file);
-                    if (c == '=') {RETURN_TOKEN(T_NEQ);}
-                    else {
-                        ungetc(c, file);
-                        RETURN_TOKEN(T_BANG);
-                    }
-                    break;
-                case '<': 
-                    c = fgetc(file);
-                    if (c == '=') {RETURN_TOKEN(T_LEQ);}
-                    else {
-                        ungetc(c, file);
-                        RETURN_TOKEN(T_LESS);
-                    }
-                    break;
-                case '>': 
-                    c = fgetc(file);
-                    if (c == '=') {RETURN_TOKEN(T_MEQ);}
-                    else {
-                        ungetc(c, file);
-                        RETURN_TOKEN(T_MORE);
-                    }
-                    break;
-
-                case '/':
-                    c = fgetc(file);
-                    if (c == '/') {
-                        consume_comment(file);
+                    case '=': 
+                        c = getc(INPUT);
+                        if (c == '=') {
+                            RETURN_TOKEN(T_EQ);
+                        } else {
+                            circ_buff_enqueue(buffer, c);
+                            RETURN_TOKEN(T_ASGN);
+                        }
+                            
                         break;
-                    } else {
-                        ungetc(c, file);
-                        RETURN_TOKEN(T_DIV);
-                    }
-                    break;
+                    case '!': 
+                        c = getc(INPUT);
+                        if (c == '=') {
+                            RETURN_TOKEN(T_NEQ);
+                        } else {
+                            circ_buff_enqueue(buffer, c);
+                            RETURN_TOKEN(T_BANG);
+                        }
+                        break;
+                    case '<': 
+                        c = getc(INPUT);
+                        if (c == '=') {
+                            RETURN_TOKEN(T_LEQ);
+                        } else {
+                            circ_buff_enqueue(buffer, c);
+                            RETURN_TOKEN(T_LESS);
+                        }
+                        break;
+                    case '>': 
+                        c = getc(INPUT);
+                        if (c == '=') {
+                            RETURN_TOKEN(T_MEQ);
+                        } else {
+                            circ_buff_enqueue(buffer, c);
+                            RETURN_TOKEN(T_MORE);
+                        }
+                        break;
 
-                case '\\':
+                    case '/':
+                        c = getc(INPUT);
+                        if (c == '/') {
+                            consume_comment(INPUT);
+                            break;
+                        } else {
+                            circ_buff_enqueue(buffer, c);
+                            RETURN_TOKEN(T_DIV);
+                        }
+                        break;
+
+                    case '\\':
+                        c = getc(INPUT);
+                        if (c == '\\') {
+                            state = S_STR_MLINE;
+                            break;
+                        } else {
+                            error(token, "Invalid character after backslash\n");
+                        }
+                        break;
                     
+                    case '"':
+                        circ_buff_enqueue(buffer, c); // '"' needs to be returned because it will be read in main while and S_STR will read nexy char 
+                        state = S_STR;
+                        break;
+                    case '@': 
+                        dyn_str_append(str, c); // add @ to dyn_string
+                        state = S_AT_IMPORT;
+                        break;
+                    default:
+                        if (isalpha(c) || c == '_') {
+                            circ_buff_enqueue(buffer, c);
+                            state = S_ID;
+                        } else if (isdigit(c)) {
+                            if (c == '0') {
+                                circ_buff_enqueue(buffer, c);
+                                state = S_ZERO;
+                            } else {
+                                state = S_INT;
+                            }
+                            dyn_str_append(str, c);
+                        } else {
+                            free_token(token);
+                            dyn_str_free(str);
+                            error_exit(1,"Unknown character\n");
+                        }
+                        break;
+                }
+                break; // S_START
+
+            case S_AT_IMPORT:
+                {   
+                    circ_buff_enqueue(buffer, c); // put character back to buffer
+                    load_id_to_dyn_str(str, buffer);
+                    int match = !strcmp(str->str, "@import");
+                    if (match) {
+                        RETURN_TOKEN(T_AT_IMPORT);
+                    } else error_exit(1,"Unknown keyword starting with @\n");
+                }
+                break; // S_AT_IMPORT
+
+            case S_ID:
+                circ_buff_enqueue(buffer, c);
+                load_id_to_dyn_str(str, buffer);
+
+                KeyWordType kw = check_keyword(str->str);
+                if (kw != NO_KW) {
+                    token->value.keyword = kw;
+                    RETURN_TOKEN(T_KW);
+                } else {
+                    token->value.string_value = (char *)malloc(str->length+1);
+                    strcpy(token->value.string_value, str->str);
+                    RETURN_TOKEN(T_ID);
+                }
+                break; // S_ID
+
+            case S_ZERO:
                 
+                break; // S_ZERO
+
+            case S_INT:
                 
-                case '"':
-                    state = S_STR;
-                    break;
-                case '0':
-                    state = S_ZERO;
-                    break;
-                case '@': 
-                    break;
-                default:
-                    if (isAlpha(c) || c == '_') {
-                    } else if (isNumber(c)) {
+                break; // S_INT
+
+            case S_F64_DOT:
+                
+                break; // S_F64_DOT
+
+            case S_F64:
+                
+                break; // S_F64
+
+            case S_F64_E:
+                if (!isdigit(c)) {
+                    
+                }
+                break; // S_F64_E
+
+            case S_F64_EXP:
+                
+                break; // S_F64_EXP
+
+            case S_STR:
+                while((c = read_char(buffer)) != '"') {
+                    if(c == '\\') {
+                        state = S_STR_ESC;
+                        break;
+                    } else if (c == '\n' || c == EOF) {
+                        error(token, "Missing terminating \" character\n");
                     } else {
-                        error_exit(1,"Unknown character\n");
+                        dyn_str_append(str, c);
                     }
+                }
+                if (state == S_STR_ESC)
                     break;
+                
+
+                token->value.string_value = (char *)malloc(str->length+1);
+                strcpy(token->value.string_value, str->str);
+                RETURN_TOKEN(T_STR);
+                break; // S_STR
+
+            case S_STR_ESC:
+                switch(c) {
+                    case 'n': 
+                        dyn_str_append(str, '\n');
+                        break;
+                    case 't': 
+                        dyn_str_append(str, '\t');
+                        break;
+                    case 'r': 
+                        dyn_str_append(str, '\r');
+                        break;
+                    case '\\': 
+                        dyn_str_append(str, '\\');
+                        break;
+                    case '"': 
+                        dyn_str_append(str, '"');
+                        break;
+                    case 'x': 
+                        state = S_STR_HEX;
+                        break;
+                    default:
+                        error(token, "Invalid escape sequence\n");
+                        break;
+                }
+                state = S_STR;
+                circ_buff_enqueue(buffer, c);
+                break; // S_STR_ESC
+
+            case S_STR_HEX:
+                
+                break; // S_STR_HEX
+
+            case S_STR_MLINE:
+
+                break; // S_STR_MLINE
             }
-            break; // S_START
+    } 
 
-        case S_AT_IMPORT:
-            // token->value.string_value = dyn_str_init();
-            // while(NOT_END_OF_ID) {
-            //     dyn_str_append(token->value.string_value, c);
-            // }
-            // int match = !strcmp(token->value.string_value->str, "@import");
-            // dyn_str_free(token->value.string_value); 
-            // if (match) {
-            //     token->type = T_AT_IMPORT;
-            //     return token;
-            // } else {
-            //     error_exit(1,"Unknown keyword\n");
-            // }
-            break; // S_AT_IMPORT
-
-        case S_ID:
-            // token->value.string_value = dyn_str_init();
-            // while(NOT_END_OF_ID) { 
-            //     if (isAlpha(c) || isNumber(c) || c == '_') {
-            //         dyn_str_append(token->value.string_value, c);
-            //     } else {
-            //         error(token, "Invalid character in ID\n");
-            //     }
-            // }
-            // KeyWordType kw = check_keyword(token->value.string_value->str);
-            // if (kw != NO_KW) {
-            //     token->type = T_KW;
-            //     dyn_str_free(token->value.string_value);
-            //     token->value.keyword = kw;
-            //     return token;
-            // } else {
-            //     token->type = T_ID;
-            // }
-            break; // S_ID
-
-        case S_ZERO:
-            // if (c == '.') {
-            //     state = S_F64_DOT;
-            //     CREATE_STR_FROM_S_ZERO;
-            // } else if (c == 'e' || c == 'E') {
-            //     state = S_F64_E;
-            //     CREATE_STR_FROM_S_ZERO;
-            // } else {
-            //     token->value.int_value = 0;
-            //     token->type = T_INT;
-            //     return token;
-            // }
-            break; // S_ZERO
-
-        case S_INT:
-            // token->value.string_value = dyn_str_init();
-            // dyn_str_append(token->value.string_value, c);
-            // while (isNumber(c = fgetc(file))) {
-            //     dyn_str_append(token->value.string_value, c);
-            // }
-            // if (c == '.') {
-            //     dyn_str_append(token->value.string_value, c);
-            //     state = S_F64_DOT;
-            // } else if (c == 'e' || c == 'E') {
-            //     dyn_str_append(token->value.string_value, c);
-            //     state = S_F64_E;
-            // } else {
-            //     ungetc(c, file);
-            //     token->type = T_INT;
-            //     char *str = token->value.string_value->str;
-            //     token->value.int_value = str_to_int(str);
-            //     free(str);
-            //     return token;
-            // }
-            break; // S_INT
-
-        case S_F64_DOT:
-                // if(c == 'e' || c == 'E'){
-                //     dyn_str_append(token->value.string_value, c);
-                //     state = S_F64_E;
-                // } else if(isNumber(c)){
-                //     ungetc(c, file);
-                //     state = S_F64;
-                // } else{
-                //     error(token, "Invalid float, no number after \'.\'\n");
-                // }
-            break; // S_F64_DOT
-
-        case S_F64:
-            // if (isNumber(c)) {
-            //     dyn_str_append(token->value.string_value, c);
-            // } else if (c == 'e' || c == 'E') {
-            //     dyn_str_append(token->value.string_value, c);
-            //     state = S_F64_E;
-            // } else {
-            //     ungetc(c, file);
-            //     token->type = T_F64;
-            //     char *str = token->value.string_value->str;
-            //     token->value.float_value = str_to_float(str);
-            //     free(str);
-            //     return token;
-            // }
-            break; // S_F64
-
-        case S_F64_E:
-            // if(c == '+' || c == '-' || isNumber(c)){
-            //     dyn_str_append(token->value.string_value, c);
-            //     state = S_F64_EXP;
-            // } else{
-            //     error(token, "Invalid float, exptected number, \'+\' or \'-\' after \'e\'\n");
-            // }
-            break; // S_F64_E
-
-        case S_F64_EXP:
-                // if(isNumber(peek(file))){
-                //     dyn_str_append(token->value.string_value, c);
-                // } else {
-                //     char *str = token->value.string_value->str;
-                //     token->type = T_F64;
-                //     token->value.float_value = str_to_float(str);
-                //     free(str);
-                //     return token;
-                // }
-            break; // S_F64_EXP
-
-        case S_STR:
-
-            break; // S_STR
-
-        case S_STR_ESC:
-
-            break; // S_STR_ESC
-
-        case S_STR_HEX:
-
-            break; // S_STR_HEX
-
-        case S_STR_MLINE:
-
-            break; // S_STR_MLINE
-        }
-    }
-    
-    token->type = T_EOF;
-
-    return token;
+    RETURN_TOKEN(T_EOF);
 }
 
-void consume_comment(FILE* file){
+void consume_comment()
+{
     int c;
-    while ((c = fgetc(file)) != EOF && c != '\n') {
+    while ((c = getc(INPUT)) != EOF && c != '\n') 
         continue;
-    }
 }
 
-void error(Token *token, char *msg){
-    free(token);
+void error(Token *token, char *msg)
+{
+    free_token(token);
 
     error_exit(1, msg);
 }
 
-KeyWordType check_keyword(char *str){
+KeyWordType check_keyword(char *str)
+{
     if(!strcmp(str, "const")) return KW_CONST;
     else if(!strcmp(str, "if")) return KW_IF;
     else if(!strcmp(str, "else")) return KW_ELSE;
@@ -310,6 +291,27 @@ KeyWordType check_keyword(char *str){
     else return NO_KW;
 }
 
-void free_token(Token* token){
+void free_token(Token* token)
+{
+    if(token->type == T_ID || token->type == T_STR)
+        free(token->value.string_value);
     free(token);
+}
+
+int read_char(circ_buff_ptr buffer)
+{
+    if (!circ_buff_is_empty(buffer)) 
+        return circ_buff_dequeue(buffer);
+    else 
+        return getc(INPUT);
+    
+}
+
+void load_id_to_dyn_str(dyn_str *str, circ_buff_ptr buffer)
+{
+    int c;
+    while((c = read_char(buffer)) != EOF && (isalnum(c) || c == '_')) 
+        dyn_str_append(str, c);
+
+    circ_buff_enqueue(buffer, c);
 }

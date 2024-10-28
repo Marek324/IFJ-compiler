@@ -8,6 +8,7 @@ Header file for circular buffer.
 #define CIRC_BUFF_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #define CIRC_BUFF_SIZE 8
