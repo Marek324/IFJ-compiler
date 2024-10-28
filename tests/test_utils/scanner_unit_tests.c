@@ -8,7 +8,7 @@ int main() {
     while(1) {
         Token *token = get_token(buffer);
         print_type(token->type);
-        if(token->type == T_F64) {
+        if(token->type == T_FLOAT) {
             printf(" %f", token->value.float_value);
         } else if(token->type == T_INT) {
             printf(" %d", token->value.int_value);
@@ -38,7 +38,7 @@ void print_type(int type)
         case T_ID: printf("T_ID,"); break;
         case T_AT_IMPORT: printf("T_AT_IMPORT,"); break;
         case T_INT: printf("T_INT,"); break;
-        case T_F64: printf("T_F64,"); break;
+        case T_FLOAT: printf("T_FLOAT,"); break;
         case T_STR: printf("T_STR,"); break;
         case T_ASGN: printf("T_ASGN,"); break;
         case T_EQ: printf("T_EQ,"); break;

@@ -35,7 +35,6 @@ Token *get_token(circ_buff_ptr buffer)
     int state = S_START;
     int c; 
     while ((c = read_char(buffer)) != EOF) {
-        
         switch (state) {
             case S_START:
                 if (isspace(c)) 
@@ -134,9 +133,9 @@ Token *get_token(circ_buff_ptr buffer)
                                 circ_buff_enqueue(buffer, c);
                                 state = S_ZERO;
                             } else {
+                                circ_buff_enqueue(buffer, c);
                                 state = S_INT;
                             }
-                            dyn_str_append(str, c);
                         } else {
                             free_token(token);
                             dyn_str_free(str);
@@ -177,26 +176,77 @@ Token *get_token(circ_buff_ptr buffer)
                 break; // S_ZERO
 
             case S_INT:
+                circ_buff_enqueue(buffer, c);
+                while (isdigit(c = read_char(buffer))) 
+                    dyn_str_append(str, c);
                 
+                if (c == '.') {
+                    c = read_char(buffer);
+                    if (isdigit(c)) {
+                        dyn_str_append(str, '.');
+                        circ_buff_enqueue(buffer, c);
+                        state = S_FLOAT;
+                        break;
+                    }
+                    circ_buff_enqueue(buffer, '.');
+                } else if (c == 'e' || c == 'E') {
+                    c = read_char(buffer);
+                    if (isdigit(c)) {
+                        dyn_str_append(str, 'e');
+                        circ_buff_enqueue(buffer, c);
+                        state = S_FLOAT_EXP;
+                        break;
+                    }
+                    circ_buff_enqueue(buffer, 'e');
+                } 
+                
+                circ_buff_enqueue(buffer, c);
+                token->value.int_value = atoi(str->str);
+                RETURN_TOKEN(T_INT);
                 break; // S_INT
 
-            case S_F64_DOT:
+            case S_FLOAT:
+                circ_buff_enqueue(buffer, c);
+                while (isdigit(c = read_char(buffer))) 
+                    dyn_str_append(str, c);
                 
-                break; // S_F64_DOT
+                if (c == 'e' || c == 'E') {
+                    c = read_char(buffer);
+                    if (isdigit(c)) {
+                        dyn_str_append(str, 'e');
+                        circ_buff_enqueue(buffer, c);
+                        state = S_FLOAT_EXP;
+                        break;
+                    } else if (c == '+' || c == '-') {
+                        char tmp = c;
+                        c = read_char(buffer);
+                        if (isdigit(c)) {
+                            dyn_str_append(str, 'e');
+                            dyn_str_append(str, tmp);
+                            circ_buff_enqueue(buffer, c);
+                            state = S_FLOAT_EXP;
+                            break;
+                        }
+                        circ_buff_enqueue(buffer, tmp);
+                    }
+                    circ_buff_enqueue(buffer, 'e');
+                } 
 
-            case S_F64:
+                circ_buff_enqueue(buffer, c);
+                token->value.float_value = atof(str->str);
+                RETURN_TOKEN(T_FLOAT);
                 
-                break; // S_F64
+                break; // S_FLOAT
 
-            case S_F64_E:
-                if (!isdigit(c)) {
-                    
-                }
-                break; // S_F64_E
-
-            case S_F64_EXP:
-                
-                break; // S_F64_EXP
+            case S_FLOAT_EXP:
+                circ_buff_enqueue(buffer, c);
+                while (isdigit(c = read_char(buffer))) 
+                    dyn_str_append(str, c);
+            
+                circ_buff_enqueue(buffer, c);
+                token->value.float_value = atof(str->str);
+                RETURN_TOKEN(T_FLOAT);
+                break; // S_FLOAT_EXP
 
             case S_STR:
                 while((c = read_char(buffer)) != '"') {

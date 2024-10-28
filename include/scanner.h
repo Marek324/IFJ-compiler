@@ -37,7 +37,7 @@ enum State {
     //NUMBERS
     S_ZERO,
     S_INT,
-    S_F64, S_F64_DOT, S_F64_E, S_F64_EXP,
+    S_FLOAT, S_FLOAT_EXP, S_FLOAT_DEC_EXP, 
 
     //LITERALS
     S_STR, S_STR_MLINE,

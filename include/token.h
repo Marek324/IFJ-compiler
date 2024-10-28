@@ -14,7 +14,7 @@ typedef enum {
     T_AT_IMPORT,
     
     T_INT,
-    T_F64,
+    T_FLOAT,
     T_STR,
 
     T_ASGN, T_EQ,
