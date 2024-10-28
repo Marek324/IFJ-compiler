@@ -5,7 +5,7 @@ Header file for tokens.
 */
 
 #ifndef TOKEN_H
-#define TOKEN
+#define TOKEN_H
 
 #include "dyn_str.h"
 typedef enum {
