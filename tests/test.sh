@@ -15,9 +15,9 @@ for input_file in $input_dir/*; do
     actual_output="tests/output/scanner/$test_name"
     expected_output="tests/exp_output/scanner/$test_name"
     
-    $BINARY "$input_file" "$actual_output"
-    
-    echo "Exit code: $?" >> "$actual_output"
+    $BINARY < "$input_file" > "$actual_output" 
+
+    echo "Exit code: $?" >> "$actual_output" 
     
     total_tests=$((total_tests + 1))
     
@@ -28,6 +28,7 @@ for input_file in $input_dir/*; do
     else
         echo "Test $test_name failed."
         diff "$actual_output" "$expected_output"
+        echo
         failed_tests=$((failed_tests + 1))
     fi
 done
