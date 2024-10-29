@@ -112,7 +112,7 @@ Token *get_token(circ_buff_ptr buffer)
                             state = S_STR_MLINE;
                             break;
                         } else {
-                            error(token, str, "Invalid character after backslash\n");
+                            error(token, str, "Invalid standalone backslash\n");
                         }
                         break;
                     
@@ -299,7 +299,8 @@ Token *get_token(circ_buff_ptr buffer)
                 int hex = 0;
                 for (int i = 0; i < 2; i++) {
                     c = read_char(buffer);
-                    if (!isxdigit(c) && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') && c != EOF) {
+                    if (!isxdigit(c)){
+                        fprintf(stderr, "Invalid hex escape number %c\n", c);
                         error(token, str, "Invalid hex escape sequence\n");
                     }
                     hex = hex * 16 + (isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
@@ -313,8 +314,42 @@ Token *get_token(circ_buff_ptr buffer)
 
 
             case S_STR_MLINE:
+                circ_buff_enqueue(buffer, c);
+                while((c = read_char(buffer)) != EOF && c != '\n') 
+                    dyn_str_append(str, c);
 
+                if (c == EOF) {
+                    token->value.string_value = (char *)malloc(str->length+1);
+                    token->value.string_value = strcpy(token->value.string_value, str->str);
+                    RETURN_TOKEN(T_STR);
+                } else if (c == '\n'){
+                    fprintf(stderr, "New line in multiline string\n");
+                    state = S_STR_MLINE_NEWLINE;
+                }
+                    
+                    
+                
                 break; // S_STR_MLINE
+
+            case S_STR_MLINE_NEWLINE:
+                circ_buff_enqueue(buffer, c);
+                while(isspace(c = read_char(buffer))) {} // skip whitespaces
+                if (c == '\\') {
+                    c = read_char(buffer);
+                    if (c == '\\') {
+                        dyn_str_append(str, '\n');
+                        state = S_STR_MLINE;
+                        break;
+                    } else {
+                        error(token, str, "Invalid standalone backslash\n");
+                    }
+                } else {
+                    circ_buff_enqueue(buffer, c);
+                    token->value.string_value = (char *)malloc(str->length+1);
+                    token->value.string_value = strcpy(token->value.string_value, str->str);
+                    RETURN_TOKEN(T_STR);
+                }
+
             }
     } 
 

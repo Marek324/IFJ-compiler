@@ -111,3 +111,33 @@ Test(scanner_tests, hex_escape)
         free_token(token);
     }
 }
+
+Test(scanner_tests, mline_string_one_line)
+{
+    setup_stdin("\\\\abcd");
+
+    Token expected_tokens[] = {
+        TOKEN_S(T_STR, "abcd")
+    };
+
+    Token *token = get_token(buffer);
+
+    assert_token_eq(token, &expected_tokens[0]);
+
+    free_token(token);
+
+}
+
+Test(scanner_tests, mline_string)
+{
+    setup_stdin("\\\\abcd\n       \\\\   abcd");
+    Token expected_tokens[] = {
+        TOKEN_S(T_STR, "abcd\n   abcd")
+    };
+
+    Token *token = get_token(buffer);
+
+    assert_token_eq(token, &expected_tokens[0]);
+
+    free_token(token);
+}

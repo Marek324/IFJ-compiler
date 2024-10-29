@@ -41,7 +41,7 @@ enum State {
     S_FLOAT_DOT, S_FLOAT_EXP_SIGN,
 
     //LITERALS
-    S_STR, S_STR_MLINE,
+    S_STR, S_STR_MLINE, S_STR_MLINE_NEWLINE,
     S_STR_ESC, S_STR_HEX,
 };
 
