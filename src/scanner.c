@@ -49,20 +49,25 @@ Implementation of scanner.
     dyn_str_append(str, C);                                                     \
     break; }
 
+#define ERROR(E) \
+    token->value.int_value = (E);\
+    RETURN_TOKEN(T_ERROR)
+
 // Function prototypes
 KeyWordType check_keyword(char *str);
-void error(Token *token, dyn_str *str, char *msg);
 int read_char(circ_buff_ptr buffer);
 
 //char buffer
 //get_token(&buffer)
 Token *get_token(circ_buff_ptr buffer) 
 {
-    Token *token = (Token *)malloc(sizeof(Token));
-    if (token == NULL) 
-        error_exit(99, "Malloc failed\n");
-    
     dyn_str *str = dyn_str_init();
+    
+    Token *token = (Token *)malloc(sizeof(Token));
+    if (token == NULL){ 
+        ERROR(99);
+    }
+    
 
     int state = S_START;
     int c; 
@@ -112,7 +117,7 @@ Token *get_token(circ_buff_ptr buffer)
                             state = S_STR_MLINE;
                             break;
                         } else {
-                            error(token, str, "Invalid standalone backslash\n");
+                            ERROR(1); // Invalid standalone backslash
                         }
                         break;
                     
@@ -125,9 +130,7 @@ Token *get_token(circ_buff_ptr buffer)
                         if (isalpha(c) || c == '_')  PUT_C_BACK_CHANGE_STATE(S_ID)
                         else if (isdigit(c)) PUT_C_BACK_CHANGE_STATE(S_INT) 
                         else {
-                            free_token(token);
-                            dyn_str_free(str);
-                            error_exit(1,"Unknown character\n");
+                            ERROR(2); // Invalid character
                         }
                         break;
                 }
@@ -139,7 +142,9 @@ Token *get_token(circ_buff_ptr buffer)
                     int match = !strcmp(str->str, "@import");
                     if (match) {
                         RETURN_TOKEN(T_AT_IMPORT);
-                    } else error_exit(1,"Unknown keyword starting with @\n");
+                    } else {
+                        ERROR(3); // Invalid @ keyword
+                    }
                 }
                 break; // S_AT_IMPORT
 
@@ -161,7 +166,9 @@ Token *get_token(circ_buff_ptr buffer)
                         token->value.int_value = 0;
                         RETURN_TOKEN(T_INT);
                     }
-                    else if (isdigit(c)) error(token, str, "Leading zero\n");
+                    else if (isdigit(c)) {
+                        ERROR(4); // Leading zero
+                    }
                     circ_buff_enqueue(buffer, '0');
                 }
 
@@ -186,7 +193,7 @@ Token *get_token(circ_buff_ptr buffer)
                     state = S_FLOAT;
                     break;
                 } else {
-                    error(token, str, "Invalid float number\n");
+                    ERROR(5); // Invalid float - no decimal part
                 }
                 break; // S_FLOAT_DOT
 
@@ -214,7 +221,7 @@ Token *get_token(circ_buff_ptr buffer)
                     state = S_FLOAT_EXP;
                     break;
                 } else {
-                    error(token, str, "Invalid float exp number\n");
+                    ERROR(6); // Invalid float - no exponent
                 }
                 break; // S_FLOAT_EXP_SIGN
 
@@ -231,7 +238,7 @@ Token *get_token(circ_buff_ptr buffer)
                         state = S_STR_ESC;
                         break;
                     } else if (c == '\n' || c == EOF) {
-                        error(token, str, "Missing terminating \" character\n");
+                        ERROR(7); // No closing quote
                     } else {
                         dyn_str_append(str, c);
                     }
@@ -253,7 +260,7 @@ Token *get_token(circ_buff_ptr buffer)
                         state = S_STR_HEX;
                         break;
                     default:
-                        error(token, str, "Invalid escape sequence\n");
+                        ERROR(8); // Invalid escape sequence
                 }
                 if (state != S_STR_HEX) state = S_STR;
                 circ_buff_enqueue(buffer, c);
@@ -265,7 +272,7 @@ Token *get_token(circ_buff_ptr buffer)
                     c = read_char(buffer);
                     if (!isxdigit(c)){
                         fprintf(stderr, "Invalid hex escape number %c\n", c);
-                        error(token, str, "Invalid hex escape sequence\n");
+                        ERROR(9); // Invalid hex escape number
                     }
                     hex = hex * 16 + (isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
                 }
@@ -297,7 +304,7 @@ Token *get_token(circ_buff_ptr buffer)
                         state = S_STR_MLINE;
                         break;
                     } else {
-                        error(token, str, "Invalid standalone backslash\n");
+                        ERROR(1); // Standalone backslash
                     }
                 } else {
                     circ_buff_enqueue(buffer, c);
@@ -308,13 +315,6 @@ Token *get_token(circ_buff_ptr buffer)
     } 
 
     RETURN_TOKEN(T_EOF);
-}
-
-void error(Token *token, dyn_str *str, char *msg)
-{
-    free_token(token);
-    dyn_str_free(str);
-    error_exit(1, msg);
 }
 
 KeyWordType check_keyword(char *str)

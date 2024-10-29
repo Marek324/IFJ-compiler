@@ -9,7 +9,6 @@ Header file for the scanner.
 
 
 #include "token.h"
-#include "error.h"
 #include "circ_buff.h"
 
 #include <stdbool.h>
