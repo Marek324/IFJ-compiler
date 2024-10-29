@@ -33,6 +33,7 @@ Test(scanner_tests, float_with_positive_exponent)
 
     Token expected_tokens[] = {
         TOKEN(T_FLOAT, 12000.0),
+        TOKEN_N(T_EOF)
     };
     
     for (int i = 0; i < N; i++){
@@ -50,6 +51,7 @@ Test(scanner_tests, float_with_negative_exponent)
 
     Token expected_tokens[] = {
         TOKEN(T_FLOAT, 0.012),
+        TOKEN_N(T_EOF)
     };
     
     for (int i = 0; i < N; i++){
@@ -67,6 +69,7 @@ Test(scanner_tests, float_with_positive_exponent_no_plus)
 
     Token expected_tokens[] = {
         TOKEN(T_FLOAT, 12000.0),
+        TOKEN_N(T_EOF)
     };
     
     for (int i = 0; i < N; i++){
@@ -84,6 +87,7 @@ Test(scanner_tests, float_with_negative_exponent_no_minus)
 
     Token expected_tokens[] = {
         TOKEN(T_FLOAT, 12000.0),
+        TOKEN_N(T_EOF)
     };
     
     for (int i = 0; i < N; i++){
@@ -100,7 +104,8 @@ Test(scanner_tests, hex_escape)
     setup_stdin("\"\\x41\"");
 
     Token expected_tokens[] = {
-        TOKEN_S(T_STR, "\x41")
+        TOKEN_S(T_STR, "\x41"),
+        TOKEN_N(T_EOF)
     };
     
     for (int i = 0; i < N; i++){
@@ -117,14 +122,17 @@ Test(scanner_tests, mline_string_one_line)
     setup_stdin("\\\\abcd");
 
     Token expected_tokens[] = {
-        TOKEN_S(T_STR, "abcd")
+        TOKEN_S(T_STR, "abcd"),
+        TOKEN_N(T_EOF)
     };
 
-    Token *token = get_token(buffer);
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
 
-    assert_token_eq(token, &expected_tokens[0]);
+        assert_token_eq(token, &expected_tokens[i]);
 
-    free_token(token);
+        free_token(token);
+    }
 
 }
 
@@ -132,12 +140,71 @@ Test(scanner_tests, mline_string)
 {
     setup_stdin("\\\\abcd\n       \\\\   abcd");
     Token expected_tokens[] = {
-        TOKEN_S(T_STR, "abcd\n   abcd")
+        TOKEN_S(T_STR, "abcd\n   abcd"),
+        TOKEN_N(T_EOF)
     };
 
-    Token *token = get_token(buffer);
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
 
-    assert_token_eq(token, &expected_tokens[0]);
+        assert_token_eq(token, &expected_tokens[i]);
 
-    free_token(token);
+        free_token(token);
+    }
+}
+
+Test(scanner_tests, zero_int)
+{
+    setup_stdin("0");
+
+    Token expected_tokens[] = {
+        TOKEN(T_INT, 0),
+        TOKEN_N(T_EOF)
+    };
+
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+}
+
+Test(scanner_tests, zero_float)
+{
+    setup_stdin("0.0");
+
+    Token expected_tokens[] = {
+        TOKEN(T_FLOAT, 0.0),
+        TOKEN_N(T_EOF)
+    };
+
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+}
+
+Test(scanner_tests, zero_exp)
+{
+    setup_stdin("0.0e0");
+
+    Token expected_tokens[] = {
+        TOKEN(T_FLOAT, 0.0),
+        TOKEN_N(T_EOF)
+    };
+
+    for (int i = 0; i < N; i++){
+        Token *token = get_token(buffer);
+
+        assert_token_eq(token, &expected_tokens[i]);
+
+        free_token(token);
+    }
+
+
 }

@@ -35,7 +35,6 @@ enum State {
     S_MORE,
 
     //NUMBERS
-    S_ZERO,
     S_INT,
     S_FLOAT, S_FLOAT_EXP, S_FLOAT_DEC_EXP, 
     S_FLOAT_DOT, S_FLOAT_EXP_SIGN,
