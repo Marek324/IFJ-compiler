@@ -39,7 +39,9 @@ typedef enum {
     T_PIPE,
     T_QMARK,
 
-    T_EOF
+    T_EOF,
+    T_ERROR
+
 } TokenType;
 
 typedef enum {
