@@ -1,5 +1,8 @@
 #include "../include/ast.h"
 
+ASTNode *ASTRoot = NULL;
+
+
 // Function to initialize the global ASTRoot
 void initializeAST() {
     ASTRoot = (ASTNode*)malloc(sizeof(ASTNode));

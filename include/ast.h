@@ -80,7 +80,7 @@ typedef struct ASTNode {
 }ASTNode;
 
 //ASTRoot globally initialized in case of internal or scanner errors 
-ASTNode *ASTRoot;
+extern ASTNode *ASTRoot;
 
 void initializeAST();
 
