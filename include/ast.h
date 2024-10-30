@@ -3,7 +3,9 @@
 
 #include <stdbool.h>  
 #include "error.h"
-#include "token.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "scanner.h"
 
 typedef enum {
 // Non-terminal nodes (for each rule in P)
@@ -35,9 +37,9 @@ typedef enum {
 
 
 // Terminal nodes (for each terminal in T)
-    EOF,
-    CONST,
-    VAR,
+    END_OF_FILE,
+    T_CONST,
+    T_VAR,
     AT_IMPORT,
     LPAREN,
     RPAREN,
