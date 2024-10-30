@@ -4,7 +4,7 @@ author: Marek Hric
 Implementation of circular buffer functions from circ_buff.h.
 */
 
-#include "../include/circ_buff.h"
+#include "scanner/circ_buff.h"
 
 #define INC_PTR(ptr) (ptr++) % CIRC_BUFF_SIZE
 

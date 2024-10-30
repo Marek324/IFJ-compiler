@@ -7,14 +7,15 @@ Header file for tokens.
 #ifndef TOKEN_H
 #define TOKEN
 
-#include "dyn_str.h"
+#include "scanner/dyn_str.h"
+
 typedef enum {
     T_KW,
     T_ID,
     T_AT_IMPORT,
     
     T_INT,
-    T_F64,
+    T_FLOAT,
     T_STR,
 
     T_ASGN, T_EQ,

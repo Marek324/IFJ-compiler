@@ -8,9 +8,9 @@ Header file for the scanner.
 #define SCANNER_H
 
 
-#include "token.h"
-#include "error.h"
-#include "circ_buff.h"
+#include "common/token.h"
+#include "common/error.h"
+#include "scanner/circ_buff.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@ enum State {
     //NUMBERS
     S_ZERO,
     S_INT,
-    S_F64, S_F64_DOT, S_F64_E, S_F64_EXP,
+    S_FLOAT, S_FLOAT_EXP, S_FLOAT_DEC_EXP, 
 
     //LITERALS
     S_STR, S_STR_MLINE,

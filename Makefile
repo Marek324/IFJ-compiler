@@ -1,58 +1,41 @@
 CC = gcc
-CFLAGS = -std=c11 -Wall -Wextra -pedantic
-DEBUGFLAGS= -std=c11 -Wall -Wextra -pedantic -g -fsanitize=address
-TARGET = main
-PHONY = all test graph clean zip debug_scanner
+CFLAGS = -Wall -Wextra -pedantic -std=c11 -Iinclude -g -fsanitize=address
+LDFLAGS =
+
+SRC_DIR = src
+BUILD_DIR = build
+OBJ_DIR = $(BUILD_DIR)/obj
+BIN_DIR = $(BUILD_DIR)/bin
+INCLUDE_DIR = include
+
+SCANNER_SRCS = $(SRC_DIR)/scanner/scanner.c $(SRC_DIR)/scanner/dyn_str.c $(SRC_DIR)/scanner/circ_buff.c
+COMMON_SRCS = $(SRC_DIR)/common/error.c
+
+SCANNER_OBJS = $(SCANNER_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+COMMON_OBJS = $(COMMON_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+OBJS = $(SCANNER_OBJS) $(COMMON_OBJS)
+
+#TARGET = $(BIN_DIR)/main
+TARGET = $(BIN_DIR)/test
+
+OBJ_SUBDIRS = $(OBJ_DIR)/common $(OBJ_DIR)/scanner
 
 all: $(TARGET)
 
-%.o: %.c
+$(TARGET): $(OBJS) |$(OBJ_SUBDIRS) $(BIN_DIR)
+	$(CC) $(CFLAGS) $(OBJS) tests/test_utils/scanner_unit_tests.c -o $(TARGET) $(LDFLAGS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SUBDIRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
-
-obj/error.o: src/error.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/dyn_str.o: src/dyn_str.c 
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/circ_buff.o: src/circ_buff.c 
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/scanner.o: src/scanner.c obj/dyn_str.o
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/error-debug.o: src/error.c
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-obj/dyn_str-debug.o: src/dyn_str.c 
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-obj/circ_buff-debug.o: src/circ_buff.c 
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-obj/scanner-debug.o: src/scanner.c 
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-bin/test_scanner: obj/scanner-debug.o obj/dyn_str-debug.o obj/circ_buff-debug.o obj/error-debug.o tests/test_utils/scanner_unit_tests.c
-	$(CC) $(DEBUGFLAGS) obj/scanner-debug.o obj/dyn_str-debug.o obj/circ_buff-debug.o obj/error-debug.o -o bin/test_scanner tests/test_utils/scanner_unit_tests.c
-
-test: bin/test_scanner
-	./tests/test.sh
-
-graph: FSMgraph.dot
-	dot -Tpng FSMgraph.dot -o FSMgraph.png
+$(OBJ_SUBDIRS) $(BIN_DIR):
+	mkdir -p $@
 
 clean:
-	rm -f obj/*.o $(TARGET)
+	rm -rf $(BUILD_DIR)
 
-zip:
-	zip xhricma00.zip *.c *.h Makefile rozdeleni
+test: $(TARGET)
+	@echo "Running tests..."
 
-#usage make debug_scanner test=test_name
-debug_scanner: bin/test_scanner
-	echo "set debuginfod enabled on\nbreak main\nbreak get_token\nrun < tests/input/scanner/$(test) > tests/output/scanner/$(test) " > debug_options
-	gdb -x debug_options bin/test_scanner
-	@rm -f debug_options bin/test_scanner
+.PHONY: all clean test
