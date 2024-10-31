@@ -1,12 +1,15 @@
 #include "../include/ast.h"
 
+ASTNode *ASTRoot = NULL;
+
+
 // Function to initialize the global ASTRoot
 void initializeAST() {
     ASTRoot = (ASTNode*)malloc(sizeof(ASTNode));
     if (ASTRoot == NULL) {
         error_exit(99, "Malloc failed\n");
     }
-    ASTRoot->type = PROG;  // Initial type
+    ASTRoot->type = P_PROG;  // Initial type
     ASTRoot->left = NULL;  // No children initially
     ASTRoot->right = NULL;
     ASTRoot->token = NULL; 
