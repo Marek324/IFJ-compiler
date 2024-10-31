@@ -38,7 +38,7 @@ typedef enum {
     T_COLON,
     T_PIPE,
     T_QMARK,
-
+ 
     T_EOF,
     T_ERROR
 
