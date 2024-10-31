@@ -37,35 +37,48 @@ typedef enum {
 
 
 // Terminal nodes (for each terminal in T)
-    END_OF_FILE,
-    T_CONST,
-    T_VAR,
-    AT_IMPORT,
-    LPAREN,
-    RPAREN,
-    SEMICOLON,
-    ASGN,
-    PUB,
-    FN,
     ID,
-    COLON,
-    LBRACKET,
-    RBRACKET,
-    IF_STATEMENT,
-    ELSE_STATEMENT,
-    VERTICALBAR,
-    WHILE_STATEMENT,
-    RETURN_STATEMENT,
-    I32_TYPE,
-    F64_TYPE,
-    LBRACE,
-    RBRACE,
-    U8_TYPE,
-    VOID_TYPE,
-    BOOL_TYPE,
-    FOR,
+    AT_IMPORT,
+
+    TYPE_INT,
+    TYPE_F64,
+    TYPE_STR,
+
+    ASSGN, EQ,
+    BANG, NEQ,
+    LESS, LEQ,
+    MORE, MEQ,
+    
+    PLUS,
+    MINUS,
+    MUL,
+    DIV,
+    LPAREN, RPAREN,
+    LBRACE, RBRACE,
+    LBRACKET, RBRACKET,
+    
     COMMA,
-    DOT
+    DOT,
+    SEMICOLON,
+    COLON,
+    PIPE,
+    QMARK,
+
+    END_OF_FILE,
+
+    T_CONST,
+    T_IF,
+    T_ELSE,
+    T_FN,
+    T_I32,
+    T_F64,
+    T_NULL,
+    T_PUB,
+    T_RETURN,
+    T_U8,
+    T_VAR,
+    T_VOID,
+    T_WHILE
 
 } ASTNodeType;
 
@@ -91,6 +104,8 @@ void insertLeft(ASTNode *parent, ASTNode *leftChild);
 void insertRight(ASTNode *parent,ASTNode *rightChild);
 
 void freeAST(ASTNode *ptr);
+
+ASTNodeType convertToASTType(TokenType type, KeyWordType keyword);
 
 
 #endif // AST_H__

@@ -58,3 +58,10 @@ void freeAST(ASTNode *ptr) {
     // Free the current node
     free(ptr);
 }
+ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
+    if (type == T_KW && keyword != NO_KW) {
+            return (ASTNodeType) keyword + 55;
+    }
+    return (ASTNodeType) type + 25;
+
+}
