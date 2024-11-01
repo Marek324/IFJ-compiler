@@ -10,8 +10,17 @@ Header file for the expression parser.
 #include "ast.h"
 #include "token.h"
 #include "parser.h"
+#include "circ_buff.h"
 
-ASTNode* parseExpression(Token* token);
+enum PRIORITY{
+    UNREACHABLE, /* ".?" postfix operator -> ("a.?" == "a orelse unreachable") -> if "a" is null -> print: "panic: reached unreachable code" return code "57" */
+    MUL_DIV, /* "*, /" */
+    ADD_SUB, /* "+, -" */
+    ORELSE, /* "x = a orelse b" -> if a is null x will be "b" with the same data type. Else it will be "a" with the same datatype. */
+    RELATION_OP /* "<, >, <=, >=, ==, !=" */
+}
+
+ASTNode* parseExpression(Token* token, circ_buff_ptr buffer);
 
 ASTNode* parseAssignment(Token* token);
 ASTNode* parseBinary(Token* token);

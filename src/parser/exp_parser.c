@@ -8,7 +8,10 @@ Implementation of the expression parser.
 #include "../include/scanner.h"
 
 // Function to parse an expression
-ASTNode *parseExpression() {
+ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
+    
+    token = get_token(buffer);
+
     ASTNode *left = parsePrimaryExpression();
     if (left == NULL) {
         return NULL; // Error: failed to parse primary expression
