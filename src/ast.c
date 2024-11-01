@@ -44,19 +44,17 @@ void insertRight(ASTNode* parent, ASTNode* rightChild) {
 // Function to free the memory allocated for the AST
 void freeAST(ASTNode *ptr) {
     if (ptr == NULL) return;  //if the node is NULL, do nothing
-
     // Recursively free the left and right children
     freeAST(ptr->left);
     freeAST(ptr->right);
-    
     // Free the token
     if (ptr->token != NULL) {
-        free(ptr->token);
+        free_token(ptr->token);
     }
-    
     // Free the current node
     free(ptr);
 }
+
 ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
     if (type == T_KW && keyword != NO_KW) {
             return (ASTNodeType) keyword + 55;
