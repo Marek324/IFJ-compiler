@@ -73,7 +73,7 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
             case KW_VAR: return T_VAR;
             case KW_VOID: return T_VOID;
             case KW_WHILE: return T_WHILE;
-            default: 
+            default: return 99;
         }
     }
 
@@ -109,6 +109,7 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
         case T_PIPE: return PIPE;
         case T_QMARK: return QMARK;
         case T_EOF: return END_OF_FILE;
-        default: 
+        default: return 99;
     }
+    return 99;
 }
