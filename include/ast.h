@@ -14,8 +14,7 @@ typedef enum {
     P_END,                // <end> -> EOF
     P_FUNCTION_DEF,       // <function_def> -> pub fn ID (<param_list>) <type_complete> <block> <function_def> | ε
     P_PARAM_LIST,         // <param_list> -> ID : <type_complete> <comma_par_found> | ε
-    P_COMMA_PAR_FOUND,    // <comma_par_found> -> , <param> | ε
-    P_PARAM,              // <param> -> ID : <type_complete> <comma_par_found> | ε
+    P_COMMA_PAR_FOUND,    // <comma_par_found> -> , <param_list> | ε
     P_BLOCK,              // <block> -> { <statement> }
     P_STATEMENT,          // <statement> -> <var_declaration> <statement> | ID <ID_found> <statement> | ... | ε
     P_VAR_DECLARATION,    // <var_declaration> -> const ID : <type_complete> = <expression> ; | var ID : <type_complete> = <expression> ;
@@ -25,8 +24,7 @@ typedef enum {
     P_WHILE_LOOP,         // <while_loop> -> while ( <expression> ) <optional_value> <optional_statements> <block> <else_statement>
     P_RETURN_STATEMENT,   // <return_statement> -> return <expression> ;
     P_EXPRESSION_LIST,    // <expression_list> -> <expression> <comma_expr_found> | ε
-    P_COMMA_EXPR_FOUND,   // <comma_expr_found> -> , <expression_list2> | ε
-    P_EXPRESSION_LIST2,   // <expression_list2> -> <expression> <comma_expr_found> | ε
+    P_COMMA_EXPR_FOUND,   // <comma_expr_found> -> , <expression_list> | ε
     P_TYPE,               // <type> -> i32 | f64 | [ ] u8 | void | bool
     P_FOR_LOOP,           // <for_loop> -> for ( <expression> ) <optional_value> <block>
     P_OPTIONAL_STATEMENTS,// <optional_statements> -> : <block> | ε
@@ -72,6 +70,7 @@ typedef enum {
     T_FN,
     T__KW_I32,
     T_KW_F64,
+    T_KW_BOOL,
     T_NULL,
     T_PUB,
     T_RETURN,
