@@ -7,13 +7,15 @@
 
 void Parse();
 
-void Prog(Token *token);
+void Prog(Token *token, circ_buff_ptr buffer);
 
-void Prolog(Token *token, ASTNode *ptr);
+void Prolog(Token *token, ASTNode *ptr, circ_buff_ptr buffer);
 
-void FunctionDef(Token *token, ASTNode *ptr);
+void FunctionDef(Token *token, ASTNode *ptr, circ_buff_ptr buffer);
 
-void End(Token *token, ASTNode *ptr); 
+void End(Token *token, ASTNode *ptr, circ_buff_ptr buffer); 
+
+void Expression(Token *token, ASTNode *ptr, circ_buff_ptr buffer);
 
 
 #endif // PARSER__H_
