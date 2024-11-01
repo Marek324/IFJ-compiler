@@ -2,7 +2,6 @@
 
 ASTNode *ASTRoot = NULL;
 
-
 // Function to initialize the global ASTRoot
 void initializeAST() {
     ASTRoot = (ASTNode*)malloc(sizeof(ASTNode));
@@ -63,5 +62,4 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
             return (ASTNodeType) keyword + 55;
     }
     return (ASTNodeType) type + 25;
-
 }
