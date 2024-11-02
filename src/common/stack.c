@@ -9,7 +9,7 @@ Implementation of the stack.
 #include "common/token.h"
 #include "common/error.h"
 
-void stackInit() {
+stack_t* stackInit() {
     stack_t* stack = malloc(sizeof(stack_t));
     if(stack == NULL) {
         error_exit(99, "ERROR: Unable to allocate memory for stack!\n");

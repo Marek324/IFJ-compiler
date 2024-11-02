@@ -13,6 +13,11 @@ Header file for the expression parser.
 #include "scanner/circ_buff.h"
 #include "common/error.h"
 
+// the associativity of operators
+enum ASOC {
+    
+}
+// the priorities of operators
 enum PRIORITY{
     UNREACHABLE, /* ".?" postfix operator -> ("a.?" == "a orelse unreachable") -> if "a" is null -> print: "panic: reached unreachable code" return code "57" */
     NEGATE,      /* "!a" */

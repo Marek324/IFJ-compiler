@@ -20,7 +20,7 @@ typedef struct {
 } stack_t;
 
 // initialises the stack
-void stackInit();
+stack_t* stackInit();
 // pushes a new element onto the top of the stack
 void stackPush(stack_t* stack, long data);
 // pops the top element off the stack
