@@ -18,7 +18,7 @@ void stackInit() {
     stack->top = NULL;
 }
 
-void stackPush(stack_t* stack, Token* token) {
+void stackPush(stack_t* stack, long data) {
     if(stack == NULL) {
         error_exit(99, "ERROR: Stack is not initialized!\n");
         return;
@@ -28,7 +28,7 @@ void stackPush(stack_t* stack, Token* token) {
         error_exit(99, "ERROR: Unable to allocate memory for stack element!\n");
         return;
     }
-    new_element->token = token;
+    new_element->data = data;
     new_element->next = stack->top;
     stack->top = new_element;
 }
@@ -62,10 +62,10 @@ void stackClear(stack_t* stack) {
     }
 }
 
-Token* stackGetTop(stack_t* stack) {
+long stackGetTop(stack_t* stack) {
     if(stack == NULL) {
         error_exit(99, "ERROR: Stack is not initialized!\n");
         return;
     }
-    return stack->top->token;
+    return stack->top->data;
 }
