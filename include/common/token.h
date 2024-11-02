@@ -51,6 +51,7 @@ typedef enum {
     KW_FN,
     KW_I32,
     KW_F64,
+    KW_BOOL,
     KW_NULL,
     KW_PUB,
     KW_RETURN,
