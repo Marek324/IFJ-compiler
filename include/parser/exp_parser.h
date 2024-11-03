@@ -17,8 +17,8 @@ Header file for the expression parser.
 enum ASOC {
     L,  /* Lower precedence: "<" -> we push onto the stack (shift) */
     H,  /* Higher precedence: ">" -> we reduce */
-    EQ, /* Equal precedence: "=" */
-    UN  /* Undefined, causing an error */
+    E, /* Equal precedence: "=" */
+    U  /* Undefined, causing an error */
 }
 // the indices of the precedence table
 enum PREC_TABLE_INDX{

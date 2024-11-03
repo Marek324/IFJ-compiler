@@ -7,6 +7,24 @@ Implementation of the expression parser.
 #include "../include/exp_parser.h"
 #include "../include/scanner.h"
 
+#define P_TABLE_SIZE 12
+
+int precedence_table[P_TABLE_SIZE][P_TABLE_SIZE] = 
+{ // .? ! */ +- orelse  r and or (  )  i  $
+    {L, U, U, U,   U,   U, U, U, L, H, L, H}, // UNREACHABLE ".?"
+    {U, L, H, H,   H,   H, H, H, L, H, H, H}, // NEGATE "!"
+    {U, L, H, H,   H,   H, H, H, L, H, L, H}, // MUL_DIV "* /"
+    {U, L, L, H,   H,   H, H, H, L, H, L, H}, // ADD_SUB "+ -"
+    {U, L, L, L,   H,   H, H, H, L, H, L, H}, // ORELSE "orelse"
+    {U, L, L, L,   L,   U, H, H, L, H, L, H}, // RELATION "r"
+    {U, L, L, L,   L,   L, H, H, L, H, L, H}, // AND "and"
+    {U, L, L, L,   L,   L, L, H, L, H, L, H}, // OR "or"
+    {L, L, L, L,   L,   L, L, L, L, E, L, U}, // L_PAR "("
+    {H, H, H, H,   H,   H, H, H, U, H, U, H}, // R_PAR ")"
+    {H, U, H, H,   H,   H, H, H, U, H, U, H}, // ID "i"
+    {L, L, L, L,   L,   L, L, L, L, U, L, U} // END "$"
+};
+
 // Function to parse an expression
 ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
 
