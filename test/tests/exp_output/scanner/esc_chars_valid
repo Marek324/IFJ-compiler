@@ -1,0 +1,4 @@
+T_STR, abc
+	\"
+T_EOF,
+Exit code: 0
