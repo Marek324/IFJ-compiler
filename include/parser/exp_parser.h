@@ -7,6 +7,8 @@ Header file for the expression parser.
 #ifndef EXP_PARSER_H
 #define EXP_PARSER_H
 
+#include <stdbool.h>
+
 #include "parser/ast.h"
 #include "common/token.h"
 #include "parser/parser.h"
@@ -14,14 +16,14 @@ Header file for the expression parser.
 #include "common/error.h"
 
 // the associativity of operators
-enum ASOC {
+typedef enum {
     L,  /* Lower precedence: "<" -> we push onto the stack (shift) */
-    H,  /* Higher precedence: ">" -> we reduce */
-    E, /* Equal precedence: "=" */
+    H,  /* Higher precedence: ">" -> we reduce (will be lower in the tree) -> down-top parsing */
+    E, /* Equal precedence: "=" (reduce) */
     U  /* Undefined, causing an error */
-}
+} ASOC;
 // the indices of the precedence table
-enum PREC_TABLE_INDX{
+typedef enum {
     // operators
     UNREACHABLE, /* ".?" postfix operator -> ("a.?" == "a orelse unreachable") -> if "a" is null -> print: "panic: reached unreachable code" return code "57" */
     NEGATE,      /* "!a" */
@@ -34,18 +36,34 @@ enum PREC_TABLE_INDX{
 
     L_PAR,       /* "(" */
     R_PAR,       /* ")" */
-    ID,          /* Identifier */
-    END          /* "$" */
-};
+    ID,          /* Identifier/literal */
+    END          /* "$" -> can be ')', ';', ... */
+} PREC_TABLE_INDEX;
 
 ASTNode* parseExpression(Token* token, circ_buff_ptr buffer);
 
-// MUL_DIV, ADD_SUB, ORELSE, RELATION, AND, OR
-ASTNode* parseBinary(Token* token);
+// ID
+ASTNode* parsePrimary(Token* token, circ_buff_ptr buffer);
 // UNREACHABLE, NEGATE
-ASTNode* parseUnary(Token* token);
+ASTNode* parseUnary(Token* token, circ_buff_ptr buffer);
+// NEGATE
+ASTNode* preUnary(Token* token, circ_buff_ptr buff);
+// UNREACHABLE
+ASTNode* postUnary(Token* token, circ_buff_ptr buff);
+// MUL_DIV, ADD_SUB, ORELSE, RELATION, AND, OR
+ASTNode* parseBinary(Token* token, circ_buff_ptr buffer);
 // Functions as expressions
-ASTNode* parseFunctionCall(Token* token);
+ASTNode* parseFunctionCall(Token* token, circ_buff_ptr buffer);
+// returns the precedence table index for the token
+PREC_TABLE_INDEX getIndex(Token* token);
+// checks if the token is a operator
+bool isOperator(Token* token);
+// checks if the token is an operand
+bool isOperand(Token* token);
+// checks if the token is a potential end for the expression
+bool isEnd(Token* token);
+// checks if the expression has ended
+bool expressionEnd(Token* token, bool operand_stack_isEmpty, bool operator_stack_isEmpty);
 
 
 #endif // EXP_PARSER_H
