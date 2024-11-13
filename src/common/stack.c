@@ -16,6 +16,7 @@ stack_t* stackInit() {
         return;
     }
     stack->top = NULL;
+    return stack;
 }
 
 void stackPush(stack_t* stack, long data) {
