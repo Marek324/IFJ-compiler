@@ -57,6 +57,7 @@ typedef enum {
     KW_U8,
     KW_VAR,
     KW_VOID,
+    KW_FOR,
     KW_WHILE,
     NO_KW
 } KeyWordType;
