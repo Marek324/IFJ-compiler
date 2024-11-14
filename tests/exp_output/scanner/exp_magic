@@ -1,7 +1,0 @@
-T_INT, 42
-T_DOT,
-T_ID, e
-T_PLUS,
-T_INT, 3
-T_EOF,
-Exit code: 0
