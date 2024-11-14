@@ -59,6 +59,8 @@ ASTNode* parseFunctionCall(Token* token, circ_buff_ptr buffer);
 void reduce(stack_t* operand_stack, stack_t* operator_stack);
 // pops all operators and operands within the parenthesis
 void reduceParen(stack_t* operand_stack, stack_t* operator_stack);
+// reduces all remaining operands and operators once the expression ends 
+ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack);
 // returns the precedence table index for the token
 PREC_TABLE_INDEX getIndex(Token* token);
 // checks if the token is a operator
@@ -68,7 +70,7 @@ bool isOperand(Token* token);
 // checks if the token is a potential end for the expression
 bool isEnd(Token* token);
 // checks if the expression has ended
-bool expressionEnd(Token* token, bool operand_stack_isEmpty, bool operator_stack_isEmpty);
+bool expressionEnd(Token* token, bool operator_stack_isEmpty);
 
 
 #endif // EXP_PARSER_H
