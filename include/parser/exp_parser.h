@@ -42,18 +42,6 @@ typedef enum {
 
 ASTNode* parseExpression(Token* token, circ_buff_ptr buffer);
 
-// ID
-ASTNode* parsePrimary(Token* token, circ_buff_ptr buffer);
-// UNREACHABLE, NEGATE
-ASTNode* parseUnary(Token* token, circ_buff_ptr buffer);
-// NEGATE
-ASTNode* preUnary(Token* token, circ_buff_ptr buff);
-// UNREACHABLE
-ASTNode* postUnary(Token* token, circ_buff_ptr buff);
-// MUL_DIV, ADD_SUB, ORELSE, RELATION, AND, OR
-ASTNode* parseBinary(Token* token, circ_buff_ptr buffer);
-// Functions as expressions
-ASTNode* parseFunctionCall(Token* token, circ_buff_ptr buffer);
 // pops the top operator and the needed amount of operands to link them together, creating a tree
 // pushes the newly created tree (root of tree) onto the operand stack 
 void reduce(stack_t* operand_stack, stack_t* operator_stack);
