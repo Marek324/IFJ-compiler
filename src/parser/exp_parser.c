@@ -163,6 +163,8 @@ PREC_TABLE_INDEX getIndex(ASTNode* node) {
         case TYPE_F64:
         case TYPE_STR:
             return LIT_ID;
+        default:
+            return END;
     }   
 }
 
