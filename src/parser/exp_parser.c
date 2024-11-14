@@ -38,19 +38,21 @@ ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
     stack_t* operand_stack = stackInit();
     stack_t* operator_stack = stackInit();
 
-    while(!expressionEnd(isEnd(token), stackIsEmpty(operand_stack), stackIsEmpty(operator_stack))) {
+    while(token != NULL && !expressionEnd(isEnd(token), stackIsEmpty(operand_stack), stackIsEmpty(operator_stack))) {
+        ASTNode* node = nodeCreate(convertToASTType(token->type), NO_KW);
         if(isOperand(token)) {
-            stackPush(operand_stack, );
+            stackPush(operand_stack, (long)node);
         }
         else if(isOperator(token)) {
             ASTNode* top = (ASTNode*)stackGetTop(operator_stack);
             switch(precedence_table[getIndex(top)][getIndex(token)]) {
                 case L:
-                    stackPush(operator_stack, (long)token);
+                    stackPush(operator_stack, (long)node);
                     break;
                 case H:
                 case E:
-                    // create root node with operator and 2 children nodes with operands
+                    reduce(operand_stack, operator_stack);
+                    stackPush(operator_stack, (long)node);
                     break;
                 case U:
                 default:
@@ -60,7 +62,10 @@ ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
         else {
             return NULL;
         }
+
     }
+    stackClear(operand_stack);
+    stackClear(operator_stack);
 
     // switch(token->type) {
     //     case T_ID:
@@ -150,6 +155,24 @@ ASTNode *parseBinaryExpression(ASTNode *left, int precedence) {
     // }
 
     // return left; // Return the constructed expression tree
+}
+
+void reduce(stack_t* operand_stack, stack_t* operator_stack) {
+    ASTNode* root = stackGetTop(operator_stack);
+    stackPop(operator_stack);
+
+    ASTNode* child = stackGetTop(operand_stack);
+    stackPop(operator_stack);
+    insertRight(root, child);
+
+    if(root->type != BANG) {
+        child = stackGetTop(operand_stack);
+        stackPop(operator_stack);
+        insertLeft(root, child);
+    }
+
+    stackPush(operand_stack, (long)root);
+
 }
 
 PREC_TABLE_INDEX getIndex(Token* token) {

@@ -15,7 +15,7 @@ Header file for the expression parser.
 #include "scanner/circ_buff.h"
 #include "common/error.h"
 
-// the associativity of operators
+// the associativity of operators (operator on top of stack vs new operator)
 typedef enum {
     L,  /* Lower precedence: "<" -> we push onto the stack (shift) */
     H,  /* Higher precedence: ">" -> we reduce (will be lower in the tree) -> down-top parsing */
@@ -25,7 +25,7 @@ typedef enum {
 // the indices of the precedence table
 typedef enum {
     // operators
-    UNREACHABLE, /* ".?" postfix operator -> ("a.?" == "a orelse unreachable") -> if "a" is null -> print: "panic: reached unreachable code" return code "57" */
+    UNREACHABLE, /* ".?" postfix binary operator -> ("a.?" == "a orelse unreachable") -> if "a" is null -> print: "panic: reached unreachable code" return code "57" */
     NEGATE,      /* "!a" */
     MUL_DIV,     /* "*, /" */
     ADD_SUB,     /* "+, -" */
@@ -54,6 +54,9 @@ ASTNode* postUnary(Token* token, circ_buff_ptr buff);
 ASTNode* parseBinary(Token* token, circ_buff_ptr buffer);
 // Functions as expressions
 ASTNode* parseFunctionCall(Token* token, circ_buff_ptr buffer);
+// pops the top operator and the needed amount of operands to link them together, creating a tree
+// pushes the newly created tree (root of tree) onto the operand stack 
+void reduce(stack_t* operand_stack, stack_t* operator_stack);
 // returns the precedence table index for the token
 PREC_TABLE_INDEX getIndex(Token* token);
 // checks if the token is a operator
