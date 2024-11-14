@@ -19,7 +19,7 @@ typedef struct {
     stack_elem* top;
 } stack_t;
 
-// initialises the stack
+// initialises and uses malloc for the stack
 stack_t* stackInit();
 // pushes a new element onto the top of the stack
 void stackPush(stack_t* stack, long data);
