@@ -1,9 +1,19 @@
 CC = gcc
-CFLAGS = -std=c11 -Wall -Wextra -pedantic
+CFLAGS = -std=c11 -Wall -Wextra -pedantic -Iinclude
 DEBUGFLAGS= -std=c11 -Wall -Wextra -pedantic -g -fsanitize=address
 TARGET = main
 PHONY = all test graph clean zip debug_scanner
 
+SRC = src
+OBJ = obj
+SRCS = $(wildcard $(SRC)/*.c)
+OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
+BIN = bin
+INC = include
+
+TEST = test
+TESTS = $(wildcard $(TEST)/*.c)
+TESTBINS = $(patsubst $(TEST)/%.c, $(TEST)/bin/%, $(TESTS))
 all: $(TARGET)
 
 %.o: %.c
@@ -22,6 +32,9 @@ obj/circ_buff.o: src/circ_buff.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 obj/scanner.o: src/scanner.c obj/dyn_str.o
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/codegen.o: src/codegen.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 obj/error-debug.o: src/error.c
@@ -46,7 +59,7 @@ graph: FSMgraph.dot
 	dot -Tpng FSMgraph.dot -o FSMgraph.png
 
 clean:
-	rm -f obj/*.o $(TARGET)
+	rm -rf $(OBJ)/* $(BIN)/* $(TEST)/bin/*
 
 zip:
 	zip xhricma00.zip *.c *.h Makefile rozdeleni
