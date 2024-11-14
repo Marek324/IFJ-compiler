@@ -127,6 +127,16 @@ void tree_to_file_Left_Right(ASTNode *root, FILE* file){
     tree_to_file_Left_Right(root->right, file);
 }
 
+void tree_to_file_Right_Left(ASTNode *root, FILE* file){
+    if (root == NULL)
+    {
+        return;
+    }
+    tree_to_file_Right_Left(root->right, file);
+    addNodeEXPToFile(root, file);
+    tree_to_file_Right_Left(root->left, file);
+}
+
 void addNodeEXPToFile(ASTNode *node, FILE* file){
     const char *data = ASTNodeTypeToString(node->type);
     fputs(data,file);
@@ -558,6 +568,33 @@ START_TEST(test_EXP_Prolog)
 
     scanner_teardown();
 }
+////////////////////////////// TESTS PARSER ////////////////////////////////////////////////
+START_TEST(test_Parse_Prolog)
+{
+    scanner_setup(); 
+    setup_stdin("const ifj = @import(\"ifj24.zig\");"); // This is the input you are testing
+    
+    Token *token = get_token(buffer);
+    ASTNode *root = parseExpression(token, buffer); // Create the EXP tree
+
+    ////// IMPORTANT NEED TO RUN PARSER AS IS :D (will add it later)
+
+    FILE *output_file = fopen("test_Parse_Prolog.out", "r"); // This is a file with the expected output, needs to be created (add space at the end (if needed))
+    FILE *output_file_EXP = fopen("tempTreeRL.txt", "w+"); // File with the output from our prog
+    tree_to_file_Left_Right(root, output_file_EXP); // Writes tree to file
+
+
+    ck_assert_int_eq(1 , compare_files_line_by_line(output_file,output_file_EXP));
+
+    fclose(output_file); // Start cleaning up and closing all the stuff
+    fclose(output_file_our);
+    remove("tempTreeRL.txt");
+    free_token(token);
+    freeAST(root);
+
+    scanner_teardown();
+}
+
 ////////////////////////////// TESTS TOTAL/FINAL ////////////////////////////////////////////////
 
 START_TEST(test_TL_hello)
@@ -640,6 +677,23 @@ Suite * EXParseSuite()
     return s;
 }
 
+Suite * ParseSuite()
+{
+    Suite *s;
+    TCase *tc_core;
+
+    s = suite_create("ParserTests");
+
+    /* Core test case */
+    tc_core = tcase_create("Core4");
+
+    tcase_add_test(tc_core, test_Parse_Prolog);
+
+    suite_add_tcase(s, tc_core);
+
+    return s;
+}
+
 Suite * TotalSuite()
 {
     Suite *s;
@@ -648,7 +702,7 @@ Suite * TotalSuite()
     s = suite_create("TotalTests");
 
     /* Core test case */
-    tc_core = tcase_create("Core5");
+    tc_core = tcase_create("Core7");
 
     tcase_add_test(tc_core, test_TL_hello);
 
@@ -661,8 +715,8 @@ Suite * TotalSuite()
  int main(int argc, char** argv)
  {
     int number_failed;
-    Suite *scanSuit,*expParseSuit, *totalSuit;
-    SRunner *scanRunner,*expParseRunner, *totalRunner;
+    Suite *scanSuit,*expParseSuit,*ParseSuit, *totalSuit;
+    SRunner *scanRunner,*expParseRunner,*ParseRunner, *totalRunner;
     if (argc == 1){
         suiteToRun = "all";
     }else{
@@ -689,6 +743,17 @@ Suite * TotalSuite()
         srunner_run_all(expParseRunner, CK_VERBOSE);
         number_failed = srunner_ntests_failed(expParseRunner);
         srunner_free(expParseRunner);
+        printf("\n");
+    }
+
+    if (strcmp(suiteToRun, "Parser") == 0 || strcmp(suiteToRun, "all") == 0) {
+        printf("\n");
+        ParseSuit = ParseSuite();
+        ParseRunner = srunner_create(ParseSuit);
+
+        srunner_run_all(ParseRunner, CK_VERBOSE);
+        number_failed = srunner_ntests_failed(ParseRunner);
+        srunner_free(ParseRunner);
         printf("\n");
     }
 
