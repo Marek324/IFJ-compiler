@@ -9,11 +9,12 @@ Header file for the expression parser.
 
 #include <stdbool.h>
 
-#include "parser/ast.h"
-#include "common/token.h"
-#include "parser/parser.h"
-#include "scanner/circ_buff.h"
-#include "common/error.h"
+#include "ast.h"
+#include "stack.h"
+#include "token.h"
+#include "parser.h"
+#include "circ_buff.h"
+#include "error.h"
 
 // the associativity of operators (operator on top of stack vs new operator)
 typedef enum {
@@ -36,7 +37,7 @@ typedef enum {
 
     L_PAR,       /* "(" */
     R_PAR,       /* ")" */
-    ID,          /* Identifier/literal */
+    LIT_ID,          /* Identifier/literal */
     END          /* "$" -> can be ')', ';', ... */
 } PREC_TABLE_INDEX;
 
@@ -50,7 +51,7 @@ void reduceParen(stack_t* operand_stack, stack_t* operator_stack);
 // reduces all remaining operands and operators once the expression ends 
 ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack);
 // returns the precedence table index for the token
-PREC_TABLE_INDEX getIndex(Token* token);
+PREC_TABLE_INDEX getIndex(ASTNode* node);
 // checks if the token is a operator
 bool isOperator(Token* token);
 // checks if the token is an operand
@@ -58,7 +59,7 @@ bool isOperand(Token* token);
 // checks if the token is a potential end for the expression
 bool isEnd(Token* token);
 // checks if the expression has ended
-bool expressionEnd(Token* token, bool operator_stack_isEmpty);
+bool expressionEnd(bool end, bool operator_stack_isEmpty);
 
 
 #endif // EXP_PARSER_H

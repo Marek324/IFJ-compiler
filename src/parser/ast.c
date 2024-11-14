@@ -1,4 +1,4 @@
-#include "../include/ast.h"
+#include "ast.h"
 
 ASTNode *ASTRoot = NULL;
 
@@ -82,7 +82,7 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
         case T_ID: return ID;
         case T_AT_IMPORT: return AT_IMPORT;
         case T_INT: return TYPE_INT;
-        case T_F64: return TYPE_F64;
+        case T_FLOAT: return TYPE_F64;
         case T_STR: return TYPE_STR;
         case T_ASGN: return ASSGN;
         case T_EQ: return EQ;

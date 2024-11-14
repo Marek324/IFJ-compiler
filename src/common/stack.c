@@ -5,9 +5,9 @@ Implementation of the stack.
 */
 
 #include <stdbool.h>
-#include "common/stack.h"
-#include "common/token.h"
-#include "common/error.h"
+#include "stack.h"
+#include "token.h"
+#include "error.h"
 
 stack_t* stackInit() {
     stack_t* stack = malloc(sizeof(stack_t));

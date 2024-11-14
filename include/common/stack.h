@@ -8,7 +8,7 @@ Header file for the stack.
 #define STACK_H
 
 #include <stdbool.h>
-#include "common/token.h"
+#include "token.h"
 
 typedef struct stack_element {
     struct stack_element* next;

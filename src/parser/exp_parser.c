@@ -6,9 +6,9 @@ Implementation of the expression parser.
 // TODO ERROR HANDLING AND EXTENSIONS
 #include <stdbool.h>
 
-#include "../include/exp_parser.h"
-#include "../include/scanner.h"
-#include "../include/stack.h"
+#include "exp_parser.h"
+#include "scanner.h"
+#include "stack.h"
 
 #define P_TABLE_SIZE 12
 
@@ -25,7 +25,7 @@ ASOC precedence_table[P_TABLE_SIZE][P_TABLE_SIZE] =
     { U, L, L, L,   L,   L, L, H, L, H, L, H }, // OR "or"
     { L, L, L, L,   L,   L, L, L, L, E, L, U }, // L_PAR "("
     { H, H, H, H,   H,   H, H, H, U, H, U, H }, // R_PAR ")"
-    { H, U, H, H,   H,   H, H, H, U, H, U, H }, // ID "i"
+    { H, U, H, H,   H,   H, H, H, U, H, U, H }, // LIT_ID "i"
     { L, L, L, L,   L,   L, L, L, L, U, L, U }  // END "$"
 };
 
@@ -41,18 +41,18 @@ ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
     int* paren_depth = malloc(sizeof(int));
     if(paren_depth == NULL) {
         error_exit(99, "ERROR: Unable to allocate memory for paren_depth!\n");
-        return;
+        return NULL;
     }
     *paren_depth = 0;
 
     while(token != NULL && !expressionEnd(isEnd(token), stackIsEmpty(operator_stack))) {
-        ASTNode* node = nodeCreate(convertToASTType(token->type), NO_KW);
+        ASTNode* node = nodeCreate(convertToASTType(token->type, NO_KW), token);
         if(isOperand(token)) {
             stackPush(operand_stack, (long)node);
         }
         else if(isOperator(token)) {
             if(token->type == T_LPAREN) {
-                *paren_depth++;
+                (*paren_depth)++;
             }
             if(token->type == T_RPAREN) {
                 if(*paren_depth != 0) {
@@ -69,7 +69,7 @@ ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
                 continue;
             }
             ASTNode* top = (ASTNode*)stackGetTop(operator_stack);
-            switch(precedence_table[getIndex(top)][getIndex(token)]) {
+            switch(precedence_table[getIndex(top)][getIndex(node)]) {
                 case L:
                     stackPush(operator_stack, (long)node);
                     break;
@@ -117,7 +117,7 @@ void reduce(stack_t* operand_stack, stack_t* operator_stack) {
 
 void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
     ASTNode* curr = (ASTNode*)stackGetTop(operator_stack);
-    while(curr->type != T_LPAREN && !stackIsEmpty(operator_stack)) {
+    while(curr->type != LPAREN && !stackIsEmpty(operator_stack)) {
         reduce(operand_stack, operator_stack);
         curr = (ASTNode*)stackGetTop(operator_stack);
     }
@@ -137,34 +137,33 @@ ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack) {
     return root;
 }
 
-PREC_TABLE_INDEX getIndex(Token* token) {
-    switch (token->type) {
-        case T_BANG:
+PREC_TABLE_INDEX getIndex(ASTNode* node) {
+    switch (node->type) {
+        case BANG:
             return NEGATE;
-        case T_MUL:
-        case T_DIV:
+        case MUL:
+        case DIV:
             return MUL_DIV;
-        case T_PLUS:
-        case T_MINUS:
+        case PLUS:
+        case MINUS:
             return ADD_SUB;
-        case T_EQ:
-        case t_NEQ:
-        case T_LESS:
-        case T_LEQ:
-        case T_MORE:
-        case T_MEQ:
+        case EQ:
+        case NEQ:
+        case LESS:
+        case LEQ:
+        case MORE:
+        case MEQ:
             return RELATION;
-        case T_LPAREN:
+        case LPAREN:
             return L_PAR;
-        case T_RPAREN:
+        case RPAREN:
             return R_PAR;
-        case T_ID:
-        case T_INT:
-        case T_FLOAT:
-        case T_STR:
-            return ID;
-    }
-        
+        case ID:
+        case TYPE_INT:
+        case TYPE_F64:
+        case TYPE_STR:
+            return LIT_ID;
+    }   
 }
 
 bool isOperator(Token* token) {
@@ -181,8 +180,9 @@ bool isOperator(Token* token) {
         case T_MUL:
         case T_DIV:
             return true;
+        default:
+            return false;
     }
-    return false;
 }
 
 bool isOperand(Token* token) {
@@ -192,8 +192,9 @@ bool isOperand(Token* token) {
         case T_FLOAT:
         case T_STR:
             return true;
+        default:
+            return false;
     }
-    return false;
 }
 
 bool isEnd(Token* token) {
@@ -202,8 +203,9 @@ bool isEnd(Token* token) {
         case T_SEMICOL:
         case T_COMMA:
             return true;
+        default:
+            return false;
     }
-    return false;
 }
 
 bool expressionEnd(bool end, bool operator_stack_isEmpty) {
