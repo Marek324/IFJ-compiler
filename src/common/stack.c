@@ -13,7 +13,7 @@ stack_t* stackInit() {
     stack_t* stack = malloc(sizeof(stack_t));
     if(stack == NULL) {
         error_exit(99, "ERROR: Unable to allocate memory for stack!\n");
-        return;
+        return NULL;
     }
     stack->top = NULL;
     return stack;
@@ -66,7 +66,7 @@ void stackClear(stack_t* stack) {
 long stackGetTop(stack_t* stack) {
     if(stack == NULL) {
         error_exit(99, "ERROR: Stack is not initialized!\n");
-        return;
+        return 0;
     }
     return stack->top->data;
 }
