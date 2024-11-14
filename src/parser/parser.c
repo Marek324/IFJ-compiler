@@ -29,8 +29,7 @@ ASTNode *ruleNode(ASTNodeType rule) {
     return node;
 }
 
-void Parse() {
-    circ_buff_ptr buffer = circ_buff_init();
+void Parse(circ_buff_ptr buffer) {
     Token *token = NULL;
     initializeAST();
     Prog(token, buffer);
@@ -100,7 +99,7 @@ void FunctionDef(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, pubFound);
     // FN
     token = get_token(buffer);
-    ASTNode *fnFound = checkToken(token, T_KW, KW_PUB);
+    ASTNode *fnFound = checkToken(token, T_KW, KW_FN);
     insertLeft(pubFound, fnFound);
     // ID
     token = get_token(buffer);

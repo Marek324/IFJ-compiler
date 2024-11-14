@@ -9,7 +9,7 @@ OBJ_DIR = $(BUILD_DIR)/obj
 BIN_DIR = $(BUILD_DIR)/bin
 
 SCANNER_SRCS = $(SRC_DIR)/scanner/scanner.c $(SRC_DIR)/scanner/dyn_str.c $(SRC_DIR)/scanner/circ_buff.c
-COMMON_SRCS = $(SRC_DIR)/common/error.c $(SRC_DIR)/common/stack.c
+COMMON_SRCS = $(SRC_DIR)/common/error.c $(SRC_DIR)/common/stack.c 
 PARSER_SRCS = $(SRC_DIR)/parser/exp_parser.c $(SRC_DIR)/parser/ast.c
 
 SRCS = $(SCANNER_SRCS) $(COMMON_SRCS) $(PARSER_SRCS)

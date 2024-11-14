@@ -3,7 +3,7 @@
 
 #include "ast.h"
 
-void Parse();
+void Parse(circ_buff_ptr buffer);
 
 void Prog(Token *token, circ_buff_ptr buffer);
 
