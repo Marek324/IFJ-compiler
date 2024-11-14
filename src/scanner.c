@@ -65,7 +65,7 @@ Token *get_token(circ_buff_ptr buffer)
     
     Token *token = (Token *)malloc(sizeof(Token));
     if (token == NULL){ 
-        ERROR(99);
+        ERROR(0); // Memory allocation error
     }
     
 
@@ -117,7 +117,7 @@ Token *get_token(circ_buff_ptr buffer)
                             state = S_STR_MLINE;
                             break;
                         } else {
-                            ERROR(1); // Invalid standalone backslash
+                            ERROR(1); // Standalone backslash
                         }
                         break;
                     
@@ -272,7 +272,7 @@ Token *get_token(circ_buff_ptr buffer)
                     c = read_char(buffer);
                     if (!isxdigit(c)){
                         fprintf(stderr, "Invalid hex escape number %c\n", c);
-                        ERROR(9); // Invalid hex escape number
+                        ERROR(9); // Invalid hex number
                     }
                     hex = hex * 16 + (isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
                 }
