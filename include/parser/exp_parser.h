@@ -57,6 +57,8 @@ ASTNode* parseFunctionCall(Token* token, circ_buff_ptr buffer);
 // pops the top operator and the needed amount of operands to link them together, creating a tree
 // pushes the newly created tree (root of tree) onto the operand stack 
 void reduce(stack_t* operand_stack, stack_t* operator_stack);
+// pops all operators and operands within the parenthesis
+void reduceParen(stack_t* operand_stack, stack_t* operator_stack);
 // returns the precedence table index for the token
 PREC_TABLE_INDEX getIndex(Token* token);
 // checks if the token is a operator

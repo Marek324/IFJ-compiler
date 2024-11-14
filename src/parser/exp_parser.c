@@ -44,6 +44,10 @@ ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
             stackPush(operand_stack, (long)node);
         }
         else if(isOperator(token)) {
+            if(token->type == T_RPAREN) {
+                reduceParen(operand_stack, operator_stack);
+                continue;
+            }
             ASTNode* top = (ASTNode*)stackGetTop(operator_stack);
             switch(precedence_table[getIndex(top)][getIndex(token)]) {
                 case L:
@@ -158,21 +162,30 @@ ASTNode *parseBinaryExpression(ASTNode *left, int precedence) {
 }
 
 void reduce(stack_t* operand_stack, stack_t* operator_stack) {
-    ASTNode* root = stackGetTop(operator_stack);
+    ASTNode* root = (ASTNode*)stackGetTop(operator_stack);
     stackPop(operator_stack);
 
-    ASTNode* child = stackGetTop(operand_stack);
+    ASTNode* child = (ASTNode*)stackGetTop(operand_stack);
     stackPop(operator_stack);
     insertRight(root, child);
 
     if(root->type != BANG) {
-        child = stackGetTop(operand_stack);
+        child = (ASTNode*)stackGetTop(operand_stack);
         stackPop(operator_stack);
         insertLeft(root, child);
     }
 
     stackPush(operand_stack, (long)root);
 
+}
+
+void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
+    ASTNode* curr = (ASTNode*)stackGetTop(operator_stack);
+    stackPop(operator_stack);
+    while(curr->type != T_LPAREN) {
+        reduce(operand_stack, operator_stack);
+    }
+    stackPop(operator_stack);
 }
 
 PREC_TABLE_INDEX getIndex(Token* token) {
