@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdbool.h>
+#include "symtable.h"
+
 ////////////////////////////// COMPONENTS ////////////////////////////////////////////////
 circ_buff_ptr buffer = NULL;
 int saved_stdin;
@@ -594,7 +596,12 @@ START_TEST(test_Parse_Prolog)
 
     scanner_teardown();
 }
-
+////////////////////////////// TESTS SYMTABLE ////////////////////////////////////////////////
+START_TEST(test_SYM_Empty)
+{
+    
+}
+END_TEST
 ////////////////////////////// TESTS TOTAL/FINAL ////////////////////////////////////////////////
 
 START_TEST(test_TL_hello)
@@ -694,6 +701,24 @@ Suite * ParseSuite()
     return s;
 }
 
+Suite * SymSuite()
+{
+    Suite *s;
+    TCase *tc_core;
+
+    s = suite_create("SymTableTests");
+
+    /* Core test case */
+    tc_core = tcase_create("Core6");
+
+    tcase_add_test(tc_core, test_SYM_Empty);
+
+
+    suite_add_tcase(s, tc_core);
+
+    return s;
+}
+
 Suite * TotalSuite()
 {
     Suite *s;
@@ -715,8 +740,8 @@ Suite * TotalSuite()
  int main(int argc, char** argv)
  {
     int number_failed;
-    Suite *scanSuit,*expParseSuit,*ParseSuit, *totalSuit;
-    SRunner *scanRunner,*expParseRunner,*ParseRunner, *totalRunner;
+    Suite *scanSuit,*expParseSuit,*ParseSuit, *totalSuit,*SymSuit;
+    SRunner *scanRunner,*expParseRunner,*ParseRunner, *totalRunner,*SymRunner;
     if (argc == 1){
         suiteToRun = "all";
     }else{
@@ -754,6 +779,17 @@ Suite * TotalSuite()
         srunner_run_all(ParseRunner, CK_VERBOSE);
         number_failed = srunner_ntests_failed(ParseRunner);
         srunner_free(ParseRunner);
+        printf("\n");
+    }
+
+    if (strcmp(suiteToRun, "Sym") == 0 || strcmp(suiteToRun, "all") == 0) {
+        printf("\n");
+        SymSuit = SymSuite();
+        SymRunner = srunner_create(SymSuit);
+
+        srunner_run_all(SymRunner, CK_VERBOSE);
+        number_failed = srunner_ntests_failed(SymRunner);
+        srunner_free(SymRunner);
         printf("\n");
     }
 
