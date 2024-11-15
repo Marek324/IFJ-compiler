@@ -34,6 +34,7 @@ for input_file in $input_dir/*; do
 done
 
 # Summary of the test results
+
 echo "======================================="
 echo "Total tests run: $total_tests"
 echo "Passed: $passed_tests"
