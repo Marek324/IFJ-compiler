@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+#include "token.h"
+#include "ast.h"
+#include "parser.h"
+
 // Function to print a token's value
 void printToken(Token *token) {
     if (token == NULL) return;

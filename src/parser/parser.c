@@ -1,4 +1,5 @@
-#include "../include/parser.h"
+#include "parser.h"
+#include "exp_parser.h"
            
 ASTNode * checkToken(Token *token, TokenType wantedType, KeyWordType wantedKeyWord) {
     ASTNode *ptr = NULL;
