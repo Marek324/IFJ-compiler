@@ -3,6 +3,7 @@
 #include "token.h"
 #include "ast.h"
 #include "parser.h"
+#include "exp_parser.h"
 
 // Function to print a token's value
 void printToken(Token *token) {
@@ -161,15 +162,26 @@ void printToken(Token *token) {
     }
 }
 
+// for expressions
+void printTreeLeftToRight(ASTNode* node) {
+    if (node == NULL) { return; }
+    printTreeLeftToRight(node->left);
+    // printToken(node->token);
+    printTreeLeftToRight(node->right);
+}
+
 // Recursive function to print the AST tokens from right to left
 void printTreeRightToLeft(ASTNode *node) {
-    if (node == NULL) return;
-    
+    if (node == NULL) { return; }
     // Recur to the right child first
     printTreeRightToLeft(node->right);
 
     // Print the token associated with this node
     printToken(node->token);
+
+    if(node->type == P_EXPRESSION) {
+        printTreeLeftToRight(node->right);
+    }
 
     // Recur to the left child last
     printTreeRightToLeft(node->left);

@@ -64,6 +64,10 @@ void Prolog(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     token = get_token(buffer);
     ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
     insertLeft(idFound, asgnFound);
+    // @import
+    token = get_token(buffer);
+    ASTNode *importFound = checkToken(token, T_AT_IMPORT, NO_KW);
+    insertLeft(asgnFound, importFound);
     // (
     token = get_token(buffer);
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);

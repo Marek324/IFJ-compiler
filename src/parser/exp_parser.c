@@ -3,7 +3,7 @@ file: exp_parser.h
 author: Adam Vesely
 Implementation of the expression parser.
 */
-// TODO ERROR HANDLING AND EXTENSIONS
+// TODO ERROR HANDLING AND EXTENSIONS, IMPLICIT CONVERSIONS
 #include <stdbool.h>
 
 #include "exp_parser.h"
