@@ -7,7 +7,7 @@ Header file for error message.
 #ifndef ERROR_H
 #define ERROR_H
 
-char *lex_error_messages = {
+char *lex_error_messages[] = {
     "Memory allocation error",
     "Standalone backslash",
     "Unknown character",

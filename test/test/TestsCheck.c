@@ -5,11 +5,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdbool.h>
-<<<<<<< HEAD
-=======
 #include "symtable.h"
 
->>>>>>> master
 ////////////////////////////// COMPONENTS ////////////////////////////////////////////////
 circ_buff_ptr buffer = NULL;
 int saved_stdin;
@@ -122,8 +119,6 @@ FILE* temp_function(const char* filename){
     return file;
 }
 
-<<<<<<< HEAD
-=======
 void tree_to_file_Left_Right(ASTNode *root, FILE* file){
     if (root == NULL)
     {
@@ -150,7 +145,6 @@ void addNodeEXPToFile(ASTNode *node, FILE* file){
     fputs(" ",file);
 }
 
->>>>>>> master
 int compare_files_line_by_line(FILE *file1, FILE *file2) {
     char line1[1024], line2[1024];
 
@@ -172,8 +166,6 @@ int compare_files_line_by_line(FILE *file1, FILE *file2) {
     // If no differences were found
     return 1;  // Files are identical
 }
-<<<<<<< HEAD
-=======
 const char* ASTNodeTypeToString(ASTNodeType type) {
     switch (type) {
         case P_PROG: return "P_PROG";
@@ -252,7 +244,6 @@ const char* ASTNodeTypeToString(ASTNodeType type) {
     }
 }
 
->>>>>>> master
 
 ////////////////////////////// TESTS SCANNER ////////////////////////////////////////////////
 
@@ -534,11 +525,6 @@ START_TEST(test_NULL)
     scanner_teardown();
 }
 END_TEST
-<<<<<<< HEAD
-////////////////////////////// TESTS TOTAL/FINAL ////////////////////////////////////////////////
-
-START_TEST(test_hello)
-=======
 ////////////////////////////// TESTS EXP PARSER ////////////////////////////////////////////////
 
 //Test for singular token
@@ -619,7 +605,6 @@ END_TEST
 ////////////////////////////// TESTS TOTAL/FINAL ////////////////////////////////////////////////
 
 START_TEST(test_TL_hello)
->>>>>>> master
 {
 
     //temp_function("hello.out"); // temp function represents our compiler, hello.out is to be replaced with hello.zig
@@ -681,8 +666,6 @@ char* suiteToRun = "all";
     return s;
 }
 
-<<<<<<< HEAD
-=======
 Suite * EXParseSuite()
 {
     Suite *s;
@@ -736,7 +719,6 @@ Suite * SymSuite()
     return s;
 }
 
->>>>>>> master
 Suite * TotalSuite()
 {
     Suite *s;
@@ -745,15 +727,9 @@ Suite * TotalSuite()
     s = suite_create("TotalTests");
 
     /* Core test case */
-<<<<<<< HEAD
-    tc_core = tcase_create("Core5");
-
-    tcase_add_test(tc_core, test_hello);
-=======
     tc_core = tcase_create("Core7");
 
     tcase_add_test(tc_core, test_TL_hello);
->>>>>>> master
 
 
     suite_add_tcase(s, tc_core);
@@ -764,13 +740,8 @@ Suite * TotalSuite()
  int main(int argc, char** argv)
  {
     int number_failed;
-<<<<<<< HEAD
-    Suite *scanSuit, *totalSuit;
-    SRunner *scanRunner, *totalRunner;
-=======
     Suite *scanSuit,*expParseSuit,*ParseSuit, *totalSuit,*SymSuit;
     SRunner *scanRunner,*expParseRunner,*ParseRunner, *totalRunner,*SymRunner;
->>>>>>> master
     if (argc == 1){
         suiteToRun = "all";
     }else{
@@ -789,8 +760,6 @@ Suite * TotalSuite()
         printf("\n");
     }
 
-<<<<<<< HEAD
-=======
     if (strcmp(suiteToRun, "EXParser") == 0 || strcmp(suiteToRun, "all") == 0) {
         printf("\n");
         expParseSuit = EXParseSuite();
@@ -824,7 +793,6 @@ Suite * TotalSuite()
         printf("\n");
     }
 
->>>>>>> master
     if (strcmp(suiteToRun, "Total") == 0 || strcmp(suiteToRun, "all") == 0) {
         printf("\n");
         totalSuit = TotalSuite();
