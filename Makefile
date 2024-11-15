@@ -13,7 +13,11 @@ COMMON_SRCS = $(SRC_DIR)/common/error.c $(SRC_DIR)/common/stack.c $(SRC_DIR)/com
 PARSER_SRCS = $(SRC_DIR)/parser/exp_parser.c $(SRC_DIR)/parser/ast.c $(SRC_DIR)/parser/parser.c
 
 SRCS = $(SCANNER_SRCS) $(COMMON_SRCS) $(PARSER_SRCS)
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+APP_SRCS = $(SRCS)
+TEST_SRCS = $(filter-out $(SRC_DIR)/common/main.c, $(SRCS))
+
+APP_OBJS = $(APP_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+TEST_OBJS = $(TEST_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 TARGET = $(BIN_DIR)/test
 
@@ -21,8 +25,8 @@ OBJ_SUBDIRS = $(OBJ_DIR)/common $(OBJ_DIR)/scanner $(OBJ_DIR)/parser
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(OBJS) tests/test_utils/scanner_unit_tests.c -o $(TARGET) $(LDFLAGS)
+$(TARGET): $(TEST_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
+	$(CC) $(CFLAGS) $(TEST_OBJS) tests/test_utils/scanner_unit_tests.c -o $(TARGET) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SUBDIRS)
 	$(CC) $(CFLAGS) -c $< -o $@

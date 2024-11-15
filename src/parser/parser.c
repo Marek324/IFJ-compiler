@@ -435,7 +435,8 @@ void IdFound(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void ExpressionList(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_EXPRESSION
-    if (ASTNode *expressionFound == parseExpression(token, buffer) != NULL ) {
+    ASTNode *expressionFound = parseExpression(token, buffer);
+    if (expressionFound != NULL ) {
         ASTNode *expression = ruleNode(P_EXPRESSION);
         insertRight(ptr, expression);
         insertRight(expression, expressionFound);
