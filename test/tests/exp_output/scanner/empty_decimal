@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 T_INT, 42
 T_DOT,
 T_EOF,
 Exit code: 0
+=======
+T_INT, 42
+T_DOT,
+T_EOF,
+Exit code: 0
+>>>>>>> master

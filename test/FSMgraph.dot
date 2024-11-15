@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 digraph G {
     graph [nodesep=0.7]
     node [shape=circle]
@@ -86,4 +87,94 @@ digraph G {
     S_START -> S_RBRACE [label="}"]
     S_START -> S_LBRACKET [label="["]
     S_START -> S_RBRACKET [label="]"]
+=======
+digraph G {
+    graph [nodesep=0.7]
+    node [shape=circle]
+
+    INVISIBLE_NODE [style=invis]
+    S_START [shape="doublecircle"]
+    INVISIBLE_NODE->S_START
+
+    subgraph final_nodes{
+        node [shape=doublecircle]
+        S_ASGN; S_EQ; S_BANG; S_NEQ; S_LESS; S_LEQ; S_MORE; S_MEQ;
+        S_PLUS; S_PASGN; S_MINUS; S_MASGN; S_MUL; S_MULASGN; S_SLASH; S_DASGN;
+        S_STR; S_STR_MLINE;
+        S_ID; S_KW;
+        S_INT; S_F64; S_F64_EXP; S_ZERO;
+        S_LPAREN; S_RPAREN; S_LBRACE; S_RBRACE; S_LBRACKET; S_RBRACKET; S_PIPE; 
+        S_QMARK; S_COLON; S_AT_IMPORT; S_COMMA; S_DOT; S_SEMICOL;
+    }
+       
+    S_START -> S_START [label="whitespace"]
+    S_START -> S_SLASH [label="/"]
+
+    S_START -> S_ASGN [label="="]
+    S_ASGN -> S_EQ [label="="]
+
+    S_START -> S_BANG [label="!"]
+    S_BANG -> S_NEQ [label="="]
+
+    S_START -> S_LESS [label="<"]
+    S_LESS -> S_LEQ [label="="]
+
+    S_START -> S_MORE [label=">"]
+    S_MORE -> S_MEQ [label="="]
+
+    S_START -> S_PLUS [label="+"]
+    S_PLUS -> S_PASGN [label="="]
+
+    S_START -> S_MINUS [label="-"]
+    S_MINUS -> S_MASGN [label="="]
+
+    S_START -> S_MUL [label="*"] 
+    S_MUL -> S_MULASGN [label="="]
+
+    S_SLASH -> S_DASGN [label="="]
+
+    S_START -> S_STR [label="\""]
+    S_STR -> S_STR [label="char"]
+    S_STR -> S_STR_ESC [label="\\"]
+    S_STR_ESC -> S_STR [label="\"nrt\\"]
+    S_STR_ESC -> S_STR_HEX [label="x"]
+    S_STR_HEX -> S_STR_HEX [label="0-9A-Fa-f"]
+    S_STR_HEX -> S_STR
+    S_START -> S_STR_MLINE [label="\\\\"]
+    S_STR_MLINE -> S_STR_MLINE [label="char"]
+
+    S_START -> S_ID [label="A-Za-z"]
+    S_ID -> S_ID [label="A-Za-z0-9_"]
+    S_ID -> S_KW [label="match"]
+
+    S_START -> S_ZERO [label="0"]
+    S_ZERO -> S_F64_DOT [label="."]
+    S_START -> S_INT [label="1-9"]
+    S_INT -> S_INT [label="0-9"]
+    S_INT -> S_F64_DOT [label="."]
+    S_F64_DOT -> S_F64 [label="0-9"]
+    S_F64_DOT -> S_F64_E [label="Ee"]
+    S_F64 -> S_F64 [label="0-9"]
+    S_F64 -> S_F64_E [label="Ee"]
+    S_F64_E -> S_F64_EXP [label="0-9"]
+    S_F64_EXP -> S_F64_EXP [label="0-9"]
+    S_INT -> S_F64_E [label="Ee"]
+
+    S_START -> S_AT_IMPORT [label="@"]
+    S_AT_IMPORT -> S_AT_IMPORT [label="A-Za-z0-9_"]
+
+    S_START -> S_COMMA [label=","]
+    S_START -> S_DOT [label="."]
+    S_START -> S_SEMICOL [label=";"]
+    S_START -> S_QMARK [label="?"]
+    S_START -> S_COLON [label=":"]
+
+    S_START -> S_PIPE [label="|"]
+    S_START -> S_LPAREN [label="("]
+    S_START -> S_RPAREN [label=")"]
+    S_START -> S_LBRACE [label="{"]
+    S_START -> S_RBRACE [label="}"]
+    S_START -> S_LBRACKET [label="["]
+    S_START -> S_RBRACKET [label="]"]
+>>>>>>> master
 }

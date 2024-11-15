@@ -7,7 +7,7 @@ Header file for the scanner.
 #ifndef SCANNER_H
 #define SCANNER_H
 
-
+#include "circ_buff.h"
 #include "common/token.h"
 #include "common/error.h"
 #include "scanner/circ_buff.h"
@@ -35,12 +35,12 @@ enum State {
     S_MORE,
 
     //NUMBERS
-    S_ZERO,
     S_INT,
     S_FLOAT, S_FLOAT_EXP, S_FLOAT_DEC_EXP, 
+    S_FLOAT_DOT, S_FLOAT_EXP_SIGN,
 
     //LITERALS
-    S_STR, S_STR_MLINE,
+    S_STR, S_STR_MLINE, S_STR_MLINE_NEWLINE,
     S_STR_ESC, S_STR_HEX,
 };
 

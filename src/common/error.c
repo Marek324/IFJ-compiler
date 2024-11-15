@@ -9,7 +9,6 @@ Implementation of error messages.
 #include <stdarg.h>
 
 #include "common/error.h"
-
 void error_exit(int exit_code, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);

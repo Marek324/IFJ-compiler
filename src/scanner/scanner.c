@@ -9,29 +9,66 @@ Implementation of scanner.
 // Macros
 #define INPUT stdin
 
-#define RETURN_TOKEN(T) \
-    token->type = T; \
-    dyn_str_free(str); \
+#define RETURN_TOKEN(T)                                                         \
+    token->type = T;                                                            \
+    dyn_str_free(str);                                                          \
     return token
 
-// Function prototypes
-void consume_comment();
-KeyWordType check_keyword(char *str);
-void error(Token *token, char *msg);
-int read_char(circ_buff_ptr buffer);
+#define RETURN_STR_TOKEN(T)                                                     \
+    token->value.string_value = (char *)malloc(str->length+1);                  \
+    strcpy(token->value.string_value, str->str);                                \
+    RETURN_TOKEN(T)
 
-void load_id_to_dyn_str(dyn_str *str, circ_buff_ptr buffer);
+// Checks if next character is '=', returns T1 if true, T2 otherwise and puts character back to buffer
+#define RETURN_TOKEN_FLW_EQ(T1, T2)                                             \
+    c = getc(INPUT);                                                            \
+    if (c == '=') {                                                             \
+        RETURN_TOKEN(T1);                                                       \
+    } else {                                                                    \
+        circ_buff_enqueue(buffer, c);                                           \
+        RETURN_TOKEN(T2);                                                       \
+    } break
+
+#define PUT_C_BACK_CHANGE_STATE(S) {                                            \
+    circ_buff_enqueue(buffer, c);                                               \
+    state = S;                                                                  \
+    break; }
+
+#define READ_ID {                                                               \
+    circ_buff_enqueue(buffer, c);                                               \
+    while((c = read_char(buffer)) != EOF && (isalnum(c) || c == '_'))           \
+        dyn_str_append(str, c);                                                 \
+    circ_buff_enqueue(buffer, c);}
+
+#define READ_NUM {                                                              \
+    circ_buff_enqueue(buffer, c);                                               \
+    while (isdigit(c = read_char(buffer)))                                      \
+        dyn_str_append(str, c);}
+
+#define APPEND_CHAR(C) {                                                        \
+    dyn_str_append(str, C);                                                     \
+    break; }
+
+#define ERROR(E) \
+    token->value.int_value = (E);\
+    RETURN_TOKEN(T_ERROR)
+
+// Function prototypes
+KeyWordType check_keyword(char *str);
+int read_char(circ_buff_ptr buffer);
 
 //char buffer
 //get_token(&buffer)
 Token *get_token(circ_buff_ptr buffer) 
 {
-    Token *token = (Token *)malloc(sizeof(Token));
-    if (token == NULL) 
-        error_exit(1, "Malloc failed\n");
-    
     dyn_str *str = dyn_str_init();
     
+    Token *token = (Token *)malloc(sizeof(Token));
+    if (token == NULL){ 
+        ERROR(0); // Memory allocation error
+    }
+    
+
     int state = S_START;
     int c; 
     while ((c = read_char(buffer)) != EOF) {
@@ -57,48 +94,16 @@ Token *get_token(circ_buff_ptr buffer)
                     case '-': RETURN_TOKEN(T_MINUS);
                     case '*': RETURN_TOKEN(T_MUL);
 
-                    case '=': 
-                        c = getc(INPUT);
-                        if (c == '=') {
-                            RETURN_TOKEN(T_EQ);
-                        } else {
-                            circ_buff_enqueue(buffer, c);
-                            RETURN_TOKEN(T_ASGN);
-                        }
-                            
-                        break;
-                    case '!': 
-                        c = getc(INPUT);
-                        if (c == '=') {
-                            RETURN_TOKEN(T_NEQ);
-                        } else {
-                            circ_buff_enqueue(buffer, c);
-                            RETURN_TOKEN(T_BANG);
-                        }
-                        break;
-                    case '<': 
-                        c = getc(INPUT);
-                        if (c == '=') {
-                            RETURN_TOKEN(T_LEQ);
-                        } else {
-                            circ_buff_enqueue(buffer, c);
-                            RETURN_TOKEN(T_LESS);
-                        }
-                        break;
-                    case '>': 
-                        c = getc(INPUT);
-                        if (c == '=') {
-                            RETURN_TOKEN(T_MEQ);
-                        } else {
-                            circ_buff_enqueue(buffer, c);
-                            RETURN_TOKEN(T_MORE);
-                        }
-                        break;
+                    case '=': RETURN_TOKEN_FLW_EQ(T_EQ, T_ASGN);
+                    case '!': RETURN_TOKEN_FLW_EQ(T_NEQ, T_BANG);
+                    case '<': RETURN_TOKEN_FLW_EQ(T_LEQ, T_LESS);
+                    case '>': RETURN_TOKEN_FLW_EQ(T_MEQ, T_MORE);
 
                     case '/':
                         c = getc(INPUT);
                         if (c == '/') {
-                            consume_comment(INPUT);
+                            while ((c = getc(INPUT)) != EOF && c != '\n')  // consume comment
+                                continue;
                             break;
                         } else {
                             circ_buff_enqueue(buffer, c);
@@ -112,34 +117,20 @@ Token *get_token(circ_buff_ptr buffer)
                             state = S_STR_MLINE;
                             break;
                         } else {
-                            error(token, "Invalid character after backslash\n");
+                            ERROR(1); // Standalone backslash
                         }
                         break;
                     
-                    case '"':
-                        circ_buff_enqueue(buffer, c); // '"' needs to be returned because it will be read in main while and S_STR will read nexy char 
-                        state = S_STR;
-                        break;
+                    case '"': PUT_C_BACK_CHANGE_STATE(S_STR)
                     case '@': 
                         dyn_str_append(str, c); // add @ to dyn_string
                         state = S_AT_IMPORT;
                         break;
                     default:
-                        if (isalpha(c) || c == '_') {
-                            circ_buff_enqueue(buffer, c);
-                            state = S_ID;
-                        } else if (isdigit(c)) {
-                            if (c == '0') {
-                                circ_buff_enqueue(buffer, c);
-                                state = S_ZERO;
-                            } else {
-                                circ_buff_enqueue(buffer, c);
-                                state = S_INT;
-                            }
-                        } else {
-                            free_token(token);
-                            dyn_str_free(str);
-                            error_exit(1,"Unknown character\n");
+                        if (isalpha(c) || c == '_')  PUT_C_BACK_CHANGE_STATE(S_ID)
+                        else if (isdigit(c)) PUT_C_BACK_CHANGE_STATE(S_INT) 
+                        else {
+                            ERROR(2); // Invalid character
                         }
                         break;
                 }
@@ -147,102 +138,95 @@ Token *get_token(circ_buff_ptr buffer)
 
             case S_AT_IMPORT:
                 {   
-                    circ_buff_enqueue(buffer, c); // put character back to buffer
-                    load_id_to_dyn_str(str, buffer);
+                    READ_ID;
                     int match = !strcmp(str->str, "@import");
                     if (match) {
                         RETURN_TOKEN(T_AT_IMPORT);
-                    } else error_exit(1,"Unknown keyword starting with @\n");
+                    } else {
+                        ERROR(3); // Invalid @ keyword
+                    }
                 }
                 break; // S_AT_IMPORT
 
             case S_ID:
-                circ_buff_enqueue(buffer, c);
-                load_id_to_dyn_str(str, buffer);
-
+                READ_ID;
                 KeyWordType kw = check_keyword(str->str);
                 if (kw != NO_KW) {
                     token->value.keyword = kw;
                     RETURN_TOKEN(T_KW);
                 } else {
-                    token->value.string_value = (char *)malloc(str->length+1);
-                    strcpy(token->value.string_value, str->str);
-                    RETURN_TOKEN(T_ID);
+                    RETURN_STR_TOKEN(T_ID);
                 }
                 break; // S_ID
 
-            case S_ZERO:
-                
-                break; // S_ZERO
-
             case S_INT:
-                circ_buff_enqueue(buffer, c);
-                while (isdigit(c = read_char(buffer))) 
-                    dyn_str_append(str, c);
-                
+                if (c == '0'){
+                    c = read_char(buffer);
+                    if (c == EOF) {
+                        token->value.int_value = 0;
+                        RETURN_TOKEN(T_INT);
+                    }
+                    else if (isdigit(c)) {
+                        ERROR(4); // Leading zero
+                    }
+                    circ_buff_enqueue(buffer, '0');
+                }
+
+                READ_NUM;
                 if (c == '.') {
-                    c = read_char(buffer);
-                    if (isdigit(c)) {
-                        dyn_str_append(str, '.');
-                        circ_buff_enqueue(buffer, c);
-                        state = S_FLOAT;
-                        break;
-                    }
-                    circ_buff_enqueue(buffer, '.');
+                    state = S_FLOAT_DOT;
+                    break;
                 } else if (c == 'e' || c == 'E') {
-                    c = read_char(buffer);
-                    if (isdigit(c)) {
-                        dyn_str_append(str, 'e');
-                        circ_buff_enqueue(buffer, c);
-                        state = S_FLOAT_EXP;
-                        break;
-                    }
-                    circ_buff_enqueue(buffer, 'e');
-                } 
-                
-                circ_buff_enqueue(buffer, c);
-                token->value.int_value = atoi(str->str);
-                RETURN_TOKEN(T_INT);
+                    state = S_FLOAT_EXP_SIGN;
+                    break;
+                } else {
+                    circ_buff_enqueue(buffer, c);
+                    token->value.int_value = atoi(str->str);
+                    RETURN_TOKEN(T_INT);
+                }
                 break; // S_INT
 
-            case S_FLOAT:
-                circ_buff_enqueue(buffer, c);
-                while (isdigit(c = read_char(buffer))) 
-                    dyn_str_append(str, c);
-                
-                if (c == 'e' || c == 'E') {
-                    c = read_char(buffer);
-                    if (isdigit(c)) {
-                        dyn_str_append(str, 'e');
-                        circ_buff_enqueue(buffer, c);
-                        state = S_FLOAT_EXP;
-                        break;
-                    } else if (c == '+' || c == '-') {
-                        char tmp = c;
-                        c = read_char(buffer);
-                        if (isdigit(c)) {
-                            dyn_str_append(str, 'e');
-                            dyn_str_append(str, tmp);
-                            circ_buff_enqueue(buffer, c);
-                            state = S_FLOAT_EXP;
-                            break;
-                        }
-                        circ_buff_enqueue(buffer, tmp);
-                    }
-                    circ_buff_enqueue(buffer, 'e');
-                } 
+            case S_FLOAT_DOT:
+                if (isdigit(c)) {
+                    dyn_str_append(str, '.');
+                    circ_buff_enqueue(buffer, c);
+                    state = S_FLOAT;
+                    break;
+                } else {
+                    ERROR(5); // Invalid float - no decimal part
+                }
+                break; // S_FLOAT_DOT
 
-                circ_buff_enqueue(buffer, c);
-                token->value.float_value = atof(str->str);
-                RETURN_TOKEN(T_FLOAT);
-                
+            case S_FLOAT:
+                READ_NUM;
+                if (c == 'e' || c == 'E') {
+                    state = S_FLOAT_EXP_SIGN;
+                    break;
+                } else {
+                    circ_buff_enqueue(buffer, c);
+                    token->value.float_value = atof(str->str);
+                    RETURN_TOKEN(T_FLOAT);
+                }
                 break; // S_FLOAT
 
-            case S_FLOAT_EXP:
-                circ_buff_enqueue(buffer, c);
-                while (isdigit(c = read_char(buffer))) 
+            case S_FLOAT_EXP_SIGN:
+                if (isdigit(c)) {
+                    dyn_str_append(str, 'e');
+                    circ_buff_enqueue(buffer, c);
+                    state = S_FLOAT_EXP;
+                    break;
+                } else if (c == '+' || c == '-') {
+                    dyn_str_append(str, 'e');
                     dyn_str_append(str, c);
-            
+                    state = S_FLOAT_EXP;
+                    break;
+                } else {
+                    ERROR(6); // Invalid float - no exponent
+                }
+                break; // S_FLOAT_EXP_SIGN
+
+            case S_FLOAT_EXP:
+                READ_NUM;
                 circ_buff_enqueue(buffer, c);
                 token->value.float_value = atof(str->str);
                 RETURN_TOKEN(T_FLOAT);
@@ -254,7 +238,7 @@ Token *get_token(circ_buff_ptr buffer)
                         state = S_STR_ESC;
                         break;
                     } else if (c == '\n' || c == EOF) {
-                        error(token, "Missing terminating \" character\n");
+                        ERROR(7); // No closing quote
                     } else {
                         dyn_str_append(str, c);
                     }
@@ -262,65 +246,75 @@ Token *get_token(circ_buff_ptr buffer)
                 if (state == S_STR_ESC)
                     break;
                 
-
-                token->value.string_value = (char *)malloc(str->length+1);
-                strcpy(token->value.string_value, str->str);
-                RETURN_TOKEN(T_STR);
+                RETURN_STR_TOKEN(T_STR);
                 break; // S_STR
 
             case S_STR_ESC:
                 switch(c) {
-                    case 'n': 
-                        dyn_str_append(str, '\n');
-                        break;
-                    case 't': 
-                        dyn_str_append(str, '\t');
-                        break;
-                    case 'r': 
-                        dyn_str_append(str, '\r');
-                        break;
-                    case '\\': 
-                        dyn_str_append(str, '\\');
-                        break;
-                    case '"': 
-                        dyn_str_append(str, '"');
-                        break;
+                    case 'n':   APPEND_CHAR('\n');
+                    case 't':   APPEND_CHAR('\t');
+                    case 'r':   APPEND_CHAR('\r');
+                    case '\\':  APPEND_CHAR('\\');
+                    case '"':   APPEND_CHAR('"');
                     case 'x': 
                         state = S_STR_HEX;
                         break;
                     default:
-                        error(token, "Invalid escape sequence\n");
-                        break;
+                        ERROR(8); // Invalid escape sequence
                 }
-                state = S_STR;
+                if (state != S_STR_HEX) state = S_STR;
                 circ_buff_enqueue(buffer, c);
                 break; // S_STR_ESC
 
-            case S_STR_HEX:
+            case S_STR_HEX: {
+                int hex = 0;
+                for (int i = 0; i < 2; i++) {
+                    c = read_char(buffer);
+                    if (!isxdigit(c)){
+                        fprintf(stderr, "Invalid hex escape number %c\n", c);
+                        ERROR(9); // Invalid hex number
+                    }
+                    hex = hex * 16 + (isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
+                }
                 
-                break; // S_STR_HEX
+                dyn_str_append(str, (char)hex);
+                state = S_STR;           
+                circ_buff_enqueue(buffer, c);     
+                } break; // S_STR_HEX
 
             case S_STR_MLINE:
+                circ_buff_enqueue(buffer, c);
+                while((c = read_char(buffer)) != EOF && c != '\n') 
+                    dyn_str_append(str, c);
 
+                if (c == EOF) {
+                    RETURN_STR_TOKEN(T_STR);
+                } else if (c == '\n'){
+                    state = S_STR_MLINE_NEWLINE;
+                }    
                 break; // S_STR_MLINE
-            }
+
+            case S_STR_MLINE_NEWLINE:
+                circ_buff_enqueue(buffer, c);
+                while(isspace(c = read_char(buffer))) {} // skip whitespaces
+                if (c == '\\') {
+                    c = read_char(buffer);
+                    if (c == '\\') {
+                        dyn_str_append(str, '\n');
+                        state = S_STR_MLINE;
+                        break;
+                    } else {
+                        ERROR(1); // Standalone backslash
+                    }
+                } else {
+                    circ_buff_enqueue(buffer, c);
+                    RETURN_STR_TOKEN(T_STR);
+                }
+                break; // S_STR_MLINE_NEWLINE
+        }
     } 
 
     RETURN_TOKEN(T_EOF);
-}
-
-void consume_comment()
-{
-    int c;
-    while ((c = getc(INPUT)) != EOF && c != '\n') 
-        continue;
-}
-
-void error(Token *token, char *msg)
-{
-    free_token(token);
-
-    error_exit(1, msg);
 }
 
 KeyWordType check_keyword(char *str)
@@ -355,13 +349,4 @@ int read_char(circ_buff_ptr buffer)
     else 
         return getc(INPUT);
     
-}
-
-void load_id_to_dyn_str(dyn_str *str, circ_buff_ptr buffer)
-{
-    int c;
-    while((c = read_char(buffer)) != EOF && (isalnum(c) || c == '_')) 
-        dyn_str_append(str, c);
-
-    circ_buff_enqueue(buffer, c);
 }

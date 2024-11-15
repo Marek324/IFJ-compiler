@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 T_EQ,
 T_NEQ,
 T_LEQ,
 T_MEQ,
 T_EOF,
 Exit code: 0
+=======
+T_EQ,
+T_NEQ,
+T_LEQ,
+T_MEQ,
+T_EOF,
+Exit code: 0
+>>>>>>> master

@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 T_STR, abc
 	\"
 T_EOF,
 Exit code: 0
+=======
+T_STR, abc
+	\"
+T_EOF,
+Exit code: 0
+>>>>>>> master
