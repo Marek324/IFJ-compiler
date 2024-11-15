@@ -13,7 +13,7 @@ void FunctionDef(Token *token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void End(Token *token, ASTNode *ptr, circ_buff_ptr buffer); 
 
-void Expression(Token *token, ASTNode *ptr, circ_buff_ptr buffer);
+void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void ParamList(Token *token, ASTNode *ptr, circ_buff_ptr buffer);
 

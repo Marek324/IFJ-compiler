@@ -76,7 +76,7 @@ void Prolog(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expression = ruleNode(P_EXPRESSION);
     insertLeft(lParenFound, expression);
     token = get_token(buffer);
-    Expression(token, expression, buffer);
+    Expression(&token, expression, buffer);
     if (expression->right == NULL) {
         freeAST(ASTRoot); 
         error_exit(2, "SYNTAX ERROR!\n"); 
@@ -91,7 +91,7 @@ void Prolog(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     token = get_token(buffer);
 }
 
-void Expression(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
+void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionFound = parseExpression(token, buffer);
     if (expressionFound != NULL) {
         insertRight(ptr, expressionFound);
@@ -355,7 +355,7 @@ void VarDeclaration(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_Expression
         ASTNode *expressionFound = ruleNode(P_EXPRESSION);
         insertLeft(asgnFound, expressionFound);
-        Expression(token, expressionFound, buffer);
+        Expression(&token, expressionFound, buffer);
         if (expressionFound->right == NULL) {
             freeAST(ASTRoot); 
             error_exit(2, "SYNTAX ERROR!\n"); 
@@ -380,7 +380,7 @@ void IdFound(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_EXPRESSION
         ASTNode *expressionFound = ruleNode(P_EXPRESSION);
         insertLeft(asgnFound, expressionFound);
-        Expression(token, expressionFound, buffer);
+        Expression(&token, expressionFound, buffer);
         if (expressionFound->right == NULL) {
             freeAST(ASTRoot); 
             error_exit(2, "SYNTAX ERROR!\n"); 
@@ -439,7 +439,7 @@ void IdFound(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void ExpressionList(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_EXPRESSION
-    ASTNode *expressionFound = parseExpression(token, buffer);
+    ASTNode *expressionFound = parseExpression(&token, buffer);
     if (expressionFound != NULL ) {
         ASTNode *expression = ruleNode(P_EXPRESSION);
         insertRight(ptr, expression);
@@ -465,7 +465,7 @@ void IfStatement(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
     insertLeft(lParenFound, expressionRule);
-    Expression(token, expressionRule, buffer);
+    Expression(&token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
         freeAST(ASTRoot); 
         error_exit(2, "SYNTAX ERROR!\n");
@@ -554,7 +554,7 @@ void While(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
     insertLeft(lParenFound, expressionRule);
-    Expression(token, expressionRule, buffer);
+    Expression(&token, expressionRule, buffer);
     // )
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
     insertLeft(expressionRule, rParenFound);
@@ -584,7 +584,7 @@ void Return(Token *token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
     insertLeft(returnFound, expressionRule);
-    Expression(token, expressionRule, buffer);
+    Expression(&token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
         freeAST(ASTRoot); 
         error_exit(2, "SYNTAX ERROR!\n");

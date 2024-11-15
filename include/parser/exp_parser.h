@@ -41,7 +41,8 @@ typedef enum {
     END          /* "$" -> can be ')', ';', ... */
 } PREC_TABLE_INDEX;
 
-ASTNode* parseExpression(Token* token, circ_buff_ptr buffer);
+// main expression parser function
+ASTNode* parseExpression(Token** token, circ_buff_ptr buffer);
 
 // pops the top operator and the needed amount of operands to link them together, creating a tree
 // pushes the newly created tree (root of tree) onto the operand stack 

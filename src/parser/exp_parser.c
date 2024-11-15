@@ -30,46 +30,49 @@ ASOC precedence_table[P_TABLE_SIZE][P_TABLE_SIZE] =
 };
 
 // Function to parse an expression
-ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
+ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
 
-    if (token == NULL) {
+    if (*token == NULL) {
         return NULL; // Error: unexpected end of input
     }
+
     stack_t* operand_stack = stackInit();
     stack_t* operator_stack = stackInit();
-    // number of left parenthesis on the stack
+
     int* paren_depth = malloc(sizeof(int));
-    if(paren_depth == NULL) {
+    if (paren_depth == NULL) {
         error_exit(99, "ERROR: Unable to allocate memory for paren_depth!\n");
         return NULL;
     }
     *paren_depth = 0;
 
-    while(token != NULL && !expressionEnd(isEnd(token), stackIsEmpty(operator_stack))) {
-        ASTNode* node = nodeCreate(convertToASTType(token->type, NO_KW), token);
-        if(isOperand(token)) {
+    while (*token != NULL && !expressionEnd(isEnd(*token), stackIsEmpty(operator_stack))) {
+        ASTNode* node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
+        if (isOperand(*token)) {
             stackPush(operand_stack, (long)node);
         }
-        else if(isOperator(token)) {
-            if(token->type == T_LPAREN) {
+        else if (isOperator(*token)) {
+            if ((*token)->type == T_LPAREN) {
                 (*paren_depth)++;
             }
-            if(token->type == T_RPAREN) {
-                if(*paren_depth != 0) {
+            if ((*token)->type == T_RPAREN) {
+                if (*paren_depth != 0) {
                     reduceParen(operand_stack, operator_stack);
                     (*paren_depth)--;
                 }
                 else {
                     break;
                 }
+                *token = get_token(buff); // Update token
                 continue;
             }
-            if(stackIsEmpty(operator_stack)) {
+            if (stackIsEmpty(operator_stack)) {
                 stackPush(operator_stack, (long)node);
+                *token = get_token(buff); // Update token
                 continue;
             }
             ASTNode* top = (ASTNode*)stackGetTop(operator_stack);
-            switch(precedence_table[getIndex(top)][getIndex(node)]) {
+            switch (precedence_table[getIndex(top)][getIndex(node)]) {
                 case L:
                     stackPush(operator_stack, (long)node);
                     break;
@@ -86,7 +89,7 @@ ASTNode *parseExpression(Token* token, circ_buff_ptr buff) {
         else {
             return NULL;
         }
-        token = get_token(buff);
+        *token = get_token(buff); // Update token
     }
 
     ASTNode* root = reduceAll(operand_stack, operator_stack);
@@ -125,7 +128,7 @@ void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
 }
 
 ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack) {
-    // while (), a = ();
+    // while (), a = ()...;
     if(stackIsEmpty(operator_stack) && stackIsEmpty(operand_stack)) {
         return NULL;
     }
