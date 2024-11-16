@@ -117,17 +117,14 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_PARAM_LIST
     *token = get_token(buffer);
     if((*token)->type == T_ID) {
-    ASTNode *paramList = ruleNode(P_PARAM_LIST);
-    insertLeft(lParenFound,paramList);
-    ParamList(token, paramList, buffer);
-    // )
-    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
-    insertLeft(paramList, rParenFound);
+        ASTNode *paramList = ruleNode(P_PARAM_LIST);
+        insertLeft(lParenFound,paramList);
+        ParamList(token, paramList, buffer);
     }
     else {
-    // )
-    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
-    insertLeft(lParenFound, rParenFound);
+        // )
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        insertLeft(lParenFound, rParenFound);
     }
     // P_TYPE_COMPLETE
     ASTNode *function_type = ruleNode(P_FUNCTION_TYPE);
@@ -160,11 +157,16 @@ void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
     TypeComplete(token, typeComplete, buffer);
     //P_COMMA_PAR_FOUND
     if ((*token)->type == T_COMMA) {
-    ASTNode *commaFound = ruleNode(P_COMMA_PAR_FOUND);
-    insertLeft (typeComplete, commaFound);
-    CommaParFound(token, commaFound, buffer);
+        ASTNode *commaFound = ruleNode(P_COMMA_PAR_FOUND);
+        insertLeft (typeComplete, commaFound);
+        CommaParFound(token, commaFound, buffer);
     }
-    else *token = get_token(buffer);
+    else {
+        // )
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        insertLeft(ptr, rParenFound);
+        *token = get_token(buffer);
+    }
 }
 
 void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -256,10 +258,10 @@ void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
                 insertRight(ptr, voidFound);
                 *token = get_token(buffer);
             }
-        else {
-            freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR!\n"); 
-        }
+    else {
+        freeAST(ASTRoot);
+        error_exit(2, "SYNTAX ERROR!\n"); 
+    }
 }
 
 void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
