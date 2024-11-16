@@ -94,7 +94,6 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionFound = parseExpression(token, buffer);
     if (expressionFound != NULL) {
-        fprintf(stderr, "%d\n", (*token)->type);
         insertRight(ptr, expressionFound);
     }
 }
@@ -284,7 +283,7 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *statementRule = NULL;
     // P_VAR_DECLARATION
     if ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR)) {
-        ASTNode *statementRule = ruleNode(P_VAR_DECLARATION);
+        statementRule = ruleNode(P_VAR_DECLARATION);
         insertRight(ptr, statementRule);
         VarDeclaration(token, statementRule, buffer);
     } 
@@ -294,25 +293,25 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, idFound);
     // P_ID_FOUND
         *token = get_token(buffer);
-        ASTNode *statementRule = ruleNode(P_ID_FOUND);
+        statementRule = ruleNode(P_ID_FOUND);
         insertLeft(idFound, statementRule);
         IdFound(token, statementRule, buffer);
     }
     // P_IF_STATEMENT
     else if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF ) {
-        ASTNode *statementRule = ruleNode(P_IF_STATEMENT);
+        statementRule = ruleNode(P_IF_STATEMENT);
         insertRight(ptr, statementRule);
         IfStatement(token, statementRule, buffer);
     }
     // P_WHILE_STATEMENT
     else if ((*token)->type == T_KW && (*token)->value.keyword == KW_WHILE) {
-        ASTNode *statementRule = ruleNode(P_WHILE_LOOP);
+        statementRule = ruleNode(P_WHILE_LOOP);
         insertRight(ptr, statementRule);
         While(token, statementRule, buffer);
     } 
     //P_RETURN_STATEMENT
     else if ((*token)->type == T_KW && (*token)->value.keyword == KW_RETURN) {
-        ASTNode *statementRule = ruleNode(P_RETURN_STATEMENT);
+        statementRule = ruleNode(P_RETURN_STATEMENT);
         insertRight(ptr, statementRule);
         Return(token, statementRule, buffer);
     }

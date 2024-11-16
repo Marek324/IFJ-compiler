@@ -90,7 +90,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         }
         *token = get_token(buff); // Update token
     }
-
     ASTNode* root = reduceAll(operand_stack, operator_stack);
     stackClear(operand_stack);
     stackClear(operator_stack);
@@ -104,12 +103,12 @@ void reduce(stack_t* operand_stack, stack_t* operator_stack) {
     stackPop(operator_stack);
 
     ASTNode* child = (ASTNode*)stackGetTop(operand_stack);
-    stackPop(operator_stack);
+    stackPop(operand_stack);
     insertRight(root, child);
 
     if(root->type != BANG) {
         child = (ASTNode*)stackGetTop(operand_stack);
-        stackPop(operator_stack);
+        stackPop(operand_stack);
         insertLeft(root, child);
     }
 
@@ -118,12 +117,14 @@ void reduce(stack_t* operand_stack, stack_t* operator_stack) {
 }
 
 void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
-    ASTNode* curr = (ASTNode*)stackGetTop(operator_stack);
-    while(curr->type != LPAREN && !stackIsEmpty(operator_stack)) {
-        reduce(operand_stack, operator_stack);
-        curr = (ASTNode*)stackGetTop(operator_stack);
+    if(!stackIsEmpty(operator_stack)) {
+        ASTNode* curr = (ASTNode*)stackGetTop(operator_stack);
+        while(curr->type != LPAREN && !stackIsEmpty(operator_stack)) {
+            reduce(operand_stack, operator_stack);
+            curr = (ASTNode*)stackGetTop(operator_stack);
+        }
+        stackPop(operator_stack);
     }
-    stackPop(operator_stack);
 }
 
 ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack) {
@@ -183,6 +184,8 @@ bool isOperator(Token* token) {
         case T_MINUS:
         case T_MUL:
         case T_DIV:
+        case T_LPAREN:
+        case T_RPAREN:
             return true;
         default:
             return false;
