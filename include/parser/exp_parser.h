@@ -61,6 +61,8 @@ bool isOperand(Token* token);
 bool isEnd(Token* token);
 // checks if the expression has ended
 bool expressionEnd(bool end, int* paren_depth);
+// frees all temporary pointers
+void freeAll(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack);
 
 
 #endif // EXP_PARSER_H

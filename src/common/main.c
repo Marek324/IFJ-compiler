@@ -192,7 +192,7 @@ int main() {
     circ_buff_ptr buffer = circ_buff_init();
     Parse(buffer);
     printf("AST Tokens (Right to Left):\n");
-    printTreeRightToLeft(ASTRoot);
+    // printTreeRightToLeft(ASTRoot);
     circ_buff_free(buffer);
     freeAST(ASTRoot);
     return 0;

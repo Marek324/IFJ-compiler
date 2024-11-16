@@ -36,15 +36,15 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         return NULL; // Error: unexpected end of input
     }
 
-    stack_t* operand_stack = stackInit();
-    stack_t* operator_stack = stackInit();
-
     int* paren_depth = malloc(sizeof(int));
     if (paren_depth == NULL) {
         error_exit(99, "ERROR: Unable to allocate memory for paren_depth!\n");
         return NULL;
     }
     *paren_depth = 0;
+    stack_t* operand_stack = stackInit();
+    stack_t* operator_stack = stackInit();
+
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
         ASTNode* node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
         if (isOperand(*token)) {
@@ -82,19 +82,18 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     break;
                 case U:
                 default:
+                    freeAll(paren_depth, operand_stack, operator_stack);
                     return NULL;
             }
         }
         else {
+            freeAll(paren_depth, operand_stack, operator_stack);
             return NULL;
         }
         *token = get_token(buff); // Update token
     }
     ASTNode* root = reduceAll(operand_stack, operator_stack);
-    stackClear(operand_stack);
-    stackClear(operator_stack);
-    free(paren_depth);
-
+    freeAll(paren_depth, operand_stack, operator_stack);
     return root;
 }
 
@@ -217,4 +216,16 @@ bool isEnd(Token* token) {
 
 bool expressionEnd(bool end, int* paren_depth) {
     return end && (*paren_depth == 0);
+}
+
+void freeAll(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
+    if(operand_stack != NULL) {
+        stackClear(operand_stack);
+    }
+    if(operator_stack != NULL) {
+        stackClear(operator_stack);
+    }
+    if(paren_depth != NULL) {
+        free(paren_depth);    
+    }    
 }

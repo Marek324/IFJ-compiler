@@ -342,6 +342,7 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         ASTNode *idFound = checkToken(token, T_ID, NO_KW);
         insertLeft(node, idFound);
         *token = get_token(buffer);
+        ASTNode* asgnFound = NULL;
         // if we decide to include the datatype during variable declaration
         if((*token)->type == T_COLON) {
             // :
@@ -355,15 +356,17 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             TypeComplete(token, type_complete, buffer);
 
             // =
-            ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
+            asgnFound = checkToken(token, T_ASGN, NO_KW);
             insertLeft(type_complete, asgnFound);
             *token = get_token(buffer);
         }
-    
-    // =
-        ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
-        insertLeft(idFound, asgnFound);
-        *token = get_token(buffer);
+        else { 
+            // =
+            asgnFound = checkToken(token, T_ASGN, NO_KW);
+            insertLeft(idFound, asgnFound);
+            *token = get_token(buffer);
+        }
+
     // P_Expression
         ASTNode *expressionFound = ruleNode(P_EXPRESSION);
         insertLeft(asgnFound, expressionFound);
