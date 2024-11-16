@@ -57,6 +57,16 @@ typedef enum {
     KW_VAR,
     KW_VOID,
     KW_WHILE,
+    KW_ORELSE,
+    KW_UNREACHABLE,
+    KW_TRUE,
+    KW_FALSE,
+    KW_BOOL,
+    KW_AND,
+    KW_OR,
+    KW_FOR,
+    KW_BREAK,
+    KW_CONTINUE,
     NO_KW
 } KeyWordType;
 
