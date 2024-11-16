@@ -125,10 +125,10 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         // )
         ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
         insertLeft(lParenFound, rParenFound);
+        *token = get_token(buffer);
     }
     // P_TYPE_COMPLETE
     ASTNode *function_type = ruleNode(P_FUNCTION_TYPE);
-    *token = get_token(buffer);
     FunctionType(token, function_type, buffer);
     // P_BLOCK
     ASTNode *block = ruleNode(P_BLOCK);
