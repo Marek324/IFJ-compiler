@@ -183,7 +183,7 @@ void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(commaFound,paramList);
     ParamList(token, paramList, buffer);
     }
-    else *token = get_token(buffer);
+    
 }
 
 void TypeComplete(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {

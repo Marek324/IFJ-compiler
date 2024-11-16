@@ -2,16 +2,17 @@
 
 ASTNode *ASTRoot = NULL;
 
-
-
 // Function to create and initialize a new ASTNode
 ASTNode * nodeCreate(ASTNodeType type, Token *token) {
     if (token->type == T_ERROR) {
+        int exit_code = token->value.int_value;
+        free_token(token);
         freeAST(ASTRoot);
-        error_exit(token->value.int_value, "Malloc failed\n");
+        error_exit(exit_code, "Scanner failed\n");
     }
     ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
+        free_token(token);
         freeAST(ASTRoot);
         error_exit(99, "Malloc failed\n");
     }

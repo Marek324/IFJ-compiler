@@ -178,11 +178,7 @@ void printTreeRightToLeft(ASTNode *node) {
 
     // Print the token associated with this node
     printToken(node->token);
-
-    if(node->type == P_EXPRESSION) {
-        printTreeLeftToRight(node->right);
-    }
-
+    
     // Recur to the left child last
     printTreeRightToLeft(node->left);
 }
@@ -192,7 +188,7 @@ int main() {
     circ_buff_ptr buffer = circ_buff_init();
     Parse(buffer);
     printf("AST Tokens (Right to Left):\n");
-    // printTreeRightToLeft(ASTRoot);
+    printTreeRightToLeft(ASTRoot);
     circ_buff_free(buffer);
     freeAST(ASTRoot);
     return 0;
