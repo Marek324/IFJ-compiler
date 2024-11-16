@@ -178,11 +178,7 @@ void printTreeRightToLeft(ASTNode *node) {
 
     // Print the token associated with this node
     printToken(node->token);
-
-    if(node->type == P_EXPRESSION) {
-        printTreeLeftToRight(node->right);
-    }
-
+    
     // Recur to the left child last
     printTreeRightToLeft(node->left);
 }
