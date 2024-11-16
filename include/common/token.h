@@ -13,6 +13,7 @@ typedef enum {
     T_KW,
     T_ID,
     T_AT_IMPORT,
+    T_AT_AS,
     
     T_INT,
     T_FLOAT,

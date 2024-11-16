@@ -130,7 +130,7 @@ Token *get_token(circ_buff_ptr buffer)
                     case '"': PUT_C_BACK_CHANGE_STATE(S_STR)
                     case '@': 
                         dyn_str_append(str, c); // add @ to dyn_string
-                        state = S_AT_IMPORT;
+                        state = S_AT;
                         break;
                     default:
                         if (isalpha(c) || c == '_')  PUT_C_BACK_CHANGE_STATE(S_ID)
@@ -142,12 +142,15 @@ Token *get_token(circ_buff_ptr buffer)
                 }
                 break; // S_START
 
-            case S_AT_IMPORT:
+            case S_AT:
                 {   
                     READ_ID;
-                    int match = !strcmp(str->str, "@import");
-                    if (match) {
+                    int import = !strcmp(str->str, "@import");
+                    int as = !strcmp(str->str, "@as");
+                    if (import) {
                         RETURN_TOKEN(T_AT_IMPORT);
+                    } else if (as) {
+                        RETURN_TOKEN(T_AT_AS);
                     } else {
                         ERROR(1, "Invalid @ keyword"); // Invalid @ keyword
                     }

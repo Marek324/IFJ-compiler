@@ -26,7 +26,7 @@ enum State {
     S_ID,
 
     S_UNDERSCORE,
-    S_AT_IMPORT,
+    S_AT,
 
     //OPERATORS
     S_ASGN, 
