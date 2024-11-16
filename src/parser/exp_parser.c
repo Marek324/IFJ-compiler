@@ -93,6 +93,10 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         *token = get_token(buff); // Update token
     }
     ASTNode* root = reduceAll(operand_stack, operator_stack);
+    if(!stackIsEmpty(operand_stack) || !stackIsEmpty(operator_stack)) {
+        freeAll(paren_depth, operand_stack, operator_stack);
+        return NULL;
+    }
     freeAll(paren_depth, operand_stack, operator_stack);
     return root;
 }
