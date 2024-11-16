@@ -342,17 +342,27 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         ASTNode *idFound = checkToken(token, T_ID, NO_KW);
         insertLeft(node, idFound);
         *token = get_token(buffer);
-    // :
-        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
-        insertLeft(idFound, colonFound);
-        *token = get_token(buffer);
-    // P_TYPE_COMPLETE
-        ASTNode *type_complete = ruleNode(P_TYPE_COMPLETE);
-        insertLeft(colonFound, type_complete);
-        TypeComplete(token, type_complete, buffer);
+        // if we decide to include the datatype during variable declaration
+        if((*token)->type == T_COLON) {
+            // :
+            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+            insertLeft(idFound, colonFound);
+            *token = get_token(buffer);
+
+            // P_TYPE_COMPLETE
+            ASTNode *type_complete = ruleNode(P_TYPE_COMPLETE);
+            insertLeft(colonFound, type_complete);
+            TypeComplete(token, type_complete, buffer);
+
+            // =
+            ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
+            insertLeft(type_complete, asgnFound);
+            *token = get_token(buffer);
+        }
+    
     // =
         ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
-        insertLeft(type_complete, asgnFound);
+        insertLeft(idFound, asgnFound);
         *token = get_token(buffer);
     // P_Expression
         ASTNode *expressionFound = ruleNode(P_EXPRESSION);
