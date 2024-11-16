@@ -94,6 +94,7 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionFound = parseExpression(token, buffer);
     if (expressionFound != NULL) {
+        fprintf(stderr, "%d\n", (*token)->type);
         insertRight(ptr, expressionFound);
     }
 }

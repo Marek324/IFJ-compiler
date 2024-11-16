@@ -45,8 +45,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         return NULL;
     }
     *paren_depth = 0;
-
-    while (*token != NULL && !expressionEnd(isEnd(*token), stackIsEmpty(operator_stack))) {
+    while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
         ASTNode* node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
         if (isOperand(*token)) {
             stackPush(operand_stack, (long)node);
@@ -213,6 +212,6 @@ bool isEnd(Token* token) {
     }
 }
 
-bool expressionEnd(bool end, bool operator_stack_isEmpty) {
-    return end && operator_stack_isEmpty;
+bool expressionEnd(bool end, int* paren_depth) {
+    return end && (*paren_depth == 0);
 }

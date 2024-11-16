@@ -60,7 +60,7 @@ bool isOperand(Token* token);
 // checks if the token is a potential end for the expression
 bool isEnd(Token* token);
 // checks if the expression has ended
-bool expressionEnd(bool end, bool operator_stack_isEmpty);
+bool expressionEnd(bool end, int* paren_depth);
 
 
 #endif // EXP_PARSER_H
