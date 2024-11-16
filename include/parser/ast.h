@@ -96,7 +96,6 @@ typedef struct ASTNode {
 //ASTRoot globally initialized in case of internal or scanner errors 
 extern ASTNode *ASTRoot;
 
-void initializeAST();
 
 ASTNode *nodeCreate(ASTNodeType type, Token *token);
 

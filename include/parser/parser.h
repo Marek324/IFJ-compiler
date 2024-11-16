@@ -5,7 +5,7 @@
 
 void Parse(circ_buff_ptr buffer);
 
-void Prog(Token **token, circ_buff_ptr buffer);
+void Prog(Token **token,  ASTNode *ptr, circ_buff_ptr buffer);
 
 void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
