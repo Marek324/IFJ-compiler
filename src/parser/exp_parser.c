@@ -98,20 +98,23 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
 }
 
 void reduce(stack_t* operand_stack, stack_t* operator_stack) {
-    ASTNode* root = (ASTNode*)stackGetTop(operator_stack);
-    stackPop(operator_stack);
+    if(!stackIsEmpty(operator_stack)) {
+        ASTNode* root = (ASTNode*)stackGetTop(operator_stack);
+        stackPop(operator_stack);
+        if(!stackIsEmpty(operand_stack)) {
+            ASTNode* child = (ASTNode*)stackGetTop(operand_stack);
+            stackPop(operand_stack);
+            insertRight(root, child);
 
-    ASTNode* child = (ASTNode*)stackGetTop(operand_stack);
-    stackPop(operand_stack);
-    insertRight(root, child);
+            if(root->type != BANG) {
+                child = (ASTNode*)stackGetTop(operand_stack);
+                stackPop(operand_stack);
+                insertLeft(root, child);
+            }
 
-    if(root->type != BANG) {
-        child = (ASTNode*)stackGetTop(operand_stack);
-        stackPop(operand_stack);
-        insertLeft(root, child);
+            stackPush(operand_stack, (long)root);
+        }
     }
-
-    stackPush(operand_stack, (long)root);
 
 }
 

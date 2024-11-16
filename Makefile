@@ -1,6 +1,6 @@
 # Compiler and Flags
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c11 -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/common -I$(INCLUDE_DIR)/parser -I$(INCLUDE_DIR)/scanner/ -g
+CFLAGS = -Wall -Wextra -pedantic -std=c11 -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/common -I$(INCLUDE_DIR)/parser -I$(INCLUDE_DIR)/scanner/ -g -fsanitize=address
 LDFLAGS =
 
 # Directories
