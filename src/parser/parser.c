@@ -324,17 +324,17 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 
 void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-
+     // T_KW
     if ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR)) {
         ASTNode *node = NULL;
     // CONST
         if ((*token)->value.keyword == KW_CONST ) {
-            ASTNode *node = checkToken(token, T_KW, KW_CONST);
+            node = checkToken(token, T_KW, KW_CONST);
             insertRight(ptr, node);
         }
     // VAR
         else {
-            ASTNode *node = checkToken(token, T_KW, KW_VAR);
+            node = checkToken(token, T_KW, KW_VAR);
             insertRight(ptr, node);
         }
         *token = get_token(buffer);
