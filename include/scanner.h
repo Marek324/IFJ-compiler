@@ -8,9 +8,9 @@ Header file for the scanner.
 #define SCANNER_H
 
 #include "circ_buff.h"
-#include "common/token.h"
-#include "common/error.h"
-#include "scanner/circ_buff.h"
+#include "token.h"
+#include "error.h"
+#include "circ_buff.h"
 
 #include <stdbool.h>
 #include <stdio.h>

@@ -8,56 +8,79 @@ SRC_DIR = src
 INCLUDE_DIR = include
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
-BIN_DIR = $(BUILD_DIR)/bin
 
-# Source Files
-SCANNER_SRCS = $(SRC_DIR)/scanner/scanner.c $(SRC_DIR)/scanner/dyn_str.c $(SRC_DIR)/scanner/circ_buff.c
-COMMON_SRCS = $(SRC_DIR)/common/error.c $(SRC_DIR)/common/stack.c $(SRC_DIR)/common/main.c
-PARSER_SRCS = $(SRC_DIR)/parser/exp_parser.c $(SRC_DIR)/parser/ast.c $(SRC_DIR)/parser/parser.c
+# Source files
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+# Object files
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+TARGET = ifj24compiler
 
-SRCS = $(SCANNER_SRCS) $(COMMON_SRCS) $(PARSER_SRCS)
+.PHONY: all clean purge submit
 
-# Targets
-APP_SRCS = $(SRCS)
-TEST_SRCS = $(filter-out $(SRC_DIR)/common/main.c, $(SRCS))
+all: $(TARGET)
 
-APP_OBJS = $(APP_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-TEST_OBJS = $(TEST_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+clean:
+	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00
 
-APP_TARGET = $(BIN_DIR)/app
-TEST_TARGET = $(BIN_DIR)/test
+purge: clean
+	rm -f $(TARGET)
 
-OBJ_SUBDIRS = $(OBJ_DIR)/common $(OBJ_DIR)/scanner $(OBJ_DIR)/parser
+submit: purge
+	mkdir xhricma00
+	cp -r src/* include/* docs/rozdeleni docs/rozsireni docs/dokumentace.pdf xhricma00
+	cat submit_make > xhricma00/Makefile
+	zip -r xhricma00.zip xhricma00/*
 
-# Default Target
-all: app
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-# Application Target
-app: $(APP_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(APP_OBJS) -o $(APP_TARGET) $(LDFLAGS)
-
-run: app
-	$(APP_TARGET)
-
-# Test Target
-test: $(TEST_TARGET)
-	@echo "Running tests..."
-	$(TEST_TARGET)
-
-$(TEST_TARGET): $(TEST_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(TEST_OBJS) tests/test_utils/scanner_unit_tests.c -o $(TEST_TARGET) $(LDFLAGS)
-
-# Object File Compilation
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SUBDIRS)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Directory Creation
-$(OBJ_SUBDIRS) $(BIN_DIR):
+$(OBJ_DIR):
 	mkdir -p $@
 
-# Cleanup
-clean:
-	rm -rf $(BUILD_DIR)
+# # Targets
+# APP_SRCS = $(SRCS)
+# TEST_SRCS = $(filter-out $(SRC_DIR)/common/main.c, $(SRCS))
 
-# Phony Targets
-.PHONY: all app run test clean
+# APP_OBJS = $(APP_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+# TEST_OBJS = $(TEST_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+# APP_TARGET = $(BIN_DIR)/app
+# TEST_TARGET = $(BIN_DIR)/test
+
+# OBJ_SUBDIRS = $(OBJ_DIR)/common $(OBJ_DIR)/scanner $(OBJ_DIR)/parser
+
+# # Default Target
+# all: app
+
+# # Application Target
+# app: $(APP_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
+# 	$(CC) $(CFLAGS) $(APP_OBJS) -o $(APP_TARGET) $(LDFLAGS)
+
+# run: app
+# 	$(APP_TARGET)
+
+# # Test Target
+# test: $(TEST_TARGET)
+# 	@echo "Running tests..."
+# 	$(TEST_TARGET)
+
+# $(TEST_TARGET): $(TEST_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
+# 	$(CC) $(CFLAGS) $(TEST_OBJS) tests/test_utils/scanner_unit_tests.c -o $(TEST_TARGET) $(LDFLAGS)
+
+# # Object File Compilation
+# $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SUBDIRS)
+# 	$(CC) $(CFLAGS) -c $< -o $@
+
+# # Directory Creation
+# $(OBJ_SUBDIRS) $(BIN_DIR):
+# 	mkdir -p $@
+
+# Cleanup
+# clean:
+# 	rm -rf $(BUILD_DIR)
+
+# # Phony Targets
+# .PHONY: all app run test clean

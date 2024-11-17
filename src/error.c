@@ -8,7 +8,7 @@ Implementation of error messages.
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "common/error.h"
+#include "error.h"
 
 char *lex_error_messages[] = {
     "Memory allocation error",
