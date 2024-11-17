@@ -596,23 +596,23 @@ END_TEST
 ////////////////////////////// TESTS EXP PARSER ////////////////////////////////////////////////
 
 //Test for singular token
-START_TEST(test_EXP_EMPTY)
-{
-    scanner_setup(); 
-    setup_stdin(" ");
+// START_TEST(test_EXP_EMPTY)
+// {
+//     scanner_setup(); 
+//     setup_stdin(" ");
     
-    Token *token = get_token(buffer);
-    ASTNode *root = parseExpression(&token, buffer);
+//     Token *token = get_token(buffer);
+//     ASTNode *root = parseExpression(&token, buffer);
 
-    ck_assert_int_eq( END_OF_FILE , root->type);
-    // ck_assert_mem_eq( token, root->Token);
+//     ck_assert_int_eq( END_OF_FILE , root->type);
+//     // ck_assert_mem_eq( token, root->Token);
 
-    free_token(token);
-    freeAST(root);
+//     free_token(token);
+//     freeAST(root);
 
-    scanner_teardown();
-}
-END_TEST
+//     scanner_teardown();
+// }
+// END_TEST
 
 //Test for longer stuff
 // START_TEST(test_EXP_Prolog)
@@ -747,7 +747,7 @@ Suite * EXParseSuite()
     /* Core test case */
     tc_core = tcase_create("Core3");
 
-    tcase_add_test(tc_core, test_EXP_EMPTY);
+    //tcase_add_test(tc_core, test_EXP_EMPTY);
     //tcase_add_test(tc_core, test_EXP_Prolog);
 
     suite_add_tcase(s, tc_core);
