@@ -254,15 +254,15 @@ START_TEST(test_KwIdImport)
     //Test T_KW
     setup_stdin("if lmao @import");
     Token *token = get_token(buffer);
-    ck_assert_int_eq(0,token->type);
+    ck_assert_int_eq(T_KW,token->type);
     free_token(token);
     //Test T_ID
     token = get_token(buffer);
-    ck_assert_int_eq(1,token->type);
+    ck_assert_int_eq(T_ID,token->type);
     free_token(token);
     //Test T_AT_IMPORT
     token = get_token(buffer);
-    ck_assert_int_eq(2,token->type);
+    ck_assert_int_eq(T_AT_IMPORT,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -275,15 +275,15 @@ START_TEST(test_DataTypes)
     setup_stdin("10 10.0 \"aaa\"");
     //Test Int
     Token *token = get_token(buffer);
-    ck_assert_int_eq(3,token->type);
+    ck_assert_int_eq(T_INT,token->type);
     free_token(token);
     //Test Float
     token = get_token(buffer);
-    ck_assert_int_eq(4,token->type);
+    ck_assert_int_eq(T_FLOAT,token->type);
     free_token(token);
     //Test String
     token = get_token(buffer);
-    ck_assert_int_eq(5,token->type);
+    ck_assert_int_eq(T_STR,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -296,19 +296,19 @@ START_TEST(test_Operations1)
     setup_stdin("= == ! !=");
     //Test ASGN
     Token *token = get_token(buffer);
-    ck_assert_int_eq(6,token->type);
+    ck_assert_int_eq(T_ASGN,token->type);
     free_token(token);
     //Test EQ
     token = get_token(buffer);
-    ck_assert_int_eq(7,token->type);
+    ck_assert_int_eq(T_EQ,token->type);
     free_token(token);
     //Test BANG
     token = get_token(buffer);
-    ck_assert_int_eq(8,token->type);
+    ck_assert_int_eq(T_BANG,token->type);
     free_token(token);
     //Test NEQ
     token = get_token(buffer);
-    ck_assert_int_eq(9,token->type);
+    ck_assert_int_eq(T_NEQ,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -321,19 +321,19 @@ START_TEST(test_Operations2)
     setup_stdin("< <= > >=");
     //Test LESS
     Token *token = get_token(buffer);
-    ck_assert_int_eq(10,token->type);
+    ck_assert_int_eq(T_LESS,token->type);
     free_token(token);
     //Test LEQ
     token = get_token(buffer);
-    ck_assert_int_eq(11,token->type);
+    ck_assert_int_eq(T_LEQ,token->type);
     free_token(token);
     //Test MORE
     token = get_token(buffer);
-    ck_assert_int_eq(12,token->type);
+    ck_assert_int_eq(T_MORE,token->type);
     free_token(token);
     //Test MEQ
     token = get_token(buffer);
-    ck_assert_int_eq(13,token->type);
+    ck_assert_int_eq(T_MEQ,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -346,19 +346,19 @@ START_TEST(test_Operations3)
     setup_stdin("+ - * /");
     //Test PLUS
     Token *token = get_token(buffer);
-    ck_assert_int_eq(14,token->type);
+    ck_assert_int_eq(T_PLUS,token->type);
     free_token(token);
     //Test MINUS
     token = get_token(buffer);
-    ck_assert_int_eq(15,token->type);
+    ck_assert_int_eq(T_MINUS,token->type);
     free_token(token);
     //Test MUL
     token = get_token(buffer);
-    ck_assert_int_eq(16,token->type);
+    ck_assert_int_eq(T_MUL,token->type);
     free_token(token);
     //Test DIV
     token = get_token(buffer);
-    ck_assert_int_eq(17,token->type);
+    ck_assert_int_eq(T_DIV,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -371,27 +371,27 @@ START_TEST(test_Brackets)
     setup_stdin("( ) { } [ ]");
     //Test T_LPAREN
     Token *token = get_token(buffer);
-    ck_assert_int_eq(18,token->type);
+    ck_assert_int_eq(T_LPAREN,token->type);
     free_token(token);
     //Test T_RPAREN
     token = get_token(buffer);
-    ck_assert_int_eq(19,token->type);
+    ck_assert_int_eq(T_RPAREN,token->type);
     free_token(token);
     //Test T_LBRACE
     token = get_token(buffer);
-    ck_assert_int_eq(20,token->type);
+    ck_assert_int_eq(T_LBRACE,token->type);
     free_token(token);
     //Test T_RBRACE
     token = get_token(buffer);
-    ck_assert_int_eq(21,token->type);
+    ck_assert_int_eq(T_RBRACE,token->type);
     free_token(token);
     //Test T_LBRACKET
     token = get_token(buffer);
-    ck_assert_int_eq(22,token->type);
+    ck_assert_int_eq(T_LBRACKET,token->type);
     free_token(token);
     //Test T_RBRACKET
     token = get_token(buffer);
-    ck_assert_int_eq(23,token->type);
+    ck_assert_int_eq(T_RBRACKET,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -404,31 +404,31 @@ START_TEST(test_Punctuation)
     setup_stdin(", . ; : | ?");
     //Test T_COMMA
     Token *token = get_token(buffer);
-    ck_assert_int_eq(24,token->type);
+    ck_assert_int_eq(T_COMMA,token->type);
     free_token(token);
     //Test T_DOT
     token = get_token(buffer);
-    ck_assert_int_eq(25,token->type);
+    ck_assert_int_eq(T_DOT,token->type);
     free_token(token);
     //Test T_SEMICOL
     token = get_token(buffer);
-    ck_assert_int_eq(26,token->type);
+    ck_assert_int_eq(T_SEMICOL,token->type);
     free_token(token);
     //Test T_COLON
     token = get_token(buffer);
-    ck_assert_int_eq(27,token->type);
+    ck_assert_int_eq(T_COLON,token->type);
     free_token(token);
     //Test T_PIPE
     token = get_token(buffer);
-    ck_assert_int_eq(28,token->type);
+    ck_assert_int_eq(T_PIPE,token->type);
     free_token(token);
     //Test T_QMARK
     token = get_token(buffer);
-    ck_assert_int_eq(29,token->type);
+    ck_assert_int_eq(T_QMARK,token->type);
     free_token(token);
     //Test T_EOF
     token = get_token(buffer);
-    ck_assert_int_eq(31,token->type);
+    ck_assert_int_eq(T_EOF,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -441,7 +441,7 @@ START_TEST(test_Empty)
     setup_stdin("");
     //Test Empty-EOF
     Token *token = get_token(buffer);
-    ck_assert_int_eq(31,token->type);
+    ck_assert_int_eq(T_EOF,token->type);
     free_token(token);
 
     scanner_teardown();
@@ -454,27 +454,27 @@ START_TEST(test_Keywords1)
     setup_stdin("const if else fn i32 f64");
     //Test KW_CONST
     Token *token = get_token(buffer);
-    ck_assert_int_eq(0,token->value.keyword);
+    ck_assert_int_eq(KW_CONST,token->value.keyword);
     free_token(token);
     //Test KW_IF
     token = get_token(buffer);
-    ck_assert_int_eq(1,token->value.keyword);
+    ck_assert_int_eq(KW_IF,token->value.keyword);
     free_token(token);
     //Test KW_ELSE
     token = get_token(buffer);
-    ck_assert_int_eq(2,token->value.keyword);
+    ck_assert_int_eq(KW_ELSE,token->value.keyword);
     free_token(token);
     //Test KW_FN
     token = get_token(buffer);
-    ck_assert_int_eq(3,token->value.keyword);
+    ck_assert_int_eq(KW_FN,token->value.keyword);
     free_token(token);
     //Test KW_I32
     token = get_token(buffer);
-    ck_assert_int_eq(4,token->value.keyword);
+    ck_assert_int_eq(KW_I32,token->value.keyword);
     free_token(token);
     //Test KW_F64
     token = get_token(buffer);
-    ck_assert_int_eq(5,token->value.keyword);
+    ck_assert_int_eq(KW_F64,token->value.keyword);
     free_token(token);
 
     scanner_teardown();
@@ -487,27 +487,94 @@ START_TEST(test_Keywords2)
     setup_stdin("pub return u8 var void while");
     //Test KW_PUB
     Token *token = get_token(buffer);
-    ck_assert_int_eq(7,token->value.keyword);
+    ck_assert_int_eq(KW_PUB,token->value.keyword);
     free_token(token);
     //Test KW_RETURN
     token = get_token(buffer);
-    ck_assert_int_eq(8,token->value.keyword);
+    ck_assert_int_eq(KW_RETURN,token->value.keyword);
     free_token(token);
     //Test KW_U8
     token = get_token(buffer);
-    ck_assert_int_eq(9,token->value.keyword);
+    ck_assert_int_eq(KW_U8,token->value.keyword);
     free_token(token);
     //Test KW_VAR
     token = get_token(buffer);
-    ck_assert_int_eq(10,token->value.keyword);
+    ck_assert_int_eq(KW_VAR,token->value.keyword);
     free_token(token);
     //Test KW_VOID
     token = get_token(buffer);
-    ck_assert_int_eq(11,token->value.keyword);
+    ck_assert_int_eq(KW_VOID,token->value.keyword);
     free_token(token);
     //Test KW_WHILE
     token = get_token(buffer);
-    ck_assert_int_eq(12,token->value.keyword);
+    ck_assert_int_eq(KW_WHILE,token->value.keyword);
+    free_token(token);
+
+    scanner_teardown();
+}
+END_TEST
+
+START_TEST(test_Keywords3)
+{
+    scanner_setup();
+    setup_stdin("for orelse true false bool");
+    //Test KW_FOR
+    Token *token = get_token(buffer);
+    ck_assert_int_eq(KW_FOR,token->value.keyword);
+    free_token(token);
+    //Test KW_ORELSE
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_ORELSE,token->value.keyword);
+    free_token(token);
+    //Test KW_TRUE
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_TRUE,token->value.keyword);
+    free_token(token);
+    //Test KW_FALSE
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_FALSE,token->value.keyword);
+    free_token(token);
+    //Test KW_BOOL
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_BOOL,token->value.keyword);
+    free_token(token);
+
+    scanner_teardown();
+}
+END_TEST
+
+START_TEST(test_Keywords4)
+{
+    scanner_setup();
+    setup_stdin("and or break continue");
+    //Test KW_AND
+    Token *token = get_token(buffer);
+    ck_assert_int_eq(KW_AND,token->value.keyword);
+    free_token(token);
+    //Test KW_OR
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_OR,token->value.keyword);
+    free_token(token);
+    //Test KW_BREAK
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_BREAK,token->value.keyword);
+    free_token(token);
+    //Test KW_CONTINUE
+    token = get_token(buffer);
+    ck_assert_int_eq(KW_CONTINUE,token->value.keyword);
+    free_token(token);
+
+    scanner_teardown();
+}
+END_TEST
+
+START_TEST(test_UNREACHABLE)
+{
+    scanner_setup();
+    setup_stdin("unreachable");
+    //Test KW_UNREACHABLE
+    Token *token = get_token(buffer);
+    ck_assert_int_eq(KW_UNREACHABLE,token->value.keyword);
     free_token(token);
 
     scanner_teardown();
@@ -520,7 +587,7 @@ START_TEST(test_NULL)
     setup_stdin("null");
     //Test KW_NULL
     Token *token = get_token(buffer);
-    ck_assert_int_eq(6,token->value.keyword);
+    ck_assert_int_eq(KW_NULL,token->value.keyword);
     free_token(token);
 
     scanner_teardown();
@@ -659,7 +726,10 @@ char* suiteToRun = "all";
     tcase_add_test(tc_core, test_Empty);
     tcase_add_test(tc_core, test_Keywords1);
     tcase_add_test(tc_core, test_Keywords2);
+    tcase_add_test(tc_core, test_Keywords3);
+    tcase_add_test(tc_core, test_Keywords4);
     tcase_add_test(tc_core, test_NULL);
+    tcase_add_test(tc_core, test_UNREACHABLE);
 
 
     suite_add_tcase(s, tc_core);
