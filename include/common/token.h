@@ -6,6 +6,7 @@ Header file for tokens.
 
 #ifndef TOKEN_H
 #define TOKEN_H
+#define TOKEN_H
 
 #include "scanner/dyn_str.h"
 
@@ -39,9 +40,10 @@ typedef enum {
     T_COLON,
     T_PIPE,
     T_QMARK,
+ 
+    T_EOF,
+    T_ERROR
 
-    T_ERROR,
-    T_EOF
 } TokenType;
 
 typedef enum {
@@ -51,12 +53,14 @@ typedef enum {
     KW_FN,
     KW_I32,
     KW_F64,
+    KW_BOOL,
     KW_NULL,
     KW_PUB,
     KW_RETURN,
     KW_U8,
     KW_VAR,
     KW_VOID,
+    KW_FOR,
     KW_WHILE,
     KW_ORELSE,
     KW_UNREACHABLE,

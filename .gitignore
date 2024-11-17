@@ -6,3 +6,8 @@ tests/output/
 build/
 *.png
 debug_options
+test/hello.out:Zone.Identifier
+test/hello.in:Zone.Identifier
+test/ic24int
+test_test_test/ic24int
+tests/test.sh

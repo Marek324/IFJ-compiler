@@ -1,71 +1,63 @@
+# Compiler and Flags
 CC = gcc
-CFLAGS = -std=c11 -Wall -Wextra -pedantic -Iinclude
-DEBUGFLAGS= -std=c11 -Wall -Wextra -pedantic -g -fsanitize=address
-TARGET = main
-PHONY = all test graph clean zip debug_scanner
+CFLAGS = -Wall -Wextra -pedantic -std=c11 -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/common -I$(INCLUDE_DIR)/parser -I$(INCLUDE_DIR)/scanner/ -g -fsanitize=address
+LDFLAGS =
 
-SRC = src
-OBJ = obj
-SRCS = $(wildcard $(SRC)/*.c)
-OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
-BIN = bin
-INC = include
+# Directories
+SRC_DIR = src
+INCLUDE_DIR = include
+BUILD_DIR = build
+OBJ_DIR = $(BUILD_DIR)/obj
+BIN_DIR = $(BUILD_DIR)/bin
 
-TEST = test
-TESTS = $(wildcard $(TEST)/*.c)
-TESTBINS = $(patsubst $(TEST)/%.c, $(TEST)/bin/%, $(TESTS))
-all: $(TARGET)
+# Source Files
+SCANNER_SRCS = $(SRC_DIR)/scanner/scanner.c $(SRC_DIR)/scanner/dyn_str.c $(SRC_DIR)/scanner/circ_buff.c
+COMMON_SRCS = $(SRC_DIR)/common/error.c $(SRC_DIR)/common/stack.c $(SRC_DIR)/common/main.c
+PARSER_SRCS = $(SRC_DIR)/parser/exp_parser.c $(SRC_DIR)/parser/ast.c $(SRC_DIR)/parser/parser.c
 
-%.o: %.c
+SRCS = $(SCANNER_SRCS) $(COMMON_SRCS) $(PARSER_SRCS)
+
+# Targets
+APP_SRCS = $(SRCS)
+TEST_SRCS = $(filter-out $(SRC_DIR)/common/main.c, $(SRCS))
+
+APP_OBJS = $(APP_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+TEST_OBJS = $(TEST_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+APP_TARGET = $(BIN_DIR)/app
+TEST_TARGET = $(BIN_DIR)/test
+
+OBJ_SUBDIRS = $(OBJ_DIR)/common $(OBJ_DIR)/scanner $(OBJ_DIR)/parser
+
+# Default Target
+all: app
+
+# Application Target
+app: $(APP_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
+	$(CC) $(CFLAGS) $(APP_OBJS) -o $(APP_TARGET) $(LDFLAGS)
+
+run: app
+	$(APP_TARGET)
+
+# Test Target
+test: $(TEST_TARGET)
+	@echo "Running tests..."
+	$(TEST_TARGET)
+
+$(TEST_TARGET): $(TEST_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
+	$(CC) $(CFLAGS) $(TEST_OBJS) tests/test_utils/scanner_unit_tests.c -o $(TEST_TARGET) $(LDFLAGS)
+
+# Object File Compilation
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SUBDIRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+# Directory Creation
+$(OBJ_SUBDIRS) $(BIN_DIR):
+	mkdir -p $@
 
-obj/error.o: src/error.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/dyn_str.o: src/dyn_str.c 
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/circ_buff.o: src/circ_buff.c 
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/scanner.o: src/scanner.c obj/dyn_str.o
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/codegen.o: src/codegen.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/error-debug.o: src/error.c
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-obj/dyn_str-debug.o: src/dyn_str.c 
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-obj/circ_buff-debug.o: src/circ_buff.c 
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-obj/scanner-debug.o: src/scanner.c 
-	$(CC) $(DEBUGFLAGS) -c $< -o $@
-
-bin/test_scanner: obj/scanner-debug.o obj/dyn_str-debug.o obj/circ_buff-debug.o obj/error-debug.o tests/test_utils/scanner_unit_tests.c
-	$(CC) $(DEBUGFLAGS) obj/scanner-debug.o obj/dyn_str-debug.o obj/circ_buff-debug.o obj/error-debug.o -o bin/test_scanner tests/test_utils/scanner_unit_tests.c
-
-test: bin/test_scanner
-	./tests/test.sh
-
-codegen: obj/codegen.o
-	$(CC) $(CFLAGS) $^ -o ./bin/codegen
-	@./bin/codegen > test_test_test/test.out
-	@test_test_test/ic24int test_test_test/test.out < test_test_test/test.in
-
-graph: FSMgraph.dot
-	dot -Tpng FSMgraph.dot -o FSMgraph.png
-
+# Cleanup
 clean:
-	rm -rf $(OBJ)/* $(BIN)/* $(TEST)/bin/*
+	rm -rf $(BUILD_DIR)
 
-zip:
-	zip xhricma00.zip *.c *.h Makefile rozdeleni
-	
+# Phony Targets
+.PHONY: all app run test clean
