@@ -4,7 +4,7 @@ author: Marek Hric
 Implementation of scanner.
 */
 
-#include "scanner/scanner.h"
+#include "scanner.h"
 
 // Macros
 #define INPUT stdin
