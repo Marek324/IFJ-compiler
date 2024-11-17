@@ -11,19 +11,26 @@ OBJ_DIR = $(BUILD_DIR)/obj
 
 # Source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS := $(filter-out $(SRC_DIR)/main.c, $(SRCS))
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+MAIN = $(SRC_DIR)/main.c
 TARGET = ifj24compiler
 
 .PHONY: all clean purge submit
 
 all: $(TARGET)
 
+test: tests/TestsCheck.c $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $< -o $@ -lcheck -lsubunit -lm
+	./test
+	@rm -f test
+
 clean:
 	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00
 
 purge: clean
-	rm -f $(TARGET)
+	rm -f $(TARGET) test
 
 submit: purge
 	mkdir xhricma00
@@ -31,56 +38,11 @@ submit: purge
 	cat submit_make > xhricma00/Makefile
 	zip -r xhricma00.zip xhricma00/*
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
+$(TARGET): $(OBJS) $(MAIN)
+	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o $(TARGET) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR):
 	mkdir -p $@
-
-# # Targets
-# APP_SRCS = $(SRCS)
-# TEST_SRCS = $(filter-out $(SRC_DIR)/common/main.c, $(SRCS))
-
-# APP_OBJS = $(APP_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-# TEST_OBJS = $(TEST_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-# APP_TARGET = $(BIN_DIR)/app
-# TEST_TARGET = $(BIN_DIR)/test
-
-# OBJ_SUBDIRS = $(OBJ_DIR)/common $(OBJ_DIR)/scanner $(OBJ_DIR)/parser
-
-# # Default Target
-# all: app
-
-# # Application Target
-# app: $(APP_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
-# 	$(CC) $(CFLAGS) $(APP_OBJS) -o $(APP_TARGET) $(LDFLAGS)
-
-# run: app
-# 	$(APP_TARGET)
-
-# # Test Target
-# test: $(TEST_TARGET)
-# 	@echo "Running tests..."
-# 	$(TEST_TARGET)
-
-# $(TEST_TARGET): $(TEST_OBJS) | $(OBJ_SUBDIRS) $(BIN_DIR)
-# 	$(CC) $(CFLAGS) $(TEST_OBJS) tests/test_utils/scanner_unit_tests.c -o $(TEST_TARGET) $(LDFLAGS)
-
-# # Object File Compilation
-# $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SUBDIRS)
-# 	$(CC) $(CFLAGS) -c $< -o $@
-
-# # Directory Creation
-# $(OBJ_SUBDIRS) $(BIN_DIR):
-# 	mkdir -p $@
-
-# Cleanup
-# clean:
-# 	rm -rf $(BUILD_DIR)
-
-# # Phony Targets
-# .PHONY: all app run test clean
