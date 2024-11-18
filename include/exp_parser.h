@@ -46,11 +46,11 @@ ASTNode* parseExpression(Token** token, circ_buff_ptr buffer);
 
 // pops the top operator and the needed amount of operands to link them together, creating a tree
 // pushes the newly created tree (root of tree) onto the operand stack 
-void reduce(stack_t* operand_stack, stack_t* operator_stack);
+void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack);
 // pops all operators and operands within the parenthesis
-void reduceParen(stack_t* operand_stack, stack_t* operator_stack);
+void reduceParen(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack);
 // reduces all remaining operands and operators once the expression ends 
-ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack);
+ASTNode* reduceAll(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack);
 // returns the precedence table index for the token
 PREC_TABLE_INDEX getIndex(ASTNode* node);
 // checks if the token is a operator

@@ -4,8 +4,6 @@ author: Adam Vesely
 Implementation of the expression parser.
 */
 // TODO ERROR HANDLING AND EXTENSIONS, IMPLICIT CONVERSIONS
-// Store the current token to compare with the next token (for function calls);
-// Function calls: create ID node, then when lParen is found create expression list
 #include <stdbool.h>
 
 #include "exp_parser.h"
@@ -56,7 +54,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 freeAST(node);
                 ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
                 if(id_node == NULL || id_node->type != ID) {
-                    error_exit(99, "ERROR: Unexpected LPAREN in expression!\n");
+                    freeAll(paren_depth, operand_stack, operator_stack);
+                    error_exit(2, "ERROR: Unexpected LPAREN in expression!\n");
                     return NULL;
                 }
                 *token = get_token(buff);
@@ -67,7 +66,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 *token = get_token(buff);
                 node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
                 if(node->type != ID) {
-                    error_exit(99, "ERROR: Unexpected DOT in expression!\n");
+                    freeAll(paren_depth, operand_stack, operator_stack);
+                    error_exit(2, "ERROR: Unexpected DOT in expression!\n");
                     return NULL;
                 }
                 ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
@@ -76,7 +76,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 continue;
             }
             if((*token)->type != T_RPAREN) {
-                error_exit(99, "ERROR: Unexpected token in expression!\n");
+                freeAll(paren_depth, operand_stack, operator_stack);
+                error_exit(2, "ERROR: Unexpected token in expression!\n");
                 return NULL;
             }
             // RPAREN
@@ -96,7 +97,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             if ((*token)->type == T_RPAREN) {
                 if (*paren_depth != 0) {
                     freeAST(node);
-                    reduceParen(operand_stack, operator_stack);
+                    reduceParen(paren_depth, operand_stack, operator_stack);
                     (*paren_depth)--;
                 }
                 else {
@@ -117,7 +118,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     break;
                 case H:
                 case E:
-                    reduce(operand_stack, operator_stack);
+                    reduce(paren_depth, operand_stack, operator_stack);
                     stackPush(operator_stack, (long)node);
                     break;
                 case U:
@@ -127,12 +128,12 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             }
         }
         else {
-            freeAll(paren_depth, operand_stack, operator_stack);
+            freeAll(paren_depth,operand_stack, operator_stack);
             return NULL;
         }
         *token = get_token(buff); // Update token
     }
-    ASTNode* root = reduceAll(operand_stack, operator_stack);
+    ASTNode* root = reduceAll(paren_depth, operand_stack, operator_stack);
     if(!stackIsEmpty(operand_stack) || !stackIsEmpty(operator_stack)) {
         freeAll(paren_depth, operand_stack, operator_stack);
         return NULL;
@@ -141,7 +142,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     return root;
 }
 
-void reduce(stack_t* operand_stack, stack_t* operator_stack) {
+void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
     if(!stackIsEmpty(operator_stack)) {
         ASTNode* root = (ASTNode*)stackGetTop(operator_stack);
         stackPop(operator_stack);
@@ -158,28 +159,33 @@ void reduce(stack_t* operand_stack, stack_t* operator_stack) {
 
             stackPush(operand_stack, (long)root);
         }
+        else {
+            freeAll(paren_depth, operand_stack, operator_stack);
+            error_exit(2, "ERROR: Not enough operands!\n");
+        }
     }
 }
 
-void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
+void reduceParen(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
     if(!stackIsEmpty(operator_stack)) {
         ASTNode* curr = (ASTNode*)stackGetTop(operator_stack);
         while(curr->type != LPAREN && !stackIsEmpty(operator_stack)) {
-            reduce(operand_stack, operator_stack);
+            reduce(paren_depth, operand_stack, operator_stack);
             curr = (ASTNode*)stackGetTop(operator_stack);
         }
+        // LPAREN
         freeAST(curr);
         stackPop(operator_stack);
     }
 }
 
-ASTNode* reduceAll(stack_t* operand_stack, stack_t* operator_stack) {
+ASTNode* reduceAll(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
     // while (), a = ()...;
     if(stackIsEmpty(operator_stack) && stackIsEmpty(operand_stack)) {
         return NULL;
     }
     while(!stackIsEmpty(operator_stack)) {
-        reduce(operand_stack, operator_stack);
+        reduce(paren_depth, operand_stack, operator_stack);
     }
     ASTNode* root = (ASTNode*)stackGetTop(operand_stack);
     stackPop(operand_stack);
