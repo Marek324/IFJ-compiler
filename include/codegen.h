@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "ast.h"
-#include "dyn_str.h"
+#include "stack.h"
 
 #define PROLOG do {printf(".IFJcode24");} while(0)
 
@@ -132,6 +132,6 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
-int codegen(ASTNode* root);
+void codegen();
 
 #endif

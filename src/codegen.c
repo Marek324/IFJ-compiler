@@ -1,29 +1,21 @@
 #include "codegen.h"
 
+stack_t* stack;
 
-int codegen(ASTNode* root)
+void codegen()
 {
-    dyn_str *functions = dyn_str_init();
+    stack = stackInit();
+    ASTNode *node = ASTRoot->right->left; // root->right is prolog, root->right->left is first function
 
-    if (functions == NULL) {
-        fprintf(stderr, "Error: Memory allocation failed\n");
-        return 99;
-    }
-
-    if (root == NULL) {
-        fprintf(stderr, "Error: Root is NULL\n");
-        return 99;
-    }
-
-    root = root->right->left; // root->right is prolog, root->right->left is first function
+    ASTNode* main = NULL;
 
     PROLOG;
 
-    
+        
 
     EPILOG;
 
-    return 0;
+    stackClear(stack);
 }
 
 // void traverse_tree()
