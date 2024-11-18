@@ -40,7 +40,7 @@ void Parse(circ_buff_ptr buffer) {
 
 void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_PROLOG
-    ASTNode *prolog = ruleNode(P_PROLOG); 
+    ASTNode *prolog = ruleNode(P_PROLOG); // save string and id
     insertRight(ptr, prolog);
     *token = get_token(buffer);
     Prolog(token, prolog, buffer);
@@ -49,6 +49,7 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(prolog, function_def);
     FunctionDef(token, function_def, buffer);
     // P_END
+    // fun()
     ASTNode *end = ruleNode(P_END); 
     insertLeft(function_def, end);
     End(token, end);
@@ -57,40 +58,40 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // CONST
     ASTNode *constFound = checkToken(token, T_KW, KW_CONST);
-    insertRight(ptr, constFound);
+    freeAST(constFound);
     // ID 
     *token = get_token(buffer);
     ASTNode *idFound = checkToken(token, T_ID, NO_KW);
-    insertLeft(constFound, idFound);
+    insertRight(ptr, idFound);
     // =
     *token = get_token(buffer);
     ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
-    insertLeft(idFound, asgnFound);
+    freeAST(asgnFound);
     // @import
     *token = get_token(buffer);
     ASTNode *importFound = checkToken(token, T_AT_IMPORT, NO_KW);
-    insertLeft(asgnFound, importFound);
+    freeAST(importFound);
     // (
     *token = get_token(buffer);
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
-    insertLeft(importFound, lParenFound);
+    freeAST(lParenFound);
     // P_EXPRESSION
     ASTNode *expression = ruleNode(P_EXPRESSION);
-    insertLeft(lParenFound, expression);
+    insertLeft(idFound, expression);
     *token = get_token(buffer);
     Expression(token, expression, buffer);
     if (expression->right == NULL) {
         free_token(*token);
         freeAST(ASTRoot); 
-        error_exit(2, "SYNTAX ERROR!\n"); 
+        error_exit(2, "SYNTAX ERROR: Prolog (Expression)\n"); 
     }
     // )
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
-    insertLeft(expression, rParenFound);
+    freeAST(rParenFound);
     // ;
     *token = get_token(buffer);
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-    insertLeft(rParenFound, semiColonFound);
+    freeAST(semiColonFound);
     *token = get_token(buffer);
 }
 
