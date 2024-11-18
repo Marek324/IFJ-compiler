@@ -2,6 +2,8 @@
 #define PARSER__H_
 
 #include "ast.h"
+#include "scanner.h"
+#include "exp_parser.h"
 
 void Parse(circ_buff_ptr buffer);
 
