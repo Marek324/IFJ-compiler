@@ -214,15 +214,15 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // [
     if ((*token)->type == T_LBRACKET) {
         ASTNode *lBracketFound = checkToken(token, T_LBRACKET, NO_KW);
-        insertRight(ptr, lBracketFound);
+        freeAST(lBracketFound);
         *token = get_token(buffer);
     // ]
         ASTNode *rBracketFound = checkToken(token, T_RBRACKET, NO_KW);
-        insertLeft(lBracketFound, rBracketFound);
+        freeAST(rBracketFound);
         *token = get_token(buffer);
     // u8
         ASTNode *u8Found = checkToken(token, T_KW, KW_U8);
-        insertLeft(rBracketFound, u8Found);
+        insertRight(ptr, u8Found);
     }
     else {
         if ((*token)->type == T_KW && (*token)->value.keyword != KW_VOID) {
@@ -270,15 +270,15 @@ void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // {
     ASTNode *lBraceFound = checkToken(token, T_LBRACE, NO_KW);
-    insertRight(ptr, lBraceFound);
+    freeAST(lBraceFound);
     *token = get_token(buffer);
     //P_STATEMENT
     ASTNode *statement = ruleNode(P_STATEMENT);
-    insertLeft(lBraceFound, statement);
+    insertRight(ptr, statement);
     Statement(token, statement, buffer);
     // }
     ASTNode *rBraceFound = checkToken(token, T_RBRACE, NO_KW);
-    insertLeft(statement, rBraceFound);
+    freeAST(rBraceFound);
     *token = get_token(buffer);
 }
 
@@ -350,12 +350,12 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if((*token)->type == T_COLON) {
             // :
             ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
-            insertLeft(idFound, colonFound);
+            freeAST(colonFound);
             *token = get_token(buffer);
 
             // P_TYPE_COMPLETE
             ASTNode *type_complete = ruleNode(P_TYPE_COMPLETE);
-            insertLeft(colonFound, type_complete);
+            insertLeft(idFound, type_complete);
             TypeComplete(token, type_complete, buffer);
 
             // =
@@ -381,7 +381,7 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
     // ;
         ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        insertLeft(expressionFound, semiColonFound);
+        freeAST(semiColonFound);
         *token = get_token(buffer);
     }
     else {
