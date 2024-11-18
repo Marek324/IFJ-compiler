@@ -73,8 +73,8 @@ typedef enum {
 } KeyWordType;
 
 typedef union {
-    int int_value;
-    float float_value;
+    long long int int_value;
+    double float_value;
     char *string_value;
     KeyWordType keyword;
 } TokenValue;
