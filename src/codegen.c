@@ -4,7 +4,7 @@
 
 int codegen(ASTNode* root)
 {
-    dyn_str *functions = ds_create();
+    dyn_str *functions = dyn_str_init();
 
     PROLOG;
 
