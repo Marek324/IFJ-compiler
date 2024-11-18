@@ -19,6 +19,7 @@ typedef struct dyn_str{
 
 dyn_str* dyn_str_init();
 dyn_str* dyn_str_append(dyn_str* ds, char c);
+dyn_str* dyn_str_append_str(dyn_str* ds, char* str);
 void dyn_str_free(dyn_str* ds);
 
 #endif  // DYN_STR_H

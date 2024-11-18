@@ -50,6 +50,21 @@ dyn_str* dyn_str_append(dyn_str* ds, char c) {
     return ds;
 }
 
+dyn_str* dyn_str_append_str(dyn_str* ds, char* str) {
+    if (str == NULL) {
+        return ds;
+    }
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        ds = dyn_str_append(ds, str[i]);
+        if (ds == NULL) {
+            return NULL;
+        }
+    }
+
+    return ds;
+}
+
 void dyn_str_free(dyn_str* ds) {
     if (ds != NULL) {
         free(ds->str);
