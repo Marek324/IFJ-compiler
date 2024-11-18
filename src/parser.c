@@ -286,7 +286,7 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR)) {
         statementRule = ruleNode(P_VAR_DECLARATION);
         insertRight(ptr, statementRule);
-        VarDeclaration(token, statementRule, buffer);
+        VarDeclaration(token, statementRule, buffer, true);
     } 
     // ID
     else if ((*token)->type == T_ID) {
@@ -296,7 +296,7 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
         statementRule = ruleNode(P_ID_FOUND);
         insertLeft(idFound, statementRule);
-        IdFound(token, statementRule, buffer);
+        IdFound(token, statementRule, buffer, true);
     }
     // P_IF_STATEMENT
     else if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF ) {
@@ -324,7 +324,7 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
 }
 
-void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
      // T_KW
     if ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR)) {
         ASTNode *node = NULL;
@@ -378,18 +378,20 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             error_exit(2, "SYNTAX ERROR!\n"); 
         }
     // ;
-        ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        freeAST(semiColonFound);
-        *token = get_token(buffer);
+        if (semic) { 
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            freeAST(semiColonFound);
+            *token = get_token(buffer);
+        }
     }
     else {
         free_token(*token);
         freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR!\n"); 
+        error_exit(2, "SYNTAX ERROR!\n");
     }
 }
  
-void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
     if ((*token)->type == T_ASGN) {
     // =
         ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
@@ -405,9 +407,11 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             error_exit(2, "SYNTAX ERROR!\n"); 
         }
     // ;
-        ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        freeAST(semiColonFound);
-        *token = get_token(buffer);
+        if (semic) { 
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            freeAST(semiColonFound);
+            *token = get_token(buffer);
+        }
     }
     else if ((*token)->type == T_LPAREN) {
     // (
@@ -423,9 +427,11 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(expressionListRule, rParenFound);
         *token = get_token(buffer);
     // ;
-        ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        freeAST(semiColonFound);
-        *token = get_token(buffer);
+        if (semic) { 
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            freeAST(semiColonFound);
+            *token = get_token(buffer);
+        }
     } 
     else if ((*token)->type == T_DOT) {
     // . 
@@ -449,9 +455,11 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(expressionListRule, rParenFound);
         *token = get_token(buffer);
     // ;
-        ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        freeAST(semiColonFound);
-        *token = get_token(buffer);
+        if (semic) { 
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            freeAST(semiColonFound);
+            *token = get_token(buffer);
+        }
     }
 }
 
@@ -501,7 +509,7 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if ((*token)->type == T_PIPE) {
-    //P_OPTION AL_VALUE
+    //P_OPTIONAL_VALUE
         ASTNode *OptionalValueRule = ruleNode(P_OPTIONAL_VALUE);
         insertRight(ptr, OptionalValueRule);
         OptionalValue(token, OptionalValueRule, buffer);
@@ -510,19 +518,89 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(OptionalValueRule, BlockRule);
         Block(token, BlockRule, buffer);
     //P_ELSE_STATEMENT
-        ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
-        insertLeft(BlockRule, ElseRule);
-        ElseStatement(token, ElseRule, buffer);
+        if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+            ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+            insertLeft(BlockRule, ElseRule);
+            ElseStatement(token, ElseRule, buffer);
+        }
     }
+
     else if ((*token)->type == T_LBRACE) {
     //P_BLOCK
         ASTNode *BlockRule = ruleNode(P_BLOCK);
-        insertLeft(ptr, BlockRule);
+        insertRight(ptr, BlockRule);
         Block(token, BlockRule, buffer);
     //P_ELSE_STATEMENT
-        ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
-        insertLeft(BlockRule, ElseRule);
-        ElseStatement(token, ElseRule, buffer);
+        if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+            ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+            insertLeft(BlockRule, ElseRule);
+            ElseStatement(token, ElseRule, buffer);
+        }
+    } 
+    // P_SINGLE_STATEMENT
+    else if((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
+        ASTNode *singleStatementRule = ruleNode(P_SINGLE_STATEMENT);
+        insertRight(ptr, singleStatementRule);
+        SingleStatement(token, singleStatementRule, buffer);
+    //ELSE
+        ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
+        freeAST(elseFound);
+        *token = get_token(buffer);
+    //P_SINGLE_STATEMENT
+        ASTNode *singleStatementRule2 = ruleNode(P_SINGLE_STATEMENT);
+        insertLeft(singleStatementRule, singleStatementRule2);
+        SingleStatement(token, singleStatementRule2, buffer);
+    // ;
+        ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+        freeAST(semiColonFound);
+        *token = get_token(buffer);
+    } else {
+        free_token(*token);
+        freeAST(ASTRoot);
+        error_exit(2, "SYNTAX ERROR!\n");
+    }
+}
+void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    ASTNode *statementRule = NULL;
+    // P_VAR_DECLARATION
+    if ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR)) {
+        statementRule = ruleNode(P_VAR_DECLARATION);
+        insertRight(ptr, statementRule);
+        VarDeclaration(token, statementRule, buffer, false);
+    } 
+    // ID
+    else if ((*token)->type == T_ID) {
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        insertRight(ptr, idFound);
+    // P_ID_FOUND
+        *token = get_token(buffer);
+        statementRule = ruleNode(P_ID_FOUND);
+        insertLeft(idFound, statementRule);
+        IdFound(token, statementRule, buffer, false);
+    }
+    // P_IF_STATEMENT
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF ) {
+        statementRule = ruleNode(P_IF_STATEMENT);
+        insertRight(ptr, statementRule);
+        IfStatement(token, statementRule, buffer);
+    }
+    // P_WHILE_STATEMENT
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_WHILE) {
+        statementRule = ruleNode(P_WHILE_LOOP);
+        insertRight(ptr, statementRule);
+        While(token, statementRule, buffer);
+    } 
+    //P_RETURN_STATEMENT
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_RETURN) {
+        statementRule = ruleNode(P_RETURN_STATEMENT);
+        insertRight(ptr, statementRule);
+        Return(token, statementRule, buffer);
+    }
+    // More statements
+    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
+        ASTNode *nextStatement = ruleNode(P_STATEMENT);
+        insertLeft(statementRule, nextStatement);
+        Statement(token, nextStatement, buffer);
     }
 }
 
@@ -540,16 +618,25 @@ void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(rPipeFound);
     *token = get_token(buffer);
 }
-
+ 
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // else 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
     freeAST(elseFound);
     *token = get_token(buffer);
+    //IF
+    if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF) {
+        ASTNode *ifFound = ruleNode(P_IF_STATEMENT);
+        insertRight(ptr, ifFound);
+        IfStatement(token, ifFound, buffer);
+    }
     // P_BLOCK
-    ASTNode *BlockRule = ruleNode(P_BLOCK);
-    insertLeft(ptr, BlockRule);
-    Block(token, BlockRule, buffer);
+    else {
+        ASTNode *BlockRule = ruleNode(P_BLOCK);
+        insertRight(ptr, BlockRule);
+        Block(token, BlockRule, buffer);
+    }
+    
 }
 
 void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
