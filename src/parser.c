@@ -755,7 +755,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 
 void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-    ASTNode *
+    
 }
 
 
