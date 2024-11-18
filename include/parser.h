@@ -53,6 +53,10 @@ void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
+void ElseStatementWhile(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+
+void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+
 void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 #endif // PARSER__H_

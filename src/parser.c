@@ -461,6 +461,16 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
             *token = get_token(buffer);
         }
     }
+    // :
+    else if ((*token)->type == T_COLON) {
+        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+        freeAST(colonFound);
+        *token = get_token(buffer);
+    // P_WHILE_STATEMENT
+        ASTNode* whileStatementRule = ruleNode(P_WHILE_LOOP);
+        insertRight(ptr, whileStatementRule);
+        While(token, whileStatementRule, buffer);
+    }
 }
 
 void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -613,14 +623,23 @@ void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *idFound = checkToken(token,T_ID, NO_KW);
     insertRight(ptr, idFound);
     *token = get_token(buffer);
-    // | 
+    // |
     ASTNode *rPipeFound = checkToken(token, T_PIPE, NO_KW);
     freeAST(rPipeFound);
     *token = get_token(buffer);
 }
- 
+void ElseStatementWhile(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    // ELSE
+    ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
+    freeAST(elseFound);
+    *token = get_token(buffer);
+    // P_BLOCK
+    ASTNode *BlockRule = ruleNode(P_BLOCK);
+    insertRight(ptr, BlockRule);
+    Block(token, BlockRule, buffer);
+}
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-    // else 
+    // ELSE 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
     freeAST(elseFound);
     *token = get_token(buffer);
@@ -648,11 +667,10 @@ void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
     insertLeft(ptr, expressionListRule);
     ExpressionList(token, expressionListRule, buffer);
-
 }
 
 void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-    //while
+    // while
     ASTNode *whileFound = checkToken(token, T_KW, KW_WHILE);
     freeAST(whileFound);
     *token = get_token(buffer);
@@ -660,7 +678,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
     freeAST(lParenFound);
     *token = get_token(buffer);
-    //P_EXPRESSION
+    // P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
@@ -668,23 +686,78 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
     freeAST(rParenFound);
     *token = get_token(buffer);
-    //P_OPTIONAL_VALUE
+    // P_OPTIONAL_VALUE
     if ((*token)->type == T_PIPE) {
         ASTNode *OptionalValueRule = ruleNode(P_OPTIONAL_VALUE);
         insertLeft(expressionRule, OptionalValueRule);
         OptionalValue(token, OptionalValueRule, buffer);
-    //P_BLOCK
-        ASTNode *BlockRule = ruleNode(P_BLOCK);
-        insertLeft(OptionalValueRule, BlockRule);
-        Block(token, BlockRule, buffer);
+
+        if ((*token)->type == T_LPAREN) {
+    // P_OPTIONAL_STATEMENTS
+            ASTNode *optionalStatementsRule = ruleNode(P_OPTIONAL_STATEMENTS);
+            insertLeft(OptionalValueRule, optionalStatementsRule);
+            OptionalStatements(token, optionalStatementsRule, buffer);
+    // P_BLOCK
+            ASTNode *BlockRule = ruleNode(P_BLOCK);
+            insertLeft(optionalStatementsRule, BlockRule);
+            Block(token, BlockRule, buffer);
+    // P_ELSE 
+            if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+                ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+                insertLeft(BlockRule, ElseRule);
+                ElseStatementWhile(token, ElseRule, buffer);
+            }
+        }
+    // P_BLOCK
+        else {
+            ASTNode *BlockRule = ruleNode(P_BLOCK);
+            insertLeft(OptionalValueRule, BlockRule);
+            Block(token, BlockRule, buffer);
+    // P_ELSE
+            if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+                ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+                insertLeft(BlockRule, ElseRule);
+                ElseStatementWhile(token, ElseRule, buffer);
+            }
+        }
     }
-    //P_BLOCK
+    // P_BLOCK
     else {
-        ASTNode *BlockRule = ruleNode(P_BLOCK);
-        insertLeft(expressionRule, BlockRule);
-        Block(token, BlockRule, buffer);
+    // P_OPTIONAL_STATEMENTS
+        if ((*token)->type == T_LPAREN) {
+            ASTNode *optionalStatementsRule = ruleNode(P_OPTIONAL_STATEMENTS);
+            insertLeft(expressionRule, optionalStatementsRule);
+            OptionalStatements(token, optionalStatementsRule, buffer);
+    // P_BLOCK
+            ASTNode *BlockRule = ruleNode(P_BLOCK);
+            insertLeft(optionalStatementsRule, BlockRule);
+            Block(token, BlockRule, buffer);
+    // P_ELSE
+            if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+                ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+                insertLeft(BlockRule, ElseRule);
+                ElseStatementWhile(token, ElseRule, buffer);
+            }
+        }
+    // P_BLOCK
+        else {
+            ASTNode *BlockRule = ruleNode(P_BLOCK);
+            insertLeft(expressionRule, BlockRule);
+            Block(token, BlockRule, buffer);
+    // P_ELSE
+            if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+                ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+                insertLeft(BlockRule, ElseRule);
+                ElseStatementWhile(token, ElseRule, buffer);
+            }
+        }
     }
 }
+
+void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    ASTNode *
+}
+
 
 void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //RETURN
