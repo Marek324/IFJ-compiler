@@ -385,6 +385,7 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
     }
     else {
+        free_token(*token);
         freeAST(ASTRoot);
         error_exit(2, "SYNTAX ERROR!\n"); 
     }
@@ -407,7 +408,7 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
     // ;
         ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        insertLeft(expressionFound, semiColonFound);
+        freeAST(semiColonFound);
         *token = get_token(buffer);
     }
     else if ((*token)->type == T_LPAREN) {
@@ -425,7 +426,7 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
     // ;
         ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        insertLeft(rParenFound, semiColonFound);
+        freeAST(semiColonFound);
         *token = get_token(buffer);
     } 
     else if ((*token)->type == T_DOT) {
@@ -451,7 +452,7 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
     // ;
         ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-        insertLeft(rParenFound, semiColonFound);
+        freeAST(semiColonFound);
         *token = get_token(buffer);
     }
 }
@@ -475,15 +476,15 @@ void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //IF
     ASTNode *ifFound = checkToken(token, T_KW, KW_IF);
-    insertRight(ptr, ifFound);
+    freeAST(ifFound);
     *token = get_token(buffer);
     // (
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
-    insertLeft(ifFound, lParenFound);
+    freeAST(lParenFound);
     *token = get_token(buffer);
     //P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
-    insertLeft(lParenFound, expressionRule);
+    insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
         free_token(*token);
@@ -492,10 +493,11 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     // )
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
-    insertLeft(expressionRule, rParenFound);
+    freeAST(rParenFound);
     *token = get_token(buffer);
+    // P_IF_FOUND
     ASTNode *ifFoundRule = ruleNode(P_IF_FOUND);
-    insertLeft(rParenFound, ifFoundRule);
+    insertLeft(expressionRule, ifFoundRule);
     IfFound(token, ifFoundRule, buffer);
 }
 
@@ -529,36 +531,36 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // | 
     ASTNode *lPipeFound = checkToken(token, T_PIPE, NO_KW);
-    insertRight(ptr, lPipeFound);
+    freeAST(lPipeFound);
     *token = get_token(buffer);
     // ID
     ASTNode *idFound = checkToken(token,T_ID, NO_KW);
-    insertLeft(lPipeFound, idFound);
+    insertRight(ptr, idFound);
     *token = get_token(buffer);
     // | 
     ASTNode *rPipeFound = checkToken(token, T_PIPE, NO_KW);
-    insertLeft(idFound, rPipeFound);
+    freeAST(rPipeFound);
     *token = get_token(buffer);
 }
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // else 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
-    insertRight(ptr, elseFound);
+    freeAST(elseFound);
     *token = get_token(buffer);
     // P_BLOCK
     ASTNode *BlockRule = ruleNode(P_BLOCK);
-    insertLeft(elseFound, BlockRule);
+    insertLeft(ptr, BlockRule);
     Block(token, BlockRule, buffer);
 }
 
 void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
     ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
-    insertRight(ptr, commaFound);
+    freeAST(commaFound);
     *token = get_token(buffer);
     // P_EXPRESSION_LIST
     ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
-    insertLeft(commaFound, expressionListRule);
+    insertLeft(ptr, expressionListRule);
     ExpressionList(token, expressionListRule, buffer);
 
 }
@@ -566,24 +568,24 @@ void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //while
     ASTNode *whileFound = checkToken(token, T_KW, KW_WHILE);
-    insertRight(ptr, whileFound);
+    freeAST(whileFound);
     *token = get_token(buffer);
     // (
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
-    insertLeft(whileFound, lParenFound);
+    freeAST(lParenFound);
     *token = get_token(buffer);
     //P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
-    insertLeft(lParenFound, expressionRule);
+    insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     // )
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
-    insertLeft(expressionRule, rParenFound);
+    freeAST(rParenFound);
     *token = get_token(buffer);
     //P_OPTIONAL_VALUE
     if ((*token)->type == T_PIPE) {
         ASTNode *OptionalValueRule = ruleNode(P_OPTIONAL_VALUE);
-        insertLeft(rParenFound, OptionalValueRule);
+        insertLeft(expressionRule, OptionalValueRule);
         OptionalValue(token, OptionalValueRule, buffer);
     //P_BLOCK
         ASTNode *BlockRule = ruleNode(P_BLOCK);
@@ -593,18 +595,19 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_BLOCK
     else {
         ASTNode *BlockRule = ruleNode(P_BLOCK);
-        insertLeft(rParenFound, BlockRule);
+        insertLeft(expressionRule, BlockRule);
         Block(token, BlockRule, buffer);
     }
 }
+
 void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //RETURN
     ASTNode *returnFound = checkToken(token, T_KW, KW_RETURN);
-    insertRight(ptr, returnFound);
+    freeAST(returnFound);
     *token = get_token(buffer);
     //P_EXPRESSION
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
-    insertLeft(returnFound, expressionRule);
+    insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
         free_token(*token);
@@ -613,7 +616,7 @@ void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     // ;
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
-    insertLeft(expressionRule, semiColonFound);
+    freeAST(semiColonFound);
     *token = get_token(buffer);
 }
 

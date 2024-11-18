@@ -1,5 +1,8 @@
 const ifj = @import("ifj24.zig");
 pub fn bar(param : []u8, lol : i32) void {
-const r : ?i32 = 3;
+while(a+b == c) |a| {
+    r = 1;
+} 
+
 return r;
 }
