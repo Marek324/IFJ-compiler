@@ -452,8 +452,6 @@ void printNodeType(ASTNodeType type){
 
 typedef enum direction { left, right, none } direction_t;
 
-void print_tree(ASTNode *tree);
-
 void print_node(ASTNode *node)
 {
     printf("[");
@@ -463,8 +461,8 @@ void print_node(ASTNode *node)
     printf("]");
 }
 
-    const char *subtree_prefix = "  |";
-    const char *space_prefix = "   ";
+const char *subtree_prefix = "  |";
+const char *space_prefix = "   ";
 
 char *make_prefix(char *prefix, const char *suffix) {
     char *result = (char *)malloc(strlen(prefix) + strlen(suffix) + 1);
