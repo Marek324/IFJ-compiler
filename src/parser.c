@@ -755,7 +755,29 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 
 void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-    
+    // (
+    ASTNode *lParenFound = checkToken(token,T_LPAREN,NO_KW);
+    freeAST(lParenFound);
+    *token = get_token(buffer);
+    // single statement
+    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
+        ASTNode *singleStatementRule = ruleNode(P_SINGLE_STATEMENT);
+        insertRight(ptr, singleStatementRule);
+        SingleStatement(token, singleStatementRule, buffer);
+    // )
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        freeAST(rParenFound);
+        *token = get_token(buffer);
+    }
+    // P_BLOCK
+    else {
+        ASTNode *BlockRule = ruleNode(P_BLOCK);
+        insertRight(ptr, BlockRule);
+        Block(token, BlockRule, buffer);
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        freeAST(rParenFound);
+        *token = get_token(buffer);
+    }
 }
 
 
