@@ -1,6 +1,5 @@
 #include "codegen.h"
-#include "ast.h"
-#include "dyn_str.h"
+
 
 int codegen(ASTNode* root)
 {

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include "ast.h"
+#include "dyn_str.h"
 
 #define PROLOG do {printf(".IFJcode24");} while(0)
 
