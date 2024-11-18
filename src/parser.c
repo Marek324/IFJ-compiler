@@ -168,7 +168,6 @@ void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
         insertLeft (typeComplete, commaFound);
         CommaParFound(token, commaFound, buffer);
     }
-    
 }
 
 void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -182,7 +181,6 @@ void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr,paramList);
     ParamList(token, paramList, buffer);
     }
-    
 }
 
 void TypeComplete(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -432,7 +430,7 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     else if ((*token)->type == T_DOT) {
     // . 
         ASTNode *dotFound = checkToken(token, T_DOT, NO_KW);
-        insertRight(ptr, dotFound);
+        freeAST(dotFound);
         *token = get_token(buffer);
     // ID 
         ASTNode *idFound = checkToken(token, T_ID, NO_KW);
@@ -488,7 +486,7 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
         free_token(*token);
-        freeAST(ASTRoot); 
+        freeAST(ASTRoot);
         error_exit(2, "SYNTAX ERROR!\n");
     }
     // )
@@ -503,7 +501,7 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if ((*token)->type == T_PIPE) {
-    //P_OPTIONAL_VALUE
+    //P_OPTION AL_VALUE
         ASTNode *OptionalValueRule = ruleNode(P_OPTIONAL_VALUE);
         insertRight(ptr, OptionalValueRule);
         OptionalValue(token, OptionalValueRule, buffer);
@@ -542,6 +540,7 @@ void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(rPipeFound);
     *token = get_token(buffer);
 }
+
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // else 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
