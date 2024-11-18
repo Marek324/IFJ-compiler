@@ -49,6 +49,7 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(prolog, function_def);
     FunctionDef(token, function_def, buffer);
     // P_END
+    // ASTNode *nextFunctionOrEnd = ruleNode()
     // fun()
     ASTNode *end = ruleNode(P_END); 
     insertLeft(function_def, end);
@@ -105,15 +106,15 @@ void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // PUB
     ASTNode *pubFound = checkToken(token, T_KW, KW_PUB);
-    insertRight(ptr, pubFound);
+    freeAST(pubFound);
     // FN
     *token = get_token(buffer);
     ASTNode *fnFound = checkToken(token, T_KW, KW_FN);
-    insertLeft(pubFound, fnFound);
+    freeAST(fnFound);
     // ID
     *token = get_token(buffer);
     ASTNode *idFound = checkToken(token, T_ID, NO_KW);
-    insertLeft(fnFound, idFound);
+    insertRight(ptr, idFound);
     // (
     *token = get_token(buffer);
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
