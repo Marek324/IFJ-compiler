@@ -2,6 +2,8 @@
 #define PARSER__H_
 
 #include "ast.h"
+#include "scanner.h"
+#include "exp_parser.h"
 
 void Parse(circ_buff_ptr buffer);
 
@@ -31,11 +33,13 @@ void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
-void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic);
 
-void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic);
 
 void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+
+void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
