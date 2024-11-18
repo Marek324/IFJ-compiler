@@ -41,11 +41,11 @@ void printToken(Token *token) {
             break;
 
         case T_INT: 
-            printf("Int(%d) ", token->value.int_value); 
+            printf("Int(%lld) ", token->value.int_value); 
             break;
 
         case T_FLOAT: 
-            printf("Float(%f) ", token->value.float_value); 
+            printf("Float(%lf) ", token->value.float_value); 
             break;
 
         case T_STR: 

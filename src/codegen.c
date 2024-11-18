@@ -16,7 +16,7 @@ int codegen(ASTNode* root)
     }
 
     root = root->right->left; // root->right is prolog, root->right->left is first function
-    
+
     PROLOG;
 
     
@@ -25,3 +25,5 @@ int codegen(ASTNode* root)
 
     return 0;
 }
+
+// void traverse_tree()
