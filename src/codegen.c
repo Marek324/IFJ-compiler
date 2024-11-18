@@ -1,10 +1,14 @@
 #include "codegen.h"
+#include "ast.h"
+#include "dyn_str.h"
 
-int codegen()
+int codegen(ASTNode* root)
 {
+    dyn_str *functions = ds_create();
+
     PROLOG;
 
-    // codegen
+    
 
     EPILOG;
 

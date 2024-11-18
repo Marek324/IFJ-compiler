@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #define PROLOG do {printf(".IFJcode24");} while(0)
-#define EPILOG EXIT(0)
 
 #define MOVE(var, symb) do {printf("\nMOVE %s %s", var, symb);} while(0)
 #define CREATEFRAME do {printf("\nCREATEFRAME");} while(0)
@@ -67,8 +66,9 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
-int codegen(); // ASTNode* root
+#define EPILOG EXIT(0)
 
+int codegen(ASTNode* root);
 
 
 #endif
