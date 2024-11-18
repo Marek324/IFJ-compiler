@@ -226,7 +226,7 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(rBracketFound, u8Found);
     }
     else {
-        if ((*token)->type == T_KW) {
+        if ((*token)->type == T_KW && (*token)->value.keyword != KW_VOID) {
             if ((*token)->value.keyword == KW_I32) {
                 ASTNode *i32Found = checkToken(token, T_KW, KW_I32);
                 insertRight(ptr, i32Found);
@@ -241,6 +241,7 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             }
         }
         else {
+            free_token(*token);
             freeAST(ASTRoot);
             error_exit(2, "SYNTAX ERROR!\n"); 
         }
@@ -410,12 +411,11 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(expressionFound, semiColonFound);
         *token = get_token(buffer);
     }
-    else if ((*token)->type == T_LBRACKET) {
+    else if ((*token)->type == T_LPAREN) {
     // (
         ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
         insertRight(ptr, lParenFound);
         *token = get_token(buffer);
-    
     // P_EXPRESSION_LIST
         ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
         insertLeft(lParenFound, expressionListRule);
@@ -470,7 +470,7 @@ void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             insertLeft(expression, exprCommaFound);
             ExprCommaFound(token, exprCommaFound, buffer);
         }
-    }  else *token = get_token(buffer);
+    }
 } 
 
 void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -556,6 +556,7 @@ void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
     ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
     insertRight(ptr, commaFound);
+    *token = get_token(buffer);
     // P_EXPRESSION_LIST
     ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
     insertLeft(commaFound, expressionListRule);

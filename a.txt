@@ -1,13 +1,5 @@
 const ifj = @import("ifj24.zig");
-pub fn bar(param : []u8) []u8 {
-var a: i32 = 2;
-if (1) |sds| {
-    while(1) |i|{
-        i= 1 + i + y;
-    }
-}
-else {
-    a = 42;
-}
+pub fn bar(param : []u8) void {
+const r : ?i32 = 3;
 return r;
 }
