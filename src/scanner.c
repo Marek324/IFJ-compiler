@@ -17,7 +17,8 @@ Implementation of scanner.
 // Returns token with string value, type can be T_ID or T_STR
 #define RETURN_STR_TOKEN(T)                                                     \
     token->value.string_value = (char *)malloc(str->length+1);                  \
-    strcpy(token->value.string_value, str->str);                                \
+    if (str->str == NULL) strcpy(token->value.string_value, "");                \
+    else strcpy(token->value.string_value, str->str);                           \
     RETURN_TOKEN(T)
 
 // Checks if next character is '=', returns T1 if true, T2 otherwise and puts character back to buffer
