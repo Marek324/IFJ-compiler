@@ -1,6 +1,6 @@
 # Compiler and Flags
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c11 -Iinclude -g
+CFLAGS = -Wall -Wextra -pedantic -std=c11 -Iinclude -g -fsanitize=address
 LDFLAGS =
 
 # Directories

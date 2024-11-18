@@ -4,6 +4,8 @@ author: Adam Vesely
 Implementation of the expression parser.
 */
 // TODO ERROR HANDLING AND EXTENSIONS, IMPLICIT CONVERSIONS
+// Store the current token to compare with the next token (for function calls);
+// Function calls: create ID node, then when lParen is found create expression list
 #include <stdbool.h>
 
 #include "exp_parser.h"
@@ -44,9 +46,39 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     *paren_depth = 0;
     stack_t* operand_stack = stackInit();
     stack_t* operator_stack = stackInit();
+    // TokenType temp_type = (*token)->type;
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
         ASTNode* node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
+        // for function calls ----------------------------------------------------------------------
+        // if((temp_type == T_ID) && ((*token)->type == T_LPAREN || (*token)->type == T_DOT)) {
+        //     fprintf(stderr, "WAAAAAAAAAAAAHHHHH\n");
+        //     if((*token)->type == T_LPAREN) {
+        //         freeAST(node);
+        //         ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
+        //         if(id_node == NULL || id_node->type != ID) {
+        //             error_exit(99, "ERROR: Unexpected LPAREN in expression!\n");
+        //             return NULL;
+        //         }
+        //         *token = get_token(buff);
+        //         ExpressionList(token, id_node, buff);
+        //     }
+        //     if((*token)->type == T_DOT) {
+        //         freeAST(node);
+        //         *token = get_token(buff);
+        //         node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
+        //         if(node->type != ID) {
+        //             error_exit(99, "ERROR: Unexpected DOT in expression!\n");
+        //             return NULL;
+        //         }
+        //         ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
+        //         insertLeft(id_node, node);
+        //     }
+        //     temp_type = (*token)->type;
+        //     continue;    
+        // }
+        // temp_type = (*token)->type;
+        // -------------Function calls ----------------------------------------------------------------
         if (isOperand(*token)) {
             stackPush(operand_stack, (long)node);
         }
@@ -56,6 +88,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             }
             if ((*token)->type == T_RPAREN) {
                 if (*paren_depth != 0) {
+                    freeAST(node);
                     reduceParen(operand_stack, operator_stack);
                     (*paren_depth)--;
                 }
@@ -119,7 +152,6 @@ void reduce(stack_t* operand_stack, stack_t* operator_stack) {
             stackPush(operand_stack, (long)root);
         }
     }
-
 }
 
 void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
@@ -129,6 +161,7 @@ void reduceParen(stack_t* operand_stack, stack_t* operator_stack) {
             reduce(operand_stack, operator_stack);
             curr = (ASTNode*)stackGetTop(operator_stack);
         }
+        freeAST(curr);
         stackPop(operator_stack);
     }
 }
@@ -216,6 +249,14 @@ bool isEnd(Token* token) {
         case T_SEMICOL:
         case T_COMMA:
             return true;
+            break;
+        case T_KW:
+            if(token->value.keyword == KW_ELSE) {
+                return true;
+            }
+            else {
+                return false;
+            }
         default:
             return false;
     }
