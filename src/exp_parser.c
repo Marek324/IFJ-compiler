@@ -46,38 +46,45 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     *paren_depth = 0;
     stack_t* operand_stack = stackInit();
     stack_t* operator_stack = stackInit();
-    // TokenType temp_type = (*token)->type;
+    TokenType temp_type = (*token)->type;
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
         ASTNode* node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
         // for function calls ----------------------------------------------------------------------
-        // if((temp_type == T_ID) && ((*token)->type == T_LPAREN || (*token)->type == T_DOT)) {
-        //     fprintf(stderr, "WAAAAAAAAAAAAHHHHH\n");
-        //     if((*token)->type == T_LPAREN) {
-        //         freeAST(node);
-        //         ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
-        //         if(id_node == NULL || id_node->type != ID) {
-        //             error_exit(99, "ERROR: Unexpected LPAREN in expression!\n");
-        //             return NULL;
-        //         }
-        //         *token = get_token(buff);
-        //         ExpressionList(token, id_node, buff);
-        //     }
-        //     if((*token)->type == T_DOT) {
-        //         freeAST(node);
-        //         *token = get_token(buff);
-        //         node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
-        //         if(node->type != ID) {
-        //             error_exit(99, "ERROR: Unexpected DOT in expression!\n");
-        //             return NULL;
-        //         }
-        //         ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
-        //         insertLeft(id_node, node);
-        //     }
-        //     temp_type = (*token)->type;
-        //     continue;    
-        // }
-        // temp_type = (*token)->type;
+        if((temp_type == T_ID) && ((*token)->type == T_LPAREN || (*token)->type == T_DOT)) {
+            if((*token)->type == T_LPAREN) {
+                freeAST(node);
+                ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
+                if(id_node == NULL || id_node->type != ID) {
+                    error_exit(99, "ERROR: Unexpected LPAREN in expression!\n");
+                    return NULL;
+                }
+                *token = get_token(buff);
+                ExpressionList(token, id_node, buff);
+            }
+            if((*token)->type == T_DOT) {
+                freeAST(node);
+                *token = get_token(buff);
+                node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
+                if(node->type != ID) {
+                    error_exit(99, "ERROR: Unexpected DOT in expression!\n");
+                    return NULL;
+                }
+                ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
+                insertLeft(id_node, node);
+                *token = get_token(buff);
+                continue;
+            }
+            if((*token)->type != T_RPAREN) {
+                error_exit(99, "ERROR: Unexpected token in expression!\n");
+                return NULL;
+            }
+            // RPAREN
+            free(*token);
+            *token = get_token(buff);
+            continue;
+        }
+        temp_type = (*token)->type;
         // -------------Function calls ----------------------------------------------------------------
         if (isOperand(*token)) {
             stackPush(operand_stack, (long)node);
