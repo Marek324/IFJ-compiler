@@ -51,7 +51,7 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_END
     ASTNode *end = ruleNode(P_END); 
     insertLeft(function_def, end);
-    End(token, end, buffer);
+    End(token, end);
 }
 
 void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -617,7 +617,7 @@ void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     *token = get_token(buffer);
 }
 
-void End(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+void End(Token **token, ASTNode *ptr) {
     ASTNode *eofFound = checkToken(token,T_EOF, NO_KW);
     insertRight(ptr, eofFound);
 }
