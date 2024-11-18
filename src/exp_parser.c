@@ -151,7 +151,7 @@ void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
             stackPop(operand_stack);
             insertRight(root, child);
 
-            if(root->type != BANG) {
+            if(root->type != BANG && root->type != T_UNREACHABLE) {
                 child = (ASTNode*)stackGetTop(operand_stack);
                 stackPop(operand_stack);
                 insertLeft(root, child);
@@ -239,6 +239,16 @@ bool isOperator(Token* token) {
         case T_LPAREN:
         case T_RPAREN:
             return true;
+        case T_KW:
+            switch(token->value.keyword) {
+                case KW_UNREACHABLE:
+                case KW_AND:
+                case KW_OR:
+                case KW_ORELSE:
+                    return true;
+                default:
+                    return false;
+            }
         default:
             return false;
     }
@@ -251,6 +261,10 @@ bool isOperand(Token* token) {
         case T_FLOAT:
         case T_STR:
             return true;
+        case T_KW:
+            if(token->value.keyword == KW_NULL) {
+                return true;
+            }
         default:
             return false;
     }

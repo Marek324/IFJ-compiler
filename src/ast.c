@@ -64,6 +64,11 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
             case KW_VAR: return T_VAR;
             case KW_VOID: return T_VOID;
             case KW_WHILE: return T_WHILE;
+            case KW_UNREACHABLE: return T_UNREACHABLE;
+            case KW_AND: return T_AND;
+            case KW_OR: return T_OR;
+            case KW_ORELSE: return T_ORELSE;
+
             default: return 99;
         }
     }

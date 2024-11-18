@@ -80,7 +80,11 @@ typedef enum {
     T_U8,
     T_VAR,
     T_VOID,
-    T_WHILE
+    T_WHILE,
+    T_UNREACHABLE,
+    T_AND,
+    T_OR,
+    T_ORELSE
 
 } ASTNodeType;
 
