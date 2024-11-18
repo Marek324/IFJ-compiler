@@ -467,7 +467,7 @@ void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
         if ((*token)->type == T_COMMA) {
             ASTNode *exprCommaFound = ruleNode(P_COMMA_EXPR_FOUND);
-            insertLeft(expressionFound, exprCommaFound);
+            insertLeft(expression, exprCommaFound);
             ExprCommaFound(token, exprCommaFound, buffer);
         }
     }  else *token = get_token(buffer);
