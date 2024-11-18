@@ -48,9 +48,6 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *function_def = ruleNode(P_FUNCTION_DEF); 
     insertLeft(prolog, function_def);
     FunctionDef(token, function_def, buffer);
-    // P_END
-    // ASTNode *nextFunctionOrEnd = ruleNode()
-    // fun()
     ASTNode *end = ruleNode(P_END); 
     insertLeft(function_def, end);
     End(token, end);
@@ -159,11 +156,11 @@ void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
     // :
     *token = get_token(buffer);
     ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
-    insertLeft(idFound, colonFound);
+    freeAST(colonFound);
     // P_TYPE_COMPLETE
     *token = get_token(buffer);
     ASTNode *typeComplete = ruleNode(P_TYPE_COMPLETE);
-    insertLeft(colonFound, typeComplete);
+    insertLeft(idFound, typeComplete);
     TypeComplete(token, typeComplete, buffer);
     //P_COMMA_PAR_FOUND
     if ((*token)->type == T_COMMA) {
@@ -177,12 +174,12 @@ void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
 void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
     ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
-    insertRight(ptr, commaFound);
+    freeAST(commaFound);
     // P_PARAM_LIST
     *token = get_token(buffer);
     if((*token)->type == T_ID) {
     ASTNode *paramList = ruleNode(P_PARAM_LIST);
-    insertLeft(commaFound,paramList);
+    insertRight(ptr,paramList);
     ParamList(token, paramList, buffer);
     }
     
