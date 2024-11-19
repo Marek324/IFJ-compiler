@@ -27,7 +27,7 @@ char* my_str_dup(char* key) {
 }
 
 int get_balance (symtable_node_ptr node) {
-    return node != NULL ? height(node-right) - height(node-left) : 0;
+    return node != NULL ? height(node->right) - height(node->left) : 0;
 }
 
 int height(symtable_node_ptr node){
