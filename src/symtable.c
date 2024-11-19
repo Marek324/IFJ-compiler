@@ -1,7 +1,19 @@
+#include <string.h>
+
 #include "symtable.h"
+#include "error.h"
 
 int max(int a, int b) {
     return a > b ? a : b;
+}
+
+char* myStrDup(char* key) {
+    char* newStr = (char*)malloc(strlen(key) + 1);
+    if(newStr == NULL) {
+        error_exit(99, "ERROR: Unable to allocate memory for newStr\n");
+    }
+    strcpy(newStr, key);
+    return newStr;
 }
 
 int height(symtable_node_ptr node){
