@@ -93,7 +93,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                         freeAll(paren_depth, operand_stack, operator_stack);
                         error_exit(2, "ERROR: Unexpected QMARK in expression!\n");
                     }
-                    ASTNode* id_node = stackGetTop(operand_stack);
+                    ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
                     insertLeft(node, id_node);
                     stackPop(operand_stack);
 
