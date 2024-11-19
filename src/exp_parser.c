@@ -268,8 +268,13 @@ bool isOperand(Token* token) {
         case T_STR:
             return true;
         case T_KW:
-            if(token->value.keyword == KW_NULL) {
-                return true;
+            switch(token->value.keyword) {
+                case KW_TRUE:
+                case KW_FALSE:
+                case KW_NULL:
+                    return true;
+                default:
+                    return false;
             }
         default:
             return false;
