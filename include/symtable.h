@@ -6,7 +6,7 @@
 
 typedef enum {
     T_VAR,
-    T_FUN
+    T_FUN,
 } symtable_entry_type;
 
 typedef enum {
@@ -27,11 +27,11 @@ typedef struct symtable_entry_s{
     bool isNullable;
     bool isUsed;
     bool isChanged;
+    bool isDefined;
 
     //variables
     bool isConst;
     bool hasExplicitType;
-    bool isDefined;
 
     // functions
     int param_count;
@@ -42,6 +42,7 @@ typedef struct symtable_entry_s{
 } symtable_entry_t, *symtable_entry_ptr;
 
 typedef struct symtable_node_s{
+    char *key;
     struct symtable_node_s *left, *right;
     symtable_entry_ptr entry;
     int balance_factor;
