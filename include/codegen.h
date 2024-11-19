@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "ast.h"
-#include "stack.h"
 
 #define PROLOG do {printf(".IFJcode24");} while(0)
 
@@ -64,68 +63,6 @@
 #define JUMPIFEQS(label, symb1, symb2) do {printf("\nJUMPIFEQS %s %s %s", label, symb1, symb2);} while(0)
 #define JUMPIFNEQS(label, symb1, symb2) do {printf("\nJUMPIFNEQS %s %s %s", label, symb1, symb2);} while(0)
 #define EXIT(exit_code) do {printf("\nEXIT int@(exit_code)");} while(0)
-
-#define AP(var) dyn_str_append_str(functions, var)
-#define APPEND_MOVE(var, symb) do {AP("\nMOVE "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_CREATEFRAME do {AP("\nCREATEFRAME");} while(0)
-#define APPEND_PUSHFRAME do {AP("\nPUSHFRAME");} while(0)
-#define APPEND_POPFRAME do {AP("\nPOPFRAME");} while(0)
-#define APPEND_DEFVAR(var) do {AP("\nDEFVAR "); AP(var);} while(0)
-#define APPEND_CALL(label) do {AP("\nCALL "); AP(label);} while(0)
-#define APPEND_RETURN do {AP("\nRETURN");} while(0)
-
-#define APPEND_PUSHS(symb) do {AP("\nPUSHS "); AP(symb);} while(0)
-#define APPEND_POPS(var) do {AP("\nPOPS "); AP(var);} while(0)
-#define APPEND_CLEARS do {AP("\nCLEARS");} while(0)
-
-#define APPEND_ADD(var, symb1, symb2) do {AP("\nADD "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_SUB(var, symb1, symb2) do {AP("\nSUB "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_MUL(var, symb1, symb2) do {AP("\nMUL "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_DIV(var, symb1, symb2) do {AP("\nDIV "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_IDIV(var, symb1, symb2) do {AP("\nIDIV "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_ADDS(var, symb1, symb2) do {AP("\nADDS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_SUBS(var, symb1, symb2) do {AP("\nSUBS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_MULS(var, symb1, symb2) do {AP("\nMULS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_DIVS(var, symb1, symb2) do {AP("\nDIVS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_IDIVS(var, symb1, symb2) do {AP("\nIDIVS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_LT(var, symb1, symb2) do {AP("\nLT "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_GT(var, symb1, symb2) do {AP("\nGT "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_EQ(var, symb1, symb2) do {AP("\nEQ "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_LTS(var, symb1, symb2) do {AP("\nLTS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_GTS(var, symb1, symb2) do {AP("\nGTS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_EQS(var, symb1, symb2) do {AP("\nEQS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_AND(var, symb1, symb2) do {AP("\nAND "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_OR(var, symb1, symb2) do {AP("\nOR "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_NOT(var, symb) do {AP("\nNOT "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_ANDS(var, symb1, symb2) do {AP("\nANDS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_ORS(var, symb1, symb2) do {AP("\nORS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_NOTS(var, symb) do {AP("\nNOTS "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_INT2FLOAT(var, symb) do {AP("\nINT2FLOAT "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_FLOAT2INT(var, symb) do {AP("\nFLOAT2INT "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_INT2CHAR(var, symb) do {AP("\nINT2CHAR "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_STRI2INT(var, symb1, symb2) do {AP("\nSTRI2INT "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_INT2FLOATS(var, symb) do {AP("\nINT2FLOATS "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_FLOAT2INTS(var, symb) do {AP("\nFLOAT2INTS "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_INT2CHARS(var, symb) do {AP("\nINT2CHARS "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_STRI2INTS(var, symb1, symb2) do {AP("\nSTRI2INTS "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-
-#define APPEND_READ(var, type) do {AP("\nREAD "); AP(var); AP(" "); AP(type);} while(0)
-#define APPEND_WRITE(symb) do {AP("\nWRITE "); AP(symb);} while(0)
-
-#define APPEND_CONCAT(var, symb1, symb2) do {AP("\nCONCAT "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_STRLEN(var, symb) do {AP("\nSTRLEN "); AP(var); AP(" "); AP(symb);} while(0)
-#define APPEND_GETCHAR(var, symb1, symb2) do {AP("\nGETCHAR "); AP(var); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_SETCHAR(var1, symb1, symb2) do {AP("\nSETCHAR "); AP(var1); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-
-#define APPEND_TYPE(var, symb) do {AP("\nTYPE "); AP(var); AP(" "); AP(symb);} while(0)
-
-#define APPEND_LABEL(label) do {AP("\nLABEL "); AP(label);} while(0)
-#define APPEND_JUMP(label) do {AP("\nJUMP "); AP(label);} while(0)
-#define APPEND_JUMPIFEQ(label, symb1, symb2) do {AP("\nJUMPIFEQ "); AP(label); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_JUMPIFNEQ(label, symb1, symb2) do {AP("\nJUMPIFNEQ "); AP(label); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_JUMPIFEQS(label, symb1, symb2) do {AP("\nJUMPIFEQS "); AP(label); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_JUMPIFNEQS(label, symb1, symb2) do {AP("\nJUMPIFNEQS "); AP(label); AP(" "); AP(symb1); AP(" "); AP(symb2);} while(0)
-#define APPEND_EXIT(exit_code) do {AP("\nEXIT "); AP(exit_code);} while(0)
 
 #define EPILOG EXIT(0)
 
