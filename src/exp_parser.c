@@ -187,6 +187,9 @@ void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
             stackPop(operand_stack);
             insertRight(root, child);
             if(root->type != BANG) {
+                if(stackIsEmpty(operand_stack)) {
+                    error_exit(2, "ERROR: Not enough operands!\n");
+                }
                 child = (ASTNode*)stackGetTop(operand_stack);
                 stackPop(operand_stack);
                 insertLeft(root, child);
