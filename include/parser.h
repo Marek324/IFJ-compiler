@@ -39,7 +39,7 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic);
 
 void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
-void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic);
 
 void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
