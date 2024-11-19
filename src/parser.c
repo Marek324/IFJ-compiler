@@ -953,11 +953,6 @@ void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
-    if (expressionRule->right == NULL) {
-        free_token(*token);
-        freeAST(ASTRoot); 
-        error_exit(2, "SYNTAX ERROR!\n");
-    }
     // ;
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
     freeAST(semiColonFound);
