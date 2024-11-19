@@ -316,12 +316,46 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, statementRule);
         Return(token, statementRule, buffer);
     }
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_CONTINUE) {
+        statementRule = ruleNode(P_BREAK);
+        insertRight(ptr, statementRule);
+        Break(token, statementRule, buffer);
+    }
+    else if ((*token)->type == T_KW &&  (*token)->value.keyword == KW_BREAK) {
+        statementRule = ruleNode(P_CONTINUE);
+        insertRight(ptr, statementRule);
+        Break(token, statementRule, buffer);
+    }
     // More statements
     if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
         ASTNode *nextStatement = ruleNode(P_STATEMENT);
         insertLeft(statementRule, nextStatement);
         Statement(token, nextStatement, buffer);
     }
+}
+
+void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    (void) ptr;
+    // continue
+    ASTNode *continueFound = checkToken(token, T_KW, KW_CONTINUE);
+    freeAST(continueFound);
+    *token = get_token(buffer);
+    // ;
+    ASTNode *semiColonFound = checkToken(token, T_KW, KW_BREAK);
+    freeAST(semiColonFound);
+    *token = get_token(buffer);
+}
+
+void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    (void) ptr;
+    // break
+    ASTNode *breakFound = checkToken(token, T_KW, KW_BREAK);
+    freeAST(breakFound);
+    *token = get_token(buffer);
+    // ;
+    ASTNode *semiColonFound = checkToken(token, T_KW, KW_BREAK);
+    freeAST(semiColonFound);
+    *token = get_token(buffer);
 }
 
 void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
