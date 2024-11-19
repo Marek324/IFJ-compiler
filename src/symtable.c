@@ -8,7 +8,7 @@ symtable_node_ptr symNodeCreate(char *key) {
     node->key = myStrDup(key);
     node->left = NULL;
     node->right = NULL;
-    node->ptr = (symtable_entry_ptr) malloc(sizeof(symtable_entry_t));
+    node->entry = (symtable_entry_ptr) malloc(sizeof(symtable_entry_t));
     node->balance_factor = 1;
 }
 
