@@ -3,4 +3,3 @@ build/
 ifj24compiler
 test
 notes/
-codegen_test/

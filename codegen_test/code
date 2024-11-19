@@ -1,0 +1,39 @@
+.IFJcode24
+CALL main
+EXIT int@0
+
+LABEL _ifj_strcmp
+
+LABEL _ifj_ord
+
+LABEL _ifj_substring
+
+LABEL main
+CREATEFRAME
+WRITE string@Zadejte\032cislo\032pro\032vypocet\032faktorialu:\032
+DEFVAR TF@inp
+READ TF@inp int
+# if
+PUSHFRAME
+CREATEFRAME
+# podmienka
+JUMPIFEQ main_else LF@inp nil@nil
+# block if
+WRITE string@if\010
+# else
+JUMP main_end
+LABEL main_else
+# block else
+WRITE string@else\010
+# block end
+LABEL main_end
+POPFRAME
+# main end
+RETURN
+
+
+
+
+LABEL decrement
+
+LABEL factorial
