@@ -17,8 +17,8 @@ typedef enum {
     P_COMMA_PAR_FOUND,      // <comma_par_found> -> , <param_list> | ε
     P_BLOCK,                // <block> -> { <statement> }
     P_STATEMENT,            // <statement> -> <var_declaration> <statement> | ID <ID_found> <statement> | <if_statement> <statement> | <for_loop> <statement> | <while_loop> <statement> | <return_statement> <statement> | ε
-    P_ID_FOUND,             // <ID_found> -> = <expression> ; | ( <expression_list> ); | : <while_loop>
-    P_VAR_DECLARATION,      // <var_declaration> -> const ID : <type_complete> = <expression> ; | var ID : <type_complete> = <expression> ;
+    P_ID_FOUND,             // <ID_found> -> = <asgn_found> ; | ( <expression_list> ); | : <while_loop>
+    P_VAR_DECLARATION,      // <var_declaration> -> const ID : <type_complete> = <asgn_found> ; | var ID : <type_complete> = <asgn_found> ;
     P_IF_STATEMENT,         // <if_statement> -> if ( <expression> ) <if_found>
     P_IF_FOUND,             // <if_found> -> <optional_value> <block> <else_statement> | <single_statement> else <single_statement>
     P_ELSE_STATEMENT,       // <else_statement> -> else <block> | ε
@@ -35,6 +35,7 @@ typedef enum {
     P_SINGLE_STATEMENT,     // <single_statement> -> <var_declaration> | ID <ID_found> | <if_statement> | <for_loop> | <while_loop> | <return_statement>
     P_FUNCTION_TYPE,        // <function_type> -> <type> | void
     P_EXPRESSION,           // expession_parser()
+    P_ASGN_FOUND,           // <asgn_found> -> <expression> | if (<expression>) <expression> else <expression>
 
 
 // Terminal nodes (for each terminal in T)
