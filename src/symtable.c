@@ -33,6 +33,18 @@ void symtable_init(symtable_tree_ptr tree) {
     *tree = NULL;
 }
 
+void symtable_insert(symtable_node_ptr node) {
+    if (node == NULL) {
+        return;
+    }
+}
+
+void symtable_remove(symtable_node_ptr node) {
+    if (node == NULL) {
+        return;
+    }
+}
+
 void symtable_dispose(symtable_node_ptr root) {
     if (root == NULL) {
         return;
