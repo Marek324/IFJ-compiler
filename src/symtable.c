@@ -40,6 +40,13 @@ int height(symtable_node_ptr node){
 }
 
 void symtable_free_entry(symtable_entry_ptr entry) {
+    if(entry->isNullable != NULL) {
+        free(entry->isNullable);
+    }
+    if(entry->param_types != NULL) {
+        free(entry->param_types);
+    }
+    symtable_dispose(entry->local_symtable);
     free(entry);
 }
 
@@ -127,6 +134,7 @@ void symtable_dispose(symtable_node_ptr root) {
     symtable_dispose(root->left);
     symtable_dispose(root->right);
     symtable_free_entry(root->entry);
+    free(root->key);
     free(root);
     root = NULL;
 }
