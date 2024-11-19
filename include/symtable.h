@@ -48,4 +48,13 @@ typedef struct symtable_node_s{
     int balance_factor;
 } symtable_node_t, **symtable_tree_ptr;
 
+symtable_node_ptr symNodeCreate(char *key) {
+    symtable_node_ptr node = (symtable_node_ptr)malloc(sizeof(symtable_node_t));
+    node->key = myStrDup(key);
+    node->left = NULL;
+    node->right = NULL;
+    node->ptr = (symtable_entry_ptr) malloc(sizeof(symtable_entry_t));
+    node->balance_factor = 1;
+}
+
 #endif // SYMTABLE_H

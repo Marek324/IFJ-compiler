@@ -1,8 +1,16 @@
 #include <string.h>
-
 #include "symtable.h"
 #include "error.h"
 #include "ast.h"
+
+symtable_node_ptr symNodeCreate(char *key) {
+    symtable_node_ptr node = (symtable_node_ptr)malloc(sizeof(symtable_node_t));
+    node->key = myStrDup(key);
+    node->left = NULL;
+    node->right = NULL;
+    node->ptr = (symtable_entry_ptr) malloc(sizeof(symtable_entry_t));
+    node->balance_factor = 1;
+}
 
 int max(int a, int b) {
     return a > b ? a : b;
