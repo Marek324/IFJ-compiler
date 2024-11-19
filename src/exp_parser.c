@@ -48,7 +48,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
         ASTNode* node = NULL;
-        if((*token)->value.keyword == KW_NULL) {
+        if((*token)->type == T_KW) {
             node = nodeCreate(convertToASTType(T_KW, (*token)->value.keyword), *token);
         }
         else {
