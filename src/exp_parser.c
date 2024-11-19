@@ -89,7 +89,13 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     new_token->value.keyword = KW_ORELSE;
                     // create node for orelse
                     node = nodeCreate(convertToASTType(T_KW, new_token->value.keyword), new_token);
-                    stackPush(operator_stack, (long)node);
+                    if(stackIsEmpty(operand_stack)) {
+                        freeAll(paren_depth, operand_stack, operator_stack);
+                        error_exit(2, "ERROR: Unexpected QMARK in expression!\n");
+                    }
+                    ASTNode* id_node = stackGetTop(operand_stack);
+                    insertLeft(node, id_node);
+                    stackPop(operand_stack);
 
                     // create a new token for unreachable
                     new_token = (Token *)malloc(sizeof(Token));
@@ -100,7 +106,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     new_token->type = T_KW;
                     new_token->value.keyword = KW_UNREACHABLE;
                     // create node for unreachable
-                    node = nodeCreate(convertToASTType(T_KW, new_token->value.keyword), new_token);
+                    ASTNode* unreachable_node = nodeCreate(convertToASTType(T_KW, new_token->value.keyword), new_token);
+                    insertRight(node, unreachable_node);
                     stackPush(operand_stack, (long)node);
                     // gets token after QMARK
                     *token = get_token(buff);
@@ -257,6 +264,12 @@ PREC_TABLE_INDEX getIndex(ASTNode* node) {
         case TYPE_F64:
         case TYPE_STR:
             return LIT_ID;
+        case T_ORELSE:
+            return ORELSE ;
+        case T_AND:
+            return AND;
+        case T_OR:
+            return OR;
         default:
             return END;
     }   
