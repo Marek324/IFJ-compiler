@@ -2,6 +2,7 @@
 
 #include "symtable.h"
 #include "error.h"
+#include "ast.h"
 
 int max(int a, int b) {
     return a > b ? a : b;
@@ -10,6 +11,7 @@ int max(int a, int b) {
 char* myStrDup(char* key) {
     char* newStr = (char*)malloc(strlen(key) + 1);
     if(newStr == NULL) {
+        freeAST(ASTRoot);
         error_exit(99, "ERROR: Unable to allocate memory for newStr\n");
     }
     strcpy(newStr, key);
