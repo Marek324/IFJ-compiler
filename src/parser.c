@@ -316,11 +316,13 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, statementRule);
         Return(token, statementRule, buffer);
     }
+    //P_BREAK
     else if ((*token)->type == T_KW && (*token)->value.keyword == KW_CONTINUE) {
         statementRule = ruleNode(P_BREAK);
         insertRight(ptr, statementRule);
         Break(token, statementRule, buffer);
     }
+    //P_CONTINUE
     else if ((*token)->type == T_KW &&  (*token)->value.keyword == KW_BREAK) {
         statementRule = ruleNode(P_CONTINUE);
         insertRight(ptr, statementRule);
@@ -341,7 +343,7 @@ void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(continueFound);
     *token = get_token(buffer);
     // ;
-    ASTNode *semiColonFound = checkToken(token, T_KW, KW_BREAK);
+    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
@@ -353,7 +355,7 @@ void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(breakFound);
     *token = get_token(buffer);
     // ;
-    ASTNode *semiColonFound = checkToken(token, T_KW, KW_BREAK);
+    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
@@ -603,18 +605,38 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         ASTNode *OptionalValueRule = ruleNode(P_OPTIONAL_VALUE);
         insertRight(ptr, OptionalValueRule);
         OptionalValue(token, OptionalValueRule, buffer);
-    //P_BLOCK
-        ASTNode *BlockRule = ruleNode(P_BLOCK);
-        insertLeft(OptionalValueRule, BlockRule);
-        Block(token, BlockRule, buffer);
+        ASTNode *node = NULL;
+    //P_SINGLE_STATEMENT
+        if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE))) {
+            node = ruleNode(P_SINGLE_STATEMENT);
+            insertLeft(OptionalValueRule, node);
+            SingleStatement(token, node, buffer);
+        }
+    // P_BLOCK
+        else {
+            node = ruleNode(P_BLOCK);
+            insertLeft(OptionalValueRule, node);
+            Block(token, node, buffer);
+        }
     //P_ELSE_STATEMENT
         if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
             ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
-            insertLeft(BlockRule, ElseRule);
+            insertLeft(node, ElseRule);
             ElseStatement(token, ElseRule, buffer);
         }
     }
+    //P_SINGLE_STATEMENT
+    else if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE))) {
+        ASTNode *node = ruleNode(P_SINGLE_STATEMENT);
+        insertRight(ptr, node);
+        SingleStatement(token, node, buffer);
 
+        if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
+            ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
+            insertLeft(node, ElseRule);
+            ElseStatement(token, ElseRule, buffer);
+        }
+    }
     else if ((*token)->type == T_LBRACE) {
     //P_BLOCK
         ASTNode *BlockRule = ruleNode(P_BLOCK);
@@ -670,12 +692,24 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, statementRule);
         Return(token, statementRule, buffer);
     }
-    // More statements
-    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
-        ASTNode *nextStatement = ruleNode(P_STATEMENT);
-        insertLeft(statementRule, nextStatement);
-        Statement(token, nextStatement, buffer);
+    //P_CONTINUE
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_CONTINUE) {
+        statementRule = ruleNode(P_CONTINUE);
+        insertRight(ptr, statementRule);
+        Continue(token, statementRule, buffer);
     }
+    //P_BREAK
+    else if ((*token)->type == T_KW &&  (*token)->value.keyword == KW_BREAK) {
+        statementRule = ruleNode(P_BREAK);
+        insertRight(ptr, statementRule);
+        Break(token, statementRule, buffer);
+    }
+    else {
+        free_token(*token);
+        freeAST(ASTRoot);
+        error_exit(2, "SYNTAX ERROR!\n");
+    }
+    
 }
 
 void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -707,11 +741,11 @@ void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
     freeAST(elseFound);
     *token = get_token(buffer);
-    //IF
-    if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF) {
-        ASTNode *ifFound = ruleNode(P_IF_STATEMENT);
-        insertRight(ptr, ifFound);
-        IfStatement(token, ifFound, buffer);
+    // P_SINGLE_STATEMENT
+    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE)))  {
+        ASTNode *singleStatementRule = ruleNode(P_SINGLE_STATEMENT);
+        insertRight(ptr, singleStatementRule);
+        SingleStatement(token, singleStatementRule, buffer);
     }
     // P_BLOCK
     else {
