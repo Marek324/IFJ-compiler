@@ -108,7 +108,7 @@ void left_right_rot(symtable_tree_ptr root) {
     simple_left_rot(root);
 }
 
-void rebalance(symtable_node_ptr *root) {
+void rebalance(symtable_tree_ptr root) {
     int balance = get_balance(*root);
 
     if (balance > 1) {  // Right heavy
