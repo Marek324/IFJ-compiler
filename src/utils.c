@@ -26,6 +26,8 @@ void printToken(Token *token) {
                 case KW_VOID: printf("Keyword(void)"); break;
                 case KW_FOR: printf("Keyword(for)"); break;
                 case KW_WHILE: printf("Keyword(while)"); break;
+                case KW_UNREACHABLE: printf("Keyword(unreachable)"); break;
+                case KW_ORELSE: printf("Keyword(orelse)"); break;
                 default: printf("Unknown Keyword"); break;
             }
             break;
@@ -454,6 +456,14 @@ void printNodeType(ASTNodeType type){
 
         case T_WHILE:
             printf("T_WHILE");
+            break;
+
+        case T_UNREACHABLE:
+            printf("T_UNREACHABLE");
+            break;
+
+        case T_ORELSE:
+            printf("T_ORELSE");
             break;
 
         default: 
