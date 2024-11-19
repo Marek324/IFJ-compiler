@@ -47,7 +47,13 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     TokenType temp_type = (*token)->type;
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
-        ASTNode* node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
+        ASTNode* node = NULL;
+        if((*token)->value.keyword == KW_NULL) {
+            node = nodeCreate(convertToASTType(T_KW, (*token)->value.keyword), *token);
+        }
+        else {
+            node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);    
+        }        
         // for function calls ----------------------------------------------------------------------
         if((temp_type == T_ID) && ((*token)->type == T_LPAREN || (*token)->type == T_DOT)) {
             if((*token)->type == T_LPAREN) {
