@@ -369,7 +369,7 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
         }
     // P_ASGN_FOUND
         ASTNode *asgnFoundRule = ruleNode(P_ASGN_FOUND);
-        insertRight(ptr, asgnFoundRule);
+        insertRight(asgnFound, asgnFoundRule);
         AsgnFound(token, asgnFoundRule, buffer);
     // ;
         if (semic) { 
@@ -429,7 +429,7 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
         *token = get_token(buffer);
     // ID 
         ASTNode *idFound = checkToken(token, T_ID, NO_KW);
-        insertLeft(dotFound, idFound);
+        insertRight(ptr, idFound);
         *token = get_token(buffer);
     // (
         ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
