@@ -65,4 +65,6 @@ void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
+void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+
 #endif // PARSER__H_

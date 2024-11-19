@@ -17,7 +17,6 @@ ASTNode * checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyW
     error_exit(2, "SYNTAX ERROR!\n"); 
     return NULL;
 }
-
 ASTNode *ruleNode(ASTNodeType rule) {
    ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
@@ -30,14 +29,12 @@ ASTNode *ruleNode(ASTNodeType rule) {
     node->token = NULL;
     return node;
 }
-
 void Parse(circ_buff_ptr buffer) {
     Token *token = NULL;
     ASTNode *progFound = ruleNode(P_PROG);
     ASTRoot = progFound;
     Prog(&token, progFound, buffer);
-} 
-
+}
 void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_PROLOG
     ASTNode *prolog = ruleNode(P_PROLOG); // save string and id
@@ -52,7 +49,6 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(function_def, end);
     End(token, end);
 }
-
 void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // CONST
     ASTNode *constFound = checkToken(token, T_KW, KW_CONST);
@@ -92,14 +88,12 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
-
 void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionFound = parseExpression(token, buffer);
     if (expressionFound != NULL) {
         insertRight(ptr, expressionFound);
     }
 }
-
 void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // PUB
     ASTNode *pubFound = checkToken(token, T_KW, KW_PUB);
@@ -148,7 +142,6 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         FunctionDef(token, function_def, buffer);
     }
 }
-
 void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
     // ID
     ASTNode *idFound = checkToken(token, T_ID, NO_KW);
@@ -169,7 +162,6 @@ void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
         CommaParFound(token, commaFound, buffer);
     }
 }
-
 void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
     ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
@@ -182,7 +174,6 @@ void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ParamList(token, paramList, buffer);
     }
 }
-
 void TypeComplete(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ?
     if ((*token)->type == T_QMARK) {
@@ -199,15 +190,12 @@ void TypeComplete(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         Type(token, type, buffer);
     }
 }
-
 void QMark(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ?
     ASTNode *qmarkFound = checkToken(token, T_QMARK, NO_KW);
     insertRight(ptr, qmarkFound);
-
     *token = get_token(buffer);
 }
-
 void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // [
     if ((*token)->type == T_LBRACKET) {
@@ -245,7 +233,6 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     *token = get_token(buffer);
 }
-
 void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_TYPE
     if((*token)->type == T_QMARK || (*token)->type == T_LBRACKET || ((*token)->type == T_KW && ((*token)->value.keyword == KW_I32 || (*token)->value.keyword == KW_F64 || (*token)->value.keyword == KW_BOOL) )) {
@@ -264,7 +251,6 @@ void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         error_exit(2, "SYNTAX ERROR!\n"); 
     }
 }
-
 void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // {
     ASTNode *lBraceFound = checkToken(token, T_LBRACE, NO_KW);
@@ -279,7 +265,6 @@ void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(rBraceFound);
     *token = get_token(buffer);
 }
-
 void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *statementRule = NULL;
     // P_VAR_DECLARATION
@@ -328,14 +313,19 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, statementRule);
         Continue(token, statementRule, buffer);
     }
+    //P_FOR_LOOP
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_FOR) {
+        statementRule = ruleNode(P_FOR_LOOP);
+        insertRight(ptr, statementRule);
+        For(token, statementRule, buffer);
+    }
     // More statements
-    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
+    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR))) {
         ASTNode *nextStatement = ruleNode(P_STATEMENT);
         insertLeft(statementRule, nextStatement);
         Statement(token, nextStatement, buffer);
     }
 }
-
 void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     (void) ptr;
     // continue
@@ -351,14 +341,12 @@ void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         ASTNode *idFound = checkToken(token, T_ID, NO_KW);
         insertRight(ptr, idFound);
         *token = get_token(buffer);
-
     }
     // ;
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
-
 void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     (void) ptr;
     // break
@@ -381,7 +369,6 @@ void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
-
 void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
      // T_KW
     if ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR)) {
@@ -442,7 +429,6 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
         error_exit(2, "SYNTAX ERROR!\n");
     }
 }
- 
 void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
     if ((*token)->type == T_ASGN) {
     // =
@@ -565,6 +551,44 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             error_exit(2, "SYNTAX ERROR3!\n");
         }
     }
+    // @AS
+    else if ((*token)->type == T_AT_AS) {
+        ASTNode *atASFound = checkToken(token, T_AT_AS, NO_KW);
+        insertRight(ptr, atASFound);
+        *token = get_token(buffer);
+    // (
+        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+        freeAST(lParenFound);
+        *token = get_token(buffer);
+    //i32
+        ASTNode *i32Found = checkToken(token, T_KW, KW_I32);
+        freeAST(i32Found);
+        *token = get_token(buffer);
+    //, 
+        ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
+        freeAST(commaFound);
+        *token = get_token(buffer);
+    //P_EXPRESSION
+        ASTNode *expressionFound = ruleNode(P_EXPRESSION);
+        insertLeft(atASFound, expressionFound);
+        Expression(token, expressionFound, buffer);
+        if (expressionFound->right == NULL) {
+            free_token(*token);
+            freeAST(ASTRoot); 
+            error_exit(2, "SYNTAX ERROR!\n"); 
+        }
+    //, 
+        if ((*token)->type == T_COMMA) {
+            ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
+            freeAST(commaFound);
+            *token = get_token(buffer);
+        }
+    // )
+            ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+            freeAST(rParenFound);
+            *token = get_token(buffer);
+        
+     }
     // P_EXPRESSION
     else {
         ASTNode *expressionFound = ruleNode(P_EXPRESSION);
@@ -629,7 +653,7 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         OptionalValue(token, OptionalValueRule, buffer);
         ASTNode *node = NULL;
     //P_SINGLE_STATEMENT
-        if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE))) {
+        if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR))) {
             node = ruleNode(P_SINGLE_STATEMENT);
             insertLeft(OptionalValueRule, node);
             SingleStatement(token, node, buffer, true);
@@ -648,7 +672,7 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
     }
     //P_SINGLE_STATEMENT
-    else if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE))) {
+    else if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR))) {
         ASTNode *node = ruleNode(P_SINGLE_STATEMENT);
         insertRight(ptr, node);
         SingleStatement(token, node, buffer, true);
@@ -726,6 +750,12 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool sem
         insertRight(ptr, statementRule);
         Break(token, statementRule, buffer);
     }
+    //P_FOR_LOOP
+    else if ((*token)->type == T_KW && (*token)->value.keyword == KW_FOR) {
+        statementRule = ruleNode(P_FOR_LOOP);
+        insertRight(ptr, statementRule);
+        For(token, statementRule, buffer);
+    }
     else {
         free_token(*token);
         freeAST(ASTRoot);
@@ -764,7 +794,7 @@ void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(elseFound);
     *token = get_token(buffer);
     // P_SINGLE_STATEMENT
-    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE)))  {
+    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR)))  {
         ASTNode *singleStatementRule = ruleNode(P_SINGLE_STATEMENT);
         insertRight(ptr, singleStatementRule);
         SingleStatement(token, singleStatementRule, buffer, true);
@@ -802,6 +832,11 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *expressionRule = ruleNode(P_EXPRESSION);
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
+    if (expressionRule->right == NULL) {
+            free_token(*token);
+            freeAST(ASTRoot); 
+            error_exit(2, "SYNTAX ERROR!\n"); 
+    }
     // )
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
     freeAST(rParenFound);
@@ -887,7 +922,7 @@ void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(lParenFound);
     *token = get_token(buffer);
     // single statement
-    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN))) {
+    if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR))) {
         ASTNode *singleStatementRule = ruleNode(P_SINGLE_STATEMENT);
         insertRight(ptr, singleStatementRule);
         SingleStatement(token, singleStatementRule, buffer, false);
@@ -928,7 +963,37 @@ void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
-
+void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    // FOR
+    ASTNode *forFound = checkToken(token, T_KW, KW_FOR);
+    freeAST(forFound);
+    *token = get_token(buffer);
+    // (
+    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+    freeAST(lParenFound);
+    *token = get_token(buffer);
+    // P_EXPRESSION
+    ASTNode *expressionRule = ruleNode(P_EXPRESSION);
+    insertRight(ptr, expressionRule);
+    Expression(token, expressionRule, buffer);
+    if (expressionRule->right == NULL) {
+            free_token(*token);
+            freeAST(ASTRoot); 
+            error_exit(2, "SYNTAX ERROR!\n"); 
+    }
+    // )
+    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+    freeAST(rParenFound);
+    *token = get_token(buffer);
+    // P_OPTIONAL_VALUE
+    ASTNode *OptionalValueRule = ruleNode(P_OPTIONAL_VALUE);
+    insertLeft(expressionRule, OptionalValueRule);
+    OptionalValue(token, OptionalValueRule, buffer);
+    // P_BLOCK
+    ASTNode *BlockRule = ruleNode(P_BLOCK);
+    insertLeft(OptionalValueRule, BlockRule);
+    Block(token, BlockRule, buffer);
+}
 void End(Token **token, ASTNode *ptr) {
     ASTNode *eofFound = checkToken(token,T_EOF, NO_KW);
     insertRight(ptr, eofFound);
