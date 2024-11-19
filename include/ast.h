@@ -16,7 +16,7 @@ typedef enum {
     P_PARAM_LIST,           // <param_list> -> ID : <type_complete> <comma_par_found> | ε
     P_COMMA_PAR_FOUND,      // <comma_par_found> -> , <param_list> | ε
     P_BLOCK,                // <block> -> { <statement> }
-    P_STATEMENT,            // <statement> -> <var_declaration> <statement> | ID <ID_found> <statement> | <if_statement> <statement> | <for_loop> <statement> | <while_loop> <statement> | <return_statement> <statement> | ε
+    P_STATEMENT,            // <statement> -> <var_declaration> <statement> | ID <ID_found> <statement> | <if_statement> <statement> | <for_loop> <statement> | <while_loop> <statement> | <return_statement> <statement> | <break> <statemet> | <continue> <statement> | ε
     P_ID_FOUND,             // <ID_found> -> = <asgn_found> ; | ( <expression_list> ); | : <while_loop>
     P_VAR_DECLARATION,      // <var_declaration> -> const ID : <type_complete> = <asgn_found> ; | var ID : <type_complete> = <asgn_found> ;
     P_IF_STATEMENT,         // <if_statement> -> if ( <expression> ) <if_found>
@@ -36,6 +36,8 @@ typedef enum {
     P_FUNCTION_TYPE,        // <function_type> -> <type> | void
     P_EXPRESSION,           // expession_parser()
     P_ASGN_FOUND,           // <asgn_found> -> <expression> | if (<expression>) <expression> else <expression>
+    P_CONTINUE,             // <continue> -> continue ;
+    P_BREAK,                // <break> -> break ;
 
 
 // Terminal nodes (for each terminal in T)

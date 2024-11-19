@@ -221,6 +221,14 @@ void printNodeType(ASTNodeType type){
         case P_WHILE_LOOP:
             printf("P_WHILE_LOOP");
             break;
+        
+        case P_CONTINUE:
+            printf("P_CONTINUE");
+            break;
+
+        case P_BREAK:
+            printf("P_BREAK");
+            break;
 
         case P_RETURN_STATEMENT:
             printf("P_RETURN_STATEMENT");

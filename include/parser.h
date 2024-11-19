@@ -45,6 +45,10 @@ void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
+void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+
+void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
+
 void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
 
 void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer);
