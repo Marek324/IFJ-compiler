@@ -153,11 +153,22 @@ void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
         ASTNode* root = (ASTNode*)stackGetTop(operator_stack);
         stackPop(operator_stack);
         if(!stackIsEmpty(operand_stack)) {
+            if(root->type == T_UNREACHABLE) {
+                // create a new token for unreachable
+                Token *token = (Token *)malloc(sizeof(Token));
+                if (token == NULL){ 
+                    error_exit(99, "Memory allocation failed"); 
+                }
+                token->type = T_KW;
+                token->value.keyword = KW_UNREACHABLE;
+                // create node for unreachable
+                ASTNode* node = nodeCreate(convertToASTType(T_KW, token->value.keyword), token);
+                stackPush(operand_stack, (long)node);
+            }
             ASTNode* child = (ASTNode*)stackGetTop(operand_stack);
             stackPop(operand_stack);
             insertRight(root, child);
-
-            if(root->type != BANG && root->type != T_UNREACHABLE) {
+            if(root->type != BANG) {
                 child = (ASTNode*)stackGetTop(operand_stack);
                 stackPop(operand_stack);
                 insertLeft(root, child);
@@ -272,6 +283,7 @@ bool isOperand(Token* token) {
                 case KW_TRUE:
                 case KW_FALSE:
                 case KW_NULL:
+                case KW_UNREACHABLE:
                     return true;
                 default:
                     return false;
