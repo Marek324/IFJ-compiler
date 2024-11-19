@@ -53,6 +53,22 @@ void symtable_remove(symtable_node_ptr node) {
     }
 }
 
+void simple_right_rot(symtable_node_ptr root) {
+
+}
+
+void simple_left_rot(symtable_node_ptr root) {
+
+}
+
+void right_left_rot(symtable_node_ptr root) {
+
+}
+
+void left_right_rot(symtable_node_ptr root) {
+
+}
+
 void symtable_dispose(symtable_node_ptr root) {
     if (root == NULL) {
         return;
