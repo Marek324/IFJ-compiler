@@ -3,7 +3,7 @@
 #include "error.h"
 #include "ast.h"
 
-symtable_node_ptr symNodeCreate(char *key) {
+symtable_node_ptr symtable_node_create(char *key) {
     symtable_node_ptr node = (symtable_node_ptr)malloc(sizeof(symtable_node_t));
     node->key = myStrDup(key);
     node->left = NULL;
@@ -16,7 +16,7 @@ int max(int a, int b) {
     return a > b ? a : b;
 }
 
-char* myStrDup(char* key) {
+char* my_str_dup(char* key) {
     char* newStr = (char*)malloc(strlen(key) + 1);
     if(newStr == NULL) {
         freeAST(ASTRoot);
@@ -24,6 +24,10 @@ char* myStrDup(char* key) {
     }
     strcpy(newStr, key);
     return newStr;
+}
+
+int get_balance (symtable_node_ptr node) {
+    return node != NULL ? height(node-right) - height(node-left) : 0;
 }
 
 int height(symtable_node_ptr node){
