@@ -67,6 +67,7 @@ typedef enum {
     COLON,
     PIPE,
     QMARK,
+    AT_AS,
 
     END_OF_FILE,
 

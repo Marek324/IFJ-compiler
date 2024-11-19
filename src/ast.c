@@ -104,6 +104,7 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
         case T_COLON: return COLON;
         case T_PIPE: return PIPE;
         case T_QMARK: return QMARK;
+        case T_AT_AS: return AT_AS;
         case T_EOF: return END_OF_FILE;
         default: return 99;
     }

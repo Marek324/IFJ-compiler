@@ -289,6 +289,10 @@ void printNodeType(ASTNodeType type){
             printf("AT_IMPORT");
             break;
 
+        case AT_AS:
+            printf("AT_AS");
+            break;
+
         case TYPE_INT:
             printf("TYPE_INT");
             break;
