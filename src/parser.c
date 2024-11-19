@@ -342,6 +342,17 @@ void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *continueFound = checkToken(token, T_KW, KW_CONTINUE);
     freeAST(continueFound);
     *token = get_token(buffer);
+    //:
+    if ((*token)->type == T_COLON) {
+        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+        freeAST(colonFound);
+        *token = get_token(buffer);
+    // ID 
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        insertRight(ptr, idFound);
+        *token = get_token(buffer);
+
+    }
     // ;
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
     freeAST(semiColonFound);
@@ -354,6 +365,17 @@ void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *breakFound = checkToken(token, T_KW, KW_BREAK);
     freeAST(breakFound);
     *token = get_token(buffer);
+    //:
+    if ((*token)->type == T_COLON) {
+        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+        freeAST(colonFound);
+        *token = get_token(buffer);
+    // ID 
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        insertRight(ptr, idFound);
+        *token = get_token(buffer);
+
+    }
     // ;
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
     freeAST(semiColonFound);
