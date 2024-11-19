@@ -1,4 +1,4 @@
 const ifj = @import("ifj24.zig");
 pub fn bar(param : []u8, lol : i32) void {
-a = "";
+a = if (s) 12 else 3;
 }

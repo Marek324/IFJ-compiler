@@ -478,7 +478,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if (expressionRule->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR!\n");
+            error_exit(2, "SYNTAX ERROR1!\n");
         }
         // )
         ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
@@ -486,25 +486,25 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
         // P_EXPRESSION
         ASTNode *expressionRule2 = ruleNode(P_EXPRESSION);
-        insertRight(expressionRule, expressionRule2);
+        insertLeft(expressionRule, expressionRule2);
         Expression(token, expressionRule2, buffer);
         if (expressionRule2->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR!\n");
+            error_exit(2, "SYNTAX ERROR2!\n");
         }
-        // else
-        ASTNode *elseFound = checkToken(token, T_KW, NO_KW);
+        // ELSE
+        ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
         freeAST(elseFound);
         *token = get_token(buffer);
         // P_EXPRESSION
         ASTNode *expressionRule3 = ruleNode(P_EXPRESSION);
-        insertRight(expressionRule2, expressionRule3);
+        insertLeft(expressionRule2, expressionRule3);
         Expression(token, expressionRule3, buffer);
         if (expressionRule3->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR!\n");
+            error_exit(2, "SYNTAX ERROR3!\n");
         }
     }
     // P_EXPRESSION

@@ -265,6 +265,10 @@ void printNodeType(ASTNodeType type){
         case P_EXPRESSION:
             printf("P_EXPRESSION");
             break;  
+        
+        case P_ASGN_FOUND:
+            printf("P_ASGN_FOUND");
+            break;
 
         case ID:
             printf("ID");
