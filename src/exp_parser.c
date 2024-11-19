@@ -53,7 +53,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         }
         else {
             node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);    
-        }        
+        }      
         // for function calls ----------------------------------------------------------------------
         if((temp_type == T_ID) && ((*token)->type == T_LPAREN || (*token)->type == T_DOT)) {
             if((*token)->type == T_LPAREN) {
@@ -88,6 +88,42 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             }
             // RPAREN
             free(*token);
+            *token = get_token(buff);
+            continue;
+        }
+        else if(temp_type == T_DOT && (*token)->type == T_QMARK) {
+            // frees QMARK node
+            freeAST(node);
+            // create a new token for orelse
+            Token *new_token = (Token *)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                freeAll(paren_depth, operand_stack, operator_stack);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_KW;
+            new_token->value.keyword = KW_ORELSE;
+            // create node for orelse
+            node = nodeCreate(convertToASTType(T_KW, new_token->value.keyword), new_token);
+            stackPush(operator_stack, (long)node);
+
+            // create a new token for unreachable
+            new_token = (Token *)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                freeAll(paren_depth, operand_stack, operator_stack);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_KW;
+            new_token->value.keyword = KW_UNREACHABLE;
+            // create node for unreachable
+            node = nodeCreate(convertToASTType(T_KW, new_token->value.keyword), new_token);
+            stackPush(operand_stack, (long)node);
+            // gets token after QMARK
+            *token = get_token(buff);
+            continue;
+        }
+        // for possible unreachable states "a.?"
+        if(node->type == DOT) {
+            freeAST(node);
             *token = get_token(buff);
             continue;
         }
@@ -153,18 +189,6 @@ void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
         ASTNode* root = (ASTNode*)stackGetTop(operator_stack);
         stackPop(operator_stack);
         if(!stackIsEmpty(operand_stack)) {
-            if(root->type == T_UNREACHABLE) {
-                // create a new token for unreachable
-                Token *token = (Token *)malloc(sizeof(Token));
-                if (token == NULL){ 
-                    error_exit(99, "Memory allocation failed"); 
-                }
-                token->type = T_KW;
-                token->value.keyword = KW_UNREACHABLE;
-                // create node for unreachable
-                ASTNode* node = nodeCreate(convertToASTType(T_KW, token->value.keyword), token);
-                stackPush(operand_stack, (long)node);
-            }
             ASTNode* child = (ASTNode*)stackGetTop(operand_stack);
             stackPop(operand_stack);
             insertRight(root, child);
