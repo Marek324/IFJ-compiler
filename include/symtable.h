@@ -5,16 +5,16 @@
 #define SYMTABLE_H
 
 typedef enum {
-    T_VAR,
-    T_FUN,
+    T_VAR_SYM,
+    T_FUN_SYM,
 } symtable_entry_type;
 
 typedef enum {
-    T_INT,
-    T_FLOAT,
-    T_BOOL,
-    T_STR,
-    T_NULL
+    T_INT_RET,
+    T_FLOAT_RET,
+    T_BOOL_RET,
+    T_STR_RET,
+    T_NULL_RET
 } ret_type;
 
 typedef struct symtable_node_s *symtable_node_ptr;

@@ -18,23 +18,23 @@ void print_symtable(symtable_node_ptr tree) {
 
 void printReturnType(ret_type type) {
     switch (type) {
-        case T_INT:
+        case T_INT_RET:
             printf("int");
             break;
 
-        case T_FLOAT:
+        case T_FLOAT_RET:
             printf("float");
             break;
 
-        case T_BOOL:
+        case T_BOOL_RET:
             printf("bool");
             break;
 
-        case T_STR:
+        case T_STR_RET:
             printf("str");
             break;
 
-        case T_NULL:
+        case T_NULL_RET:
             printf("null");
             break;
 
@@ -46,11 +46,11 @@ void printReturnType(ret_type type) {
 
 void printEntryType(symtable_entry_type type) {
     switch (type) {
-        case T_VAR:
+        case T_VAR_SYM:
             printf("var");
             break;
 
-        case T_FUN:
+        case T_FUN_SYM:
             printf("fun");
             break;
 
@@ -69,7 +69,7 @@ void print_sym_node(symtable_node_ptr node)
     printf("%d, ", node->entry->isNullable);
     printf("%d, ", node->entry->isUsed);
     printf("%d, ", node->entry->isChanged);
-    if(node->entry->entry_type == T_FUN){
+    if(node->entry->entry_type == T_FUN_SYM){
         printf("%d {", node->entry->param_count);
         for (int i = 0; i < node->entry->param_count; i++) {
             printf("%d, ", node->entry->param_nullable[i]);

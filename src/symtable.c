@@ -3,9 +3,19 @@
 #include "error.h"
 #include "ast.h"
 
+char* my_str_dup(char* key) {
+    char* newStr = (char*)malloc(strlen(key) + 1);
+    if(newStr == NULL) {
+        freeAST(ASTRoot);
+        error_exit(99, "ERROR: Unable to allocate memory for newStr\n");
+    }
+    strcpy(newStr, key);
+    return newStr;
+}
+
 symtable_node_ptr symtable_node_create(char *key) {
     symtable_node_ptr node = (symtable_node_ptr)malloc(sizeof(symtable_node_t));
-    node->key = myStrDup(key);
+    node->key = my_str_dup(key);
     node->left = NULL;
     node->right = NULL;
     node->entry = (symtable_entry_ptr) malloc(sizeof(symtable_entry_t));
@@ -18,20 +28,6 @@ int max(int a, int b) {
     return a > b ? a : b;
 }
 
-char* my_str_dup(char* key) {
-    char* newStr = (char*)malloc(strlen(key) + 1);
-    if(newStr == NULL) {
-        freeAST(ASTRoot);
-        error_exit(99, "ERROR: Unable to allocate memory for newStr\n");
-    }
-    strcpy(newStr, key);
-    return newStr;
-}
-
-int get_balance (symtable_node_ptr node) {
-    return node != NULL ? height(node->right) - height(node->left) : 0;
-}
-
 int height(symtable_node_ptr node){
     if (node == NULL) {
         return 0;
@@ -39,15 +35,30 @@ int height(symtable_node_ptr node){
     return 1 + max(height(node->left), height(node->right));
 }
 
+int get_balance (symtable_node_ptr node) {
+    return node != NULL ? height(node->right) - height(node->left) : 0;
+}
+
+void symtable_dispose(symtable_node_ptr root);
+
 void symtable_free_entry(symtable_entry_ptr entry) {
-    if(entry->isNullable != NULL) {
-        free(entry->isNullable);
-    }
     if(entry->param_types != NULL) {
         free(entry->param_types);
     }
     symtable_dispose(entry->local_symtable);
     free(entry);
+}
+
+void symtable_dispose(symtable_node_ptr root) {
+    if (root == NULL) {
+        return;
+    }
+    symtable_dispose(root->left);
+    symtable_dispose(root->right);
+    symtable_free_entry(root->entry);
+    free(root->key);
+    free(root);
+    root = NULL;
 }
 
 void symtable_init(symtable_tree_ptr tree) {
@@ -127,14 +138,3 @@ void rebalance(symtable_tree_ptr root) {
 }
 
 
-void symtable_dispose(symtable_node_ptr root) {
-    if (root == NULL) {
-        return;
-    }
-    symtable_dispose(root->left);
-    symtable_dispose(root->right);
-    symtable_free_entry(root->entry);
-    free(root->key);
-    free(root);
-    root = NULL;
-}
