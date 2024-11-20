@@ -179,7 +179,14 @@ bool update_balances(symtable_tree_ptr tree) {
 
 void rebalance(symtable_tree_ptr tree) {
     if (tree == NULL || (*tree) == NULL) return;
-
+    rebalance(&((*tree)->left));
+    rebalance(&((*tree)->right));
+    if((*tree)->balance_factor > 1) {
+        simple_left_rot(tree);
+    }
+    else if((*tree)->balance_factor < -1) {
+        simple_right_rot(tree);
+    }
 }
 
 void symtable_dispose(symtable_tree_ptr tree) {
