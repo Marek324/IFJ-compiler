@@ -27,10 +27,7 @@ test: tests/TestsCheck.c $(OBJS)
 	@rm -f test
 
 clean:
-	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00
-
-purge: clean
-	rm -f $(TARGET) test
+	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test
 
 submit: purge
 	mkdir xhricma00

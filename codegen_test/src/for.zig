@@ -11,4 +11,5 @@ pub fn main() void {
         ifj.write(character);
         ifj.write(".\n");
     }
+    ifj.print("koteseni\n");
 }
