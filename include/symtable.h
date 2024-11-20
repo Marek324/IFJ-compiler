@@ -18,6 +18,7 @@ typedef enum {
 } ret_type;
 
 typedef struct symtable_node_s *symtable_node_ptr;
+typedef struct symtable_node_s **symtable_tree_ptr;
 
 typedef struct symtable_entry_s{
     symtable_entry_type entry_type;
@@ -38,7 +39,7 @@ typedef struct symtable_entry_s{
     bool *param_nullable;
     ret_type *param_types;
     bool returnsValue;
-    symtable_node_ptr local_symtable;
+    symtable_tree_ptr local_symtable;
 } symtable_entry_t, *symtable_entry_ptr;
 
 typedef struct symtable_node_s{
@@ -46,11 +47,11 @@ typedef struct symtable_node_s{
     struct symtable_node_s *left, *right;
     symtable_entry_ptr entry;
     int balance_factor;
-} symtable_node_t, **symtable_tree_ptr;
+} symtable_node_t;
 
-symtable_node_ptr symNodeCreate(char *key);
+symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type);
 
-void symtable_dispose(symtable_node_ptr root);
+void symtable_dispose(symtable_tree_ptr tree);
 
 char* my_str_dup(char* key);
 
@@ -64,7 +65,7 @@ void symtable_free_entry(symtable_entry_ptr entry);
 
 void symtable_init(symtable_tree_ptr tree);
 
-void symtable_insert(symtable_node_ptr node);
+void symtable_insert(symtable_tree_ptr tree, char* key, symtable_entry_type type);
 
 void symtable_remove(symtable_node_ptr node);
 
@@ -77,5 +78,11 @@ void right_left_rot(symtable_tree_ptr root);
 void left_right_rot(symtable_tree_ptr root);
 
 void rebalance(symtable_tree_ptr root);
+
+symtable_entry_ptr symtable_entry_init();
+
+// symtable_entry_var_modify();
+
+// symtable_entry_fun_modify();
 
 #endif // SYMTABLE_H
