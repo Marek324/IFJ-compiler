@@ -28,7 +28,7 @@ int max(int a, int b) {
     return a > b ? a : b;
 }
 
-int height(symtable_node_ptr node){
+int height(symtable_node_ptr node) {
     if (node == NULL) {
         return 0;
     }

@@ -49,6 +49,33 @@ typedef struct symtable_node_s{
 } symtable_node_t, **symtable_tree_ptr;
 
 symtable_node_ptr symNodeCreate(char *key);
+
 void symtable_dispose(symtable_node_ptr root);
+
+char* my_str_dup(char* key);
+
+int max(int a, int b);
+
+int height(symtable_node_ptr node);
+
+int get_balance (symtable_node_ptr node);
+
+void symtable_free_entry(symtable_entry_ptr entry);
+
+void symtable_init(symtable_tree_ptr tree);
+
+void symtable_insert(symtable_node_ptr node);
+
+void symtable_remove(symtable_node_ptr node);
+
+void simple_right_rot(symtable_tree_ptr root);
+
+void simple_left_rot(symtable_tree_ptr root);
+
+void right_left_rot(symtable_tree_ptr root);
+
+void left_right_rot(symtable_tree_ptr root);
+
+void rebalance(symtable_tree_ptr root);
 
 #endif // SYMTABLE_H
