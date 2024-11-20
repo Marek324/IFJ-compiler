@@ -132,6 +132,19 @@ void simple_left_rot(symtable_tree_ptr root) {
     T2->balance_factor = get_balance(T2);
 }
 
+symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key) {
+    if (tree == NULL) return NULL;
+
+  if (strcmp(tree->key, key) == 0) {
+    return tree;
+  }
+  else if (strcmp(tree->key, key) < 0 ) {
+    return symtable_search(tree->right, key);
+  }
+  else {
+      return symtable_search(tree->left, key);
+    }
+}
 
 void symtable_dispose(symtable_tree_ptr tree) {
     if ((*tree) == NULL) {
