@@ -101,9 +101,9 @@ void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type 
     if(strcmp((*tree)->key, new_key) < 0) {
         symtable_insert(&((*tree)->right), new_key, type);
     }
-    // new_key is bigger than the node key (we go right)
+    // new_key is smaller than the node key (we go left)
     else if(strcmp((*tree)->key, new_key) > 0) {
-        symtable_insert(&((*tree)->right), new_key, type);
+        symtable_insert(&((*tree)->left), new_key, type);
     }
     else {
         // key already exists in symtable
