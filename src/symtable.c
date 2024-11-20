@@ -60,10 +60,6 @@ int max(int a, int b) {
     return a > b ? a : b;
 }
 
-int get_balance (symtable_node_ptr node) {
-    return node != NULL ? height(node->left) - height(node->right) : 0;
-}
-
 int height(symtable_node_ptr node){
     if (node == NULL) {
         return 0;
