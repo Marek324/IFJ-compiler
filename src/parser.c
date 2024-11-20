@@ -788,6 +788,7 @@ void ElseStatementWhile(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, BlockRule);
     Block(token, BlockRule, buffer);
 }
+
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ELSE 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
