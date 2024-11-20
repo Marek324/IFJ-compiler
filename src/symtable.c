@@ -104,12 +104,13 @@ void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type 
     // new_key is smaller than the node key (we go left)
     else if(strcmp((*tree)->key, new_key) > 0) {
         symtable_insert(&((*tree)->left), new_key, type);
+        fprintf(stderr, "**********\n");
     }
     else {
         // key already exists in symtable
         symtable_dispose(tree);
         freeAST(ASTRoot);
-        error_exit(5, "ERROR: Redefinition of a variable or function!");
+        error_exit(5, "ERROR: Redefinition of a variable or function!\n");
     }
 }
 
@@ -193,13 +194,15 @@ void rebalance(symtable_tree_ptr tree) {
 }
 
 void symtable_dispose(symtable_tree_ptr tree) {
-    if ((*tree) == NULL) {
+    if (tree == NULL || (*tree) == NULL) {
         return;
     }
     symtable_dispose(&((*tree)->left));
     symtable_dispose(&((*tree)->right));
     symtable_free_entry((*tree)->entry);
-    free((*tree)->key);
-    free(tree);
+    if((*tree)->key != NULL) {
+        free((*tree)->key);
+    }
+    free(*tree);    
     *tree = NULL;
 }

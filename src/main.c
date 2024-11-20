@@ -44,8 +44,9 @@ void test_symtable() {
     }
 
     printf("TEST 4: Handle duplicate insertion\n");
+    symtable_insert(&symtable, "key2", T_VAR_SYM);
     // Expect an error_exit when attempting to insert a duplicate key
-    printf("EXPECTED: Error for duplicate key insertion...\n");
+    fprintf(stderr, "EXPECTED: Error for duplicate key insertion...\n");
 
     printf("TEST 5: Cleanup\n");
     symtable_dispose(&symtable);
