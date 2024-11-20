@@ -60,16 +60,6 @@ int max(int a, int b) {
     return a > b ? a : b;
 }
 
-char* my_str_dup(char* key) {
-    char* newStr = (char*)malloc(strlen(key) + 1);
-    if(newStr == NULL) {
-        freeAST(ASTRoot);
-        error_exit(99, "ERROR: Unable to allocate memory for newStr\n");
-    }
-    strcpy(newStr, key);
-    return newStr;
-}
-
 int get_balance (symtable_node_ptr node) {
     return node != NULL ? height(node->left) - height(node->right) : 0;
 }
@@ -97,18 +87,6 @@ void symtable_free_entry(symtable_entry_ptr entry) {
         symtable_dispose(entry->local_symtable);
         free(entry);
     }
-}
-
-void symtable_dispose(symtable_tree_ptr tree) {
-    if (*tree == NULL) {
-        return;
-    }
-    symtable_dispose(&((*tree)->left));
-    symtable_dispose(&((*tree)->right));
-    symtable_free_entry((*tree)->entry);
-    free((*tree)->key);
-    free((*tree));
-    *tree = NULL;
 }
 
 void symtable_init(symtable_tree_ptr tree) {
