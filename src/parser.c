@@ -118,7 +118,7 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(lParenFound,paramList);
         ParamList(token, paramList, buffer);
     // )
-        rParenFound = checkToken(token, T_RPAREN, NO_KW);
+         rParenFound = checkToken(token, T_RPAREN, NO_KW);
         insertLeft(paramList, rParenFound);
         *token = get_token(buffer);
     } else {
@@ -509,7 +509,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF) {
         //IF
         ASTNode *ifFound = checkToken(token, T_KW, KW_IF);
-        freeAST(ifFound);
+        insertRight(ptr, ifFound);
         *token = get_token(buffer);
         // (
         ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
@@ -517,7 +517,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
         //P_EXPRESSION
         ASTNode *expressionRule = ruleNode(P_EXPRESSION);
-        insertRight(ptr, expressionRule);
+        insertLeft(ifFound, expressionRule);
         Expression(token, expressionRule, buffer);
         if (expressionRule->right == NULL) {
             free_token(*token);
@@ -788,6 +788,7 @@ void ElseStatementWhile(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, BlockRule);
     Block(token, BlockRule, buffer);
 }
+
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ELSE 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
