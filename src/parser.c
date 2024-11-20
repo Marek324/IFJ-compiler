@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "exp_parser.h"
            
-ASTNode * checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWord) {
+ASTNode * checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWord, const char *error) {
     ASTNode *ptr = NULL;
     if ((*token)->type == T_KW) {
         if ((*token)->value.keyword == wantedKeyWord) {
@@ -14,9 +14,10 @@ ASTNode * checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyW
     }
     free_token(*token);
     freeAST(ASTRoot);
-    error_exit(2, "SYNTAX ERROR!\n"); 
+    error_exit(2, "%s\n", error); 
     return NULL;
 }
+
 ASTNode *ruleNode(ASTNodeType rule) {
    ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
@@ -29,6 +30,7 @@ ASTNode *ruleNode(ASTNodeType rule) {
     node->token = NULL;
     return node;
 }
+
 void Parse(circ_buff_ptr buffer) {
     Token *token = NULL;
     ASTNode *progFound = ruleNode(P_PROG);
@@ -51,23 +53,23 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // CONST
-    ASTNode *constFound = checkToken(token, T_KW, KW_CONST);
+    ASTNode *constFound = checkToken(token, T_KW, KW_CONST,"SYNTAX ERROR: Prolog expected CONST");
     freeAST(constFound);
     // ID 
     *token = get_token(buffer);
-    ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+    ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: Prolog expected ID");
     insertRight(ptr, idFound);
     // =
     *token = get_token(buffer);
-    ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
+    ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW, "SYNTAX ERROR: Prolog expected =");
     freeAST(asgnFound);
     // @import
     *token = get_token(buffer);
-    ASTNode *importFound = checkToken(token, T_AT_IMPORT, NO_KW);
+    ASTNode *importFound = checkToken(token, T_AT_IMPORT, NO_KW, "SYNTAX ERROR: Prolog expected @import");
     freeAST(importFound);
     // (
     *token = get_token(buffer);
-    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: Prolog expected (");
     freeAST(lParenFound);
     // P_EXPRESSION
     ASTNode *expression = ruleNode(P_EXPRESSION);
@@ -80,11 +82,11 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         error_exit(2, "SYNTAX ERROR: Prolog (Expression)\n"); 
     }
     // )
-    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: Prolog expected )");
     freeAST(rParenFound);
     // ;
     *token = get_token(buffer);
-    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: Prolog expected ;");
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
@@ -96,19 +98,19 @@ void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // PUB
-    ASTNode *pubFound = checkToken(token, T_KW, KW_PUB);
+    ASTNode *pubFound = checkToken(token, T_KW, KW_PUB, "SYNTAX ERROR: FuncDef expected PUB");
     freeAST(pubFound);
     // FN
     *token = get_token(buffer);
-    ASTNode *fnFound = checkToken(token, T_KW, KW_FN);
+    ASTNode *fnFound = checkToken(token, T_KW, KW_FN, "SYNTAX ERROR: FuncDef expected FN");
     freeAST(fnFound);
     // ID
     *token = get_token(buffer);
-    ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+    ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: FuncDef expected ID");
     insertRight(ptr, idFound);
     // (
     *token = get_token(buffer);
-    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected (");
     insertLeft(idFound, lParenFound);
     // P_PARAM_LIST
     *token = get_token(buffer);
@@ -118,12 +120,12 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(lParenFound,paramList);
         ParamList(token, paramList, buffer);
     // )
-         rParenFound = checkToken(token, T_RPAREN, NO_KW);
+         rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected )");
         insertLeft(paramList, rParenFound);
         *token = get_token(buffer);
     } else {
     // )
-    rParenFound = checkToken(token, T_RPAREN, NO_KW);
+    rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected )");
     insertLeft(lParenFound, rParenFound);
     *token = get_token(buffer);
     }
@@ -144,11 +146,11 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
     // ID
-    ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+    ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: ParamList expected ID");
     insertRight(ptr, idFound);
     // :
     *token = get_token(buffer);
-    ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+    ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: ParamList expected :");
     freeAST(colonFound);
     // P_TYPE_COMPLETE
     *token = get_token(buffer);
@@ -164,7 +166,7 @@ void ParamList(Token **token, ASTNode *ptr, circ_buff_ptr buffer){
 }
 void CommaParFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
-    ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
+    ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: CommaParFound expected ,");
     freeAST(commaFound);
     // P_PARAM_LIST
     *token = get_token(buffer);
@@ -192,43 +194,43 @@ void TypeComplete(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 }
 void QMark(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ?
-    ASTNode *qmarkFound = checkToken(token, T_QMARK, NO_KW);
+    ASTNode *qmarkFound = checkToken(token, T_QMARK, NO_KW, "SYNTAX ERROR: QMark expected ?");
     insertRight(ptr, qmarkFound);
     *token = get_token(buffer);
 }
 void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // [
     if ((*token)->type == T_LBRACKET) {
-        ASTNode *lBracketFound = checkToken(token, T_LBRACKET, NO_KW);
+        ASTNode *lBracketFound = checkToken(token, T_LBRACKET, NO_KW, "SYNTAX ERROR: Type expected [");
         freeAST(lBracketFound);
         *token = get_token(buffer);
     // ]
-        ASTNode *rBracketFound = checkToken(token, T_RBRACKET, NO_KW);
+        ASTNode *rBracketFound = checkToken(token, T_RBRACKET, NO_KW,"SYNTAX ERROR: Type expected ]" );
         freeAST(rBracketFound);
         *token = get_token(buffer);
     // u8
-        ASTNode *u8Found = checkToken(token, T_KW, KW_U8);
+        ASTNode *u8Found = checkToken(token, T_KW, KW_U8, "SYNTAX ERROR: Type expected u8");
         insertRight(ptr, u8Found);
     }
     else {
         if ((*token)->type == T_KW && (*token)->value.keyword != KW_VOID) {
             if ((*token)->value.keyword == KW_I32) {
-                ASTNode *i32Found = checkToken(token, T_KW, KW_I32);
+                ASTNode *i32Found = checkToken(token, T_KW, KW_I32, "SYNTAX ERROR: Type expected i32");
                 insertRight(ptr, i32Found);
             }
             if ((*token)->value.keyword == KW_F64) {
-                ASTNode *f64Found = checkToken(token, T_KW, KW_F64);
+                ASTNode *f64Found = checkToken(token, T_KW, KW_F64, "SYNTAX ERROR: Type expected f64");
                 insertRight(ptr, f64Found);
             }
             if ((*token)->value.keyword == KW_BOOL) {
-                ASTNode *boolFound = checkToken(token, T_KW, KW_BOOL);
+                ASTNode *boolFound = checkToken(token, T_KW, KW_BOOL, "SYNTAX ERROR: Type expected bool");
                 insertRight(ptr, boolFound);
             }
         }
         else {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR!\n"); 
+            error_exit(2, "SYNTAX ERROR: Type unknown type\n"); 
         }
     }
     *token = get_token(buffer);
@@ -242,18 +244,19 @@ void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     // VOID
     else if ((*token)->value.keyword == KW_VOID) {
-                ASTNode *voidFound = checkToken(token, T_KW, KW_VOID);
+                ASTNode *voidFound = checkToken(token, T_KW, KW_VOID, "SYNTAX ERROR: FuncType expected void");
                 insertRight(ptr, voidFound);
                 *token = get_token(buffer);
             }
     else {
+        free_token(*token);
         freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR!\n"); 
+        error_exit(2, "SYNTAX ERROR: Unknown func type\n"); 
     }
 }
 void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // {
-    ASTNode *lBraceFound = checkToken(token, T_LBRACE, NO_KW);
+    ASTNode *lBraceFound = checkToken(token, T_LBRACE, NO_KW, "SYNTAX ERROR: Block expected {");
     freeAST(lBraceFound);
     *token = get_token(buffer);
     //P_STATEMENT
@@ -261,7 +264,7 @@ void Block(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, statement);
     Statement(token, statement, buffer);
     // }
-    ASTNode *rBraceFound = checkToken(token, T_RBRACE, NO_KW);
+    ASTNode *rBraceFound = checkToken(token, T_RBRACE, NO_KW, "SYNTAX ERROR: Block expected }");
     freeAST(rBraceFound);
     *token = get_token(buffer);
 }
@@ -275,7 +278,7 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     } 
     // ID
     else if ((*token)->type == T_ID) {
-        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: Statement expected ID");
         insertRight(ptr, idFound);
     // P_ID_FOUND
         *token = get_token(buffer);
@@ -319,6 +322,11 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, statementRule);
         For(token, statementRule, buffer);
     }
+    else {
+        free_token(*token);
+        freeAST(ASTRoot);
+        error_exit(2, "SYNTAX ERROR: Not a statement\n"); 
+    }
     // More statements
     if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR))) {
         ASTNode *nextStatement = ruleNode(P_STATEMENT);
@@ -329,43 +337,43 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void Continue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     (void) ptr;
     // continue
-    ASTNode *continueFound = checkToken(token, T_KW, KW_CONTINUE);
+    ASTNode *continueFound = checkToken(token, T_KW, KW_CONTINUE, "SYNTAX ERROR: Continue expected continue");
     freeAST(continueFound);
     *token = get_token(buffer);
     //:
     if ((*token)->type == T_COLON) {
-        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: Continue expected :");
         freeAST(colonFound);
         *token = get_token(buffer);
     // ID 
-        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: Continue expected ID");
         insertRight(ptr, idFound);
         *token = get_token(buffer);
     }
     // ;
-    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: Continue expected ;");
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
 void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     (void) ptr;
     // break
-    ASTNode *breakFound = checkToken(token, T_KW, KW_BREAK);
+    ASTNode *breakFound = checkToken(token, T_KW, KW_BREAK, "SYNTAX ERROR: Break expected break");
     freeAST(breakFound);
     *token = get_token(buffer);
     //:
     if ((*token)->type == T_COLON) {
-        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: Break expected :");
         freeAST(colonFound);
         *token = get_token(buffer);
     // ID 
-        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: Break expected ID");
         insertRight(ptr, idFound);
         *token = get_token(buffer);
 
     }
     // ;
-    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: Break expected ;");
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
@@ -375,24 +383,24 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
         ASTNode *node = NULL;
     // CONST
         if ((*token)->value.keyword == KW_CONST ) {
-            node = checkToken(token, T_KW, KW_CONST);
+            node = checkToken(token, T_KW, KW_CONST, "SYNTAX ERROR: VarDec expected CONST");
             insertRight(ptr, node);
         }
     // VAR
         else {
-            node = checkToken(token, T_KW, KW_VAR);
+            node = checkToken(token, T_KW, KW_VAR, "SYNTAX ERROR: VarDec expected VAR");
             insertRight(ptr, node);
         }
         *token = get_token(buffer);
     // ID
-        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: VarDec expected ID");
         insertLeft(node, idFound);
         *token = get_token(buffer);
         ASTNode* asgnFound = NULL;
         // if we decide to include the datatype during variable declaration
         if((*token)->type == T_COLON) {
             // :
-            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: VarDec expected :");
             freeAST(colonFound);
             *token = get_token(buffer);
 
@@ -402,13 +410,13 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
             TypeComplete(token, type_complete, buffer);
 
             // =
-            asgnFound = checkToken(token, T_ASGN, NO_KW);
+            asgnFound = checkToken(token, T_ASGN, NO_KW, "SYNTAX ERROR: VarDec expected =");
             insertLeft(type_complete, asgnFound);
             *token = get_token(buffer);
         }
         else { 
             // =
-            asgnFound = checkToken(token, T_ASGN, NO_KW);
+            asgnFound = checkToken(token, T_ASGN, NO_KW, "SYNTAX ERROR: VarDec expected =");
             insertLeft(idFound, asgnFound);
             *token = get_token(buffer);
         }
@@ -418,7 +426,7 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
         AsgnFound(token, asgnFoundRule, buffer);
     // ;
         if (semic) { 
-            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: VarDec expected ;");
             freeAST(semiColonFound);
             *token = get_token(buffer);
         }
@@ -426,13 +434,13 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
     else {
         free_token(*token);
         freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR!\n");
+        error_exit(2, "SYNTAX ERROR: NOT CONST OR VAR\n");
     }
 }
 void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
     if ((*token)->type == T_ASGN) {
     // =
-        ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW);
+        ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW, "SYNTAX ERROR: IdFound expected =");
         freeAST(asgnFound);
         *token = get_token(buffer);
     // P_ASGN_FOUND
@@ -441,14 +449,14 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
         AsgnFound(token, asgnFoundRule, buffer);
     // ;
         if (semic) { 
-            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: IdFound expected ;");
             freeAST(semiColonFound);
             *token = get_token(buffer);
         }
     }
     else if ((*token)->type == T_LPAREN) {
     // (
-        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: IdFound expected (");
         insertRight(ptr, lParenFound);
         *token = get_token(buffer);
     // P_EXPRESSION_LIST
@@ -456,27 +464,27 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
         insertLeft(lParenFound, expressionListRule);
         ExpressionList(token, expressionListRule, buffer);
     // )
-        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: IdFound expected )");
         insertLeft(expressionListRule, rParenFound);
         *token = get_token(buffer);
     // ;
         if (semic) { 
-            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: IdFound expected ;");
             freeAST(semiColonFound);
             *token = get_token(buffer);
         }
     } 
     else if ((*token)->type == T_DOT) {
     // . 
-        ASTNode *dotFound = checkToken(token, T_DOT, NO_KW);
+        ASTNode *dotFound = checkToken(token, T_DOT, NO_KW, "SYNTAX ERROR: IdFound expected .");
         freeAST(dotFound);
         *token = get_token(buffer);
     // ID 
-        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: IdFound expected ID");
         insertRight(ptr, idFound);
         *token = get_token(buffer);
     // (
-        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: IdFound expected (");
         insertLeft(idFound, lParenFound);
         *token = get_token(buffer);
     // P_EXPRESSION_LIST
@@ -484,19 +492,19 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
         insertLeft(lParenFound, expressionListRule);
         ExpressionList(token, expressionListRule, buffer);
     // )
-        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: IdFound expected )");
         insertLeft(expressionListRule, rParenFound);
         *token = get_token(buffer);
     // ;
         if (semic) { 
-            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+            ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: IdFound expected ;");
             freeAST(semiColonFound);
             *token = get_token(buffer);
         }
     }
     // :
     else if ((*token)->type == T_COLON) {
-        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+        ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: IdFound expected :");
         freeAST(colonFound);
         *token = get_token(buffer);
     // P_WHILE_STATEMENT
@@ -508,11 +516,11 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
 void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF) {
         //IF
-        ASTNode *ifFound = checkToken(token, T_KW, KW_IF);
+        ASTNode *ifFound = checkToken(token, T_KW, KW_IF, "SYNTAX ERROR: AsgnFound expected IF");
         insertRight(ptr, ifFound);
         *token = get_token(buffer);
         // (
-        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected (");
         freeAST(lParenFound);
         *token = get_token(buffer);
         //P_EXPRESSION
@@ -522,10 +530,10 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if (expressionRule->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR1!\n");
+            error_exit(2, "SYNTAX ERROR wrong condition in ternary\n");
         }
         // )
-        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected )");
         freeAST(rParenFound);
         *token = get_token(buffer);
         // P_EXPRESSION
@@ -535,10 +543,10 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if (expressionRule2->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR2!\n");
+            error_exit(2, "SYNTAX ERROR wrong expression 1 in ternary!\n");
         }
         // ELSE
-        ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
+        ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE, "SYNTAX ERROR: AsgnFound expected ELSE");
         freeAST(elseFound);
         *token = get_token(buffer);
         // P_EXPRESSION
@@ -548,24 +556,24 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if (expressionRule3->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR3!\n");
+            error_exit(2, "SYNTAX ERROR wrong expression 2 in ternary!\n");
         }
     }
     // @AS
     else if ((*token)->type == T_AT_AS) {
-        ASTNode *atASFound = checkToken(token, T_AT_AS, NO_KW);
+        ASTNode *atASFound = checkToken(token, T_AT_AS, NO_KW, "SYNTAX ERROR: AsgnFound expected @AS");
         insertRight(ptr, atASFound);
         *token = get_token(buffer);
     // (
-        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected (");
         freeAST(lParenFound);
         *token = get_token(buffer);
     //i32
-        ASTNode *i32Found = checkToken(token, T_KW, KW_I32);
+        ASTNode *i32Found = checkToken(token, T_KW, KW_I32, "SYNTAX ERROR: AsgnFound expected Type i32");
         freeAST(i32Found);
         *token = get_token(buffer);
     //, 
-        ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
+        ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: AsgnFound expected ,");
         freeAST(commaFound);
         *token = get_token(buffer);
     //P_EXPRESSION
@@ -575,16 +583,16 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if (expressionFound->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot); 
-            error_exit(2, "SYNTAX ERROR!\n"); 
+            error_exit(2, "SYNTAX ERROR WRONG @AS FUNCTION ARG!\n"); 
         }
     //, 
         if ((*token)->type == T_COMMA) {
-            ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
+            ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: AsgnFound expected ,");
             freeAST(commaFound);
             *token = get_token(buffer);
         }
     // )
-            ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+            ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected )");
             freeAST(rParenFound);
             *token = get_token(buffer);
         
@@ -597,7 +605,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         if (expressionFound->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot); 
-            error_exit(2, "SYNTAX ERROR!\n"); 
+            error_exit(2, "SYNTAX ERROR assigning wrong expression!\n"); 
         }
     }
 }
@@ -619,11 +627,11 @@ void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //IF
-    ASTNode *ifFound = checkToken(token, T_KW, KW_IF);
+    ASTNode *ifFound = checkToken(token, T_KW, KW_IF, "SYNTAX ERROR: IfStatement expected IF");
     freeAST(ifFound);
     *token = get_token(buffer);
     // (
-    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: IfStatement expected (");
     freeAST(lParenFound);
     *token = get_token(buffer);
     //P_EXPRESSION
@@ -633,10 +641,10 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if (expressionRule->right == NULL) {
         free_token(*token);
         freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR!\n");
+        error_exit(2, "SYNTAX ERROR wrong if condition!\n");
     }
     // )
-    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: IfStatement expected )");
     freeAST(rParenFound);
     *token = get_token(buffer);
     // P_IF_FOUND
@@ -699,7 +707,7 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     else {
         free_token(*token);
         freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR!\n");
+        error_exit(2, "SYNTAX ERROR: after if condition\n");
     }
 }
 void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
@@ -712,7 +720,7 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool sem
     } 
     // ID
     else if ((*token)->type == T_ID) {
-        ASTNode *idFound = checkToken(token, T_ID, NO_KW);
+        ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: SingleStatement expected ID");
         insertRight(ptr, idFound);
     // P_ID_FOUND
         *token = get_token(buffer);
@@ -759,29 +767,29 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool sem
     else {
         free_token(*token);
         freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR!\n");
+        error_exit(2, "SYNTAX ERROR not a statement!\n");
     }
     
 }
 
 void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // | 
-    ASTNode *lPipeFound = checkToken(token, T_PIPE, NO_KW);
+    ASTNode *lPipeFound = checkToken(token, T_PIPE, NO_KW, "SYNTAX ERROR: OptionalValue expected |");
     freeAST(lPipeFound);
     *token = get_token(buffer);
     // ID
-    ASTNode *idFound = checkToken(token,T_ID, NO_KW);
+    ASTNode *idFound = checkToken(token,T_ID, NO_KW, "SYNTAX ERROR: OptionalValue expected ID");
     insertRight(ptr, idFound);
     *token = get_token(buffer);
     // |
-    ASTNode *rPipeFound = checkToken(token, T_PIPE, NO_KW);
+    ASTNode *rPipeFound = checkToken(token, T_PIPE, NO_KW, "SYNTAX ERROR: OptionalValue expected |");
     freeAST(rPipeFound);
     *token = get_token(buffer);
 }
 
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ELSE 
-    ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE);
+    ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE, "SYNTAX ERROR: ElseStatement expected ELSE");
     freeAST(elseFound);
     *token = get_token(buffer);
     // P_SINGLE_STATEMENT
@@ -801,7 +809,7 @@ void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
-    ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW);
+    ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: ExprCommaFound expected ,");
     freeAST(commaFound);
     *token = get_token(buffer);
     // P_EXPRESSION_LIST
@@ -812,11 +820,11 @@ void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // while
-    ASTNode *whileFound = checkToken(token, T_KW, KW_WHILE);
+    ASTNode *whileFound = checkToken(token, T_KW, KW_WHILE, "SYNTAX ERROR: While expected while");
     freeAST(whileFound);
     *token = get_token(buffer);
     // (
-    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: While expected (");
     freeAST(lParenFound);
     *token = get_token(buffer);
     // P_EXPRESSION
@@ -826,10 +834,10 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if (expressionRule->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot); 
-            error_exit(2, "SYNTAX ERROR!\n"); 
+            error_exit(2, "SYNTAX ERROR wrong while condition!\n"); 
     }
     // )
-    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: While expected )");
     freeAST(rParenFound);
     *token = get_token(buffer);
     // P_OPTIONAL_VALUE
@@ -839,7 +847,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         OptionalValue(token, OptionalValueRule, buffer);
     //:
         if ((*token)->type == T_COLON) {
-            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: While expected :");
             freeAST(colonFound);
             *token = get_token(buffer);
     // P_OPTIONAL_STATEMENTS
@@ -893,7 +901,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     else {
     // :
         if ((*token)->type == T_COLON) {
-            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW);
+            ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: While expected :");
             freeAST(colonFound);
             *token = get_token(buffer);
     // P_OPTIONAL_STATEMENTS
@@ -946,7 +954,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // (
-    ASTNode *lParenFound = checkToken(token,T_LPAREN,NO_KW);
+    ASTNode *lParenFound = checkToken(token,T_LPAREN,NO_KW, "SYNTAX ERROR: OptionalStatements expected (");
     freeAST(lParenFound);
     *token = get_token(buffer);
     // single statement
@@ -955,7 +963,7 @@ void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, singleStatementRule);
         SingleStatement(token, singleStatementRule, buffer, false);
     // )
-        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: OptionalStatements expected )");
         freeAST(rParenFound);
         *token = get_token(buffer);
     }
@@ -965,7 +973,7 @@ void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, BlockRule);
         Block(token, BlockRule, buffer);
     // )
-        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: OptionalStatements expected )");
         freeAST(rParenFound);
         *token = get_token(buffer);
     }
@@ -974,7 +982,7 @@ void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 
 void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //RETURN
-    ASTNode *returnFound = checkToken(token, T_KW, KW_RETURN);
+    ASTNode *returnFound = checkToken(token, T_KW, KW_RETURN, "SYNTAX ERROR: Return expected return");
     freeAST(returnFound);
     *token = get_token(buffer);
     //P_EXPRESSION
@@ -982,17 +990,17 @@ void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     // ;
-    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW);
+    ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: Return expected ;");
     freeAST(semiColonFound);
     *token = get_token(buffer);
 }
 void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // FOR
-    ASTNode *forFound = checkToken(token, T_KW, KW_FOR);
+    ASTNode *forFound = checkToken(token, T_KW, KW_FOR, "SYNTAX ERROR: For expected for");
     freeAST(forFound);
     *token = get_token(buffer);
     // (
-    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW);
+    ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: For expected (");
     freeAST(lParenFound);
     *token = get_token(buffer);
     // P_EXPRESSION
@@ -1002,10 +1010,10 @@ void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if (expressionRule->right == NULL) {
             free_token(*token);
             freeAST(ASTRoot); 
-            error_exit(2, "SYNTAX ERROR!\n"); 
+            error_exit(2, "SYNTAX ERROR wrong for condition!\n"); 
     }
     // )
-    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW);
+    ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: For expected )");
     freeAST(rParenFound);
     *token = get_token(buffer);
     // P_OPTIONAL_VALUE
@@ -1019,6 +1027,6 @@ void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     
 }
 void End(Token **token, ASTNode *ptr) {
-    ASTNode *eofFound = checkToken(token,T_EOF, NO_KW);
+    ASTNode *eofFound = checkToken(token,T_EOF, NO_KW, "SYNTAX ERROR: END WHERE IS END OF FILE ?!");
     insertRight(ptr, eofFound);
 }
