@@ -17,7 +17,6 @@ ASTNode * checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyW
     error_exit(2, "%s\n", error); 
     return NULL;
 }
-
 ASTNode *ruleNode(ASTNodeType rule) {
    ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
@@ -30,7 +29,6 @@ ASTNode *ruleNode(ASTNodeType rule) {
     node->token = NULL;
     return node;
 }
-
 void Parse(circ_buff_ptr buffer) {
     Token *token = NULL;
     ASTNode *progFound = ruleNode(P_PROG);
@@ -370,7 +368,6 @@ void Break(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: Break expected ID");
         insertRight(ptr, idFound);
         *token = get_token(buffer);
-
     }
     // ;
     ASTNode *semiColonFound = checkToken(token, T_SEMICOL, NO_KW, "SYNTAX ERROR: Break expected ;");
@@ -595,7 +592,6 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected )");
             freeAST(rParenFound);
             *token = get_token(buffer);
-        
      }
     // P_EXPRESSION
     else {
@@ -624,7 +620,6 @@ void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
     }
 } 
-
 void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //IF
     ASTNode *ifFound = checkToken(token, T_KW, KW_IF, "SYNTAX ERROR: IfStatement expected IF");
@@ -652,7 +647,6 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(expressionRule, ifFoundRule);
     IfFound(token, ifFoundRule, buffer);
 }
-
 void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     if ((*token)->type == T_PIPE) {
     //P_OPTIONAL_VALUE
@@ -684,7 +678,6 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         ASTNode *node = ruleNode(P_SINGLE_STATEMENT);
         insertRight(ptr, node);
         SingleStatement(token, node, buffer, true);
-
         if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
             ASTNode *ElseRule = ruleNode(P_ELSE_STATEMENT);
             insertLeft(node, ElseRule);
@@ -703,7 +696,6 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             ElseStatement(token, ElseRule, buffer);
         }
     }
-
     else {
         free_token(*token);
         freeAST(ASTRoot);
@@ -771,7 +763,6 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool sem
     }
     
 }
-
 void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // | 
     ASTNode *lPipeFound = checkToken(token, T_PIPE, NO_KW, "SYNTAX ERROR: OptionalValue expected |");
@@ -786,7 +777,6 @@ void OptionalValue(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(rPipeFound);
     *token = get_token(buffer);
 }
-
 void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ELSE 
     ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE, "SYNTAX ERROR: ElseStatement expected ELSE");
@@ -804,9 +794,7 @@ void ElseStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, BlockRule);
         Block(token, BlockRule, buffer);
     }
-    
 }
-
 void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ,
     ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: ExprCommaFound expected ,");
@@ -817,7 +805,6 @@ void ExprCommaFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(ptr, expressionListRule);
     ExpressionList(token, expressionListRule, buffer);
 }
-
 void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // while
     ASTNode *whileFound = checkToken(token, T_KW, KW_WHILE, "SYNTAX ERROR: While expected while");
@@ -874,7 +861,6 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
                 ElseStatement(token, ElseRule, buffer);
             }
         }
-
         else {
                ASTNode *singleStatOrBlock = NULL;
     // P_SINGLE_STATEMENT
@@ -897,7 +883,6 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             }
         } 
     }
-    
     else {
     // :
         if ((*token)->type == T_COLON) {
@@ -951,7 +936,6 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
     }
 }
-
 void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // (
     ASTNode *lParenFound = checkToken(token,T_LPAREN,NO_KW, "SYNTAX ERROR: OptionalStatements expected (");
@@ -978,8 +962,6 @@ void OptionalStatements(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         *token = get_token(buffer);
     }
 }
-
-
 void Return(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //RETURN
     ASTNode *returnFound = checkToken(token, T_KW, KW_RETURN, "SYNTAX ERROR: Return expected return");
@@ -1024,7 +1006,6 @@ void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *BlockRule = ruleNode(P_BLOCK);
     insertRight(OptionalValueRule, BlockRule);
     Block(token, BlockRule, buffer);
-    
 }
 void End(Token **token, ASTNode *ptr) {
     ASTNode *eofFound = checkToken(token,T_EOF, NO_KW, "SYNTAX ERROR: END WHERE IS END OF FILE ?!");

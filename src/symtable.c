@@ -157,7 +157,7 @@ symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key) {
 }
 
 bool update_balances(symtable_tree_ptr tree) {
-    if (tree == NULL) {
+    if (*tree == NULL) {
         return false;
     }
 

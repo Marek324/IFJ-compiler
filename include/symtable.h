@@ -59,6 +59,8 @@ int max(int a, int b);
 
 int height(symtable_node_ptr node);
 
+symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key);
+
 int get_balance (symtable_node_ptr node);
 
 void symtable_free_entry(symtable_entry_ptr entry);
