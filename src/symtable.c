@@ -187,6 +187,9 @@ void rebalance(symtable_tree_ptr tree) {
     else if((*tree)->balance_factor < -1) {
         simple_right_rot(tree);
     }
+    if(update_balances(tree)) {
+        rebalance(tree);
+    }
 }
 
 void symtable_dispose(symtable_tree_ptr tree) {
