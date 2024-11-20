@@ -67,8 +67,6 @@ void symtable_init(symtable_tree_ptr tree);
 
 void symtable_insert(symtable_tree_ptr tree, char* key, symtable_entry_type type);
 
-void symtable_remove(symtable_node_ptr node);
-
 void simple_right_rot(symtable_tree_ptr root);
 
 void simple_left_rot(symtable_tree_ptr root);
@@ -76,6 +74,8 @@ void simple_left_rot(symtable_tree_ptr root);
 void right_left_rot(symtable_tree_ptr root);
 
 void left_right_rot(symtable_tree_ptr root);
+// updates balances of all nodes and returns a bool (true->rebalance, false->all ok)
+bool update_balances(symtable_tree_ptr tree);
 
 void rebalance(symtable_tree_ptr root);
 

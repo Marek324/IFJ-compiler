@@ -92,14 +92,24 @@ void symtable_init(symtable_tree_ptr tree) {
 void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type type) {
     if (*tree == NULL) {
         *tree = symtable_node_create(new_key, type);
+        if(update_balances(tree)) {
+            rebalance(tree);
+        }
         return;
     }
-    // (*tree)->balance_factor = 
-}
-
-void symtable_remove(symtable_node_ptr node) {
-    if (node == NULL) {
-        return;
+    // new_key is bigger than the node key (we go right)
+    if(strcmp((*tree)->key, new_key) < 0) {
+        symtable_insert(&((*tree)->right), new_key, type);
+    }
+    // new_key is bigger than the node key (we go right)
+    else if(strcmp((*tree)->key, new_key) > 0) {
+        symtable_insert(&((*tree)->right), new_key, type);
+    }
+    else {
+        // key already exists in symtable
+        symtable_dispose(tree);
+        freeAST(ASTRoot);
+        error_exit(5, "ERROR: Redefinition of a variable or function!");
     }
 }
 
@@ -144,6 +154,32 @@ symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key) {
   else {
       return symtable_search(tree->left, key);
     }
+}
+
+bool update_balances(symtable_tree_ptr tree) {
+    if (tree == NULL) {
+        return false;
+    }
+
+    bool left_unbalanced = update_balances(&((*tree)->left));
+    bool right_unbalanced = update_balances(&((*tree)->right));
+
+    // Update the current node's balance factor
+    (*tree)->balance_factor = get_balance(*tree);
+
+    // Check if the current node or any subtree is unbalanced
+    if (((*tree)->balance_factor > 1) || ((*tree)->balance_factor < -1) || left_unbalanced || right_unbalanced) {
+        // Tree is unbalanced.
+        return true;
+    }
+
+    // Tree is balanced.
+    return false;
+}
+
+void rebalance(symtable_tree_ptr tree) {
+    if (tree == NULL || (*tree) == NULL) return;
+
 }
 
 void symtable_dispose(symtable_tree_ptr tree) {
