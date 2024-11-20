@@ -2,33 +2,93 @@
 CALL main
 EXIT int@0
 
-LABEL _ifj_strcmp
+LABEL &strcmp
+DEFVAR TF@&strcmp_cnt
 
-LABEL _ifj_ord
+LT TF@&strcmp_cnt TF@s1 TF@s2
+JUMPIFEQ &strcmp_smaller TF@&strcmp_cnt bool@true
 
-LABEL _ifj_substring
+GT TF@&strcmp_cnt TF@s1 TF@s2
+JUMPIFEQ &strcmp_bigger TF@&strcmp_cnt bool@true
+
+MOVE TF@&strcmp_res int@0
+RETURN
+
+LABEL &strcmp_smaller
+MOVE TF@&strcmp_res int@-1
+RETURN
+
+LABEL &strcmp_bigger
+MOVE TF@&strcmp_res int@1
+RETURN
+
+
+LABEL &substring
+MOVE TF@&substring_res string@
+
+DEFVAR TF@&substring_err_cnt
+LT TF@&substring_err_cnt TF@i int@0
+JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
+LT TF@&substring_err_cnt TF@j int@0
+JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
+LT TF@&substring_err_cnt TF@j TF@i
+JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
+
+DEFVAR TF@&substring_strlen
+STRLEN TF@&substring_strlen TF@s
+
+GT TF@&substring_err_cnt TF@j TF@&substring_strlen
+JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
+
+LT TF@&substring_err_cnt TF@i TF@&substring_strlen
+NOT TF@&substring_err_cnt TF@&substring_err_cnt
+JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
+
+DEFVAR TF@&substring_char
+
+LABEL &substring_loop
+
+GETCHAR TF@&substring_char TF@s TF@i
+
+CONCAT TF@&substring_res TF@&substring_res TF@&substring_char
+
+ADD TF@i TF@i int@1
+JUMPIFNEQ &substring_loop TF@i TF@j
+
+RETURN
+
+LABEL &substring_err
+MOVE TF@&substring_res nil@nil
+RETURN
 
 LABEL main
 CREATEFRAME
-WRITE string@Zadejte\032cislo\032pro\032vypocet\032faktorialu:\032
-DEFVAR TF@inp
-READ TF@inp int
-# if
+
+DEFVAR TF@a
+MOVE TF@a string@abc
+
+DEFVAR TF@c
+
+
 PUSHFRAME
 CREATEFRAME
-# podmienka
-JUMPIFEQ main_else LF@inp nil@nil
-# block if
-WRITE string@if\010
-# else
-JUMP main_end
-LABEL main_else
-# block else
-WRITE string@else\010
-# block end
-LABEL main_end
+DEFVAR TF@&substring_res
+DEFVAR TF@s
+DEFVAR TF@i
+DEFVAR TF@j
+
+MOVE TF@s LF@a
+MOVE TF@i int@1
+MOVE TF@j int@2
+
+CALL &substring
+
+MOVE LF@c TF@&substring_res
 POPFRAME
-# main end
+
+WRITE TF@c
+WRITE string@\010
+
 RETURN
 
 
