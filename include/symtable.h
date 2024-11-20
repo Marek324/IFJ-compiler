@@ -49,5 +49,6 @@ typedef struct symtable_node_s{
 } symtable_node_t, **symtable_tree_ptr;
 
 symtable_node_ptr symNodeCreate(char *key);
+void symtable_dispose(symtable_node_ptr root);
 
 #endif // SYMTABLE_H

@@ -39,9 +39,13 @@ int get_balance (symtable_node_ptr node) {
     return node != NULL ? height(node->right) - height(node->left) : 0;
 }
 
-void symtable_dispose(symtable_node_ptr root);
+// void symtable_dispose(symtable_node_ptr root);
 
 void symtable_free_entry(symtable_entry_ptr entry) {
+    if(entry->param_nullable != NULL) {
+        free(entry->param_nullable);
+    }
+
     if(entry->param_types != NULL) {
         free(entry->param_types);
     }
