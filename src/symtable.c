@@ -133,14 +133,14 @@ void simple_left_rot(symtable_tree_ptr root) {
 }
 
 
-void symtable_dispose(symtable_node_ptr root) {
-    if (root == NULL) {
+void symtable_dispose(symtable_tree_ptr tree) {
+    if ((*tree) == NULL) {
         return;
     }
-    symtable_dispose(root->left);
-    symtable_dispose(root->right);
-    symtable_free_entry(root->entry);
-    free(root->key);
-    free(root);
-    root = NULL;
+    symtable_dispose(&((*tree)->left));
+    symtable_dispose(&((*tree)->right));
+    symtable_free_entry((*tree)->entry);
+    free((*tree)->key);
+    free(tree);
+    *tree = NULL;
 }
