@@ -92,9 +92,6 @@ void symtable_init(symtable_tree_ptr tree) {
 void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type type) {
     if (*tree == NULL) {
         *tree = symtable_node_create(new_key, type);
-        if(update_balances(tree)) {
-            rebalance(tree);
-        }
         return;
     }
     // new_key is bigger than the node key (we go right)
@@ -104,7 +101,6 @@ void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type 
     // new_key is smaller than the node key (we go left)
     else if(strcmp((*tree)->key, new_key) > 0) {
         symtable_insert(&((*tree)->left), new_key, type);
-        fprintf(stderr, "**********\n");
     }
     else {
         // key already exists in symtable
@@ -112,35 +108,37 @@ void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type 
         freeAST(ASTRoot);
         error_exit(5, "ERROR: Redefinition of a variable or function!\n");
     }
+    int a = 99;
+    if((a = update_balances(tree)) == true) {
+        rebalance(tree);
+    }
 }
 
+// we pass in the node that has the imbalance
+// then we take its left child and make it the new root. The old root will be the right child of the new root
+// If the new root had a right child tree it will now be the left child tree of the old node
 void simple_right_rot(symtable_tree_ptr root) {
 
     symtable_node_ptr new_root = (*root)->left;
-    symtable_node_ptr T2 = new_root->right;
+    symtable_node_ptr old_root_child = new_root->right;
     
     //Rotate
     new_root->right = *root;
-    (*root)->left = T2;
-
-    // Recalculate balance factors or heights here if needed
-    (*root)->balance_factor = get_balance(*root);
-    T2->balance_factor = get_balance(T2);
+    (*root)->left = old_root_child;
+    *root = new_root;
 }
 
+// we pass in the node that has the imbalance
+// then we take its left child and make it the new root. The old root will be the right child of the new root
+// If the new root had a right child tree it will now be the left child tree of the old node
 void simple_left_rot(symtable_tree_ptr root) {
-
     symtable_node_ptr new_root = (*root)->right;
-    symtable_node_ptr T2 = new_root->left;
+    symtable_node_ptr old_root_child = new_root->left;
 
     // Rotation
     new_root->left = *root;
-    (*root)->right = T2;
-    
-    // Recalculate balance factors or heights here if needed
-    (*root)->balance_factor = get_balance(*root);
-
-    T2->balance_factor = get_balance(T2);
+    (*root)->right = old_root_child;
+    *root = new_root;
 }
 
 symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key) {
