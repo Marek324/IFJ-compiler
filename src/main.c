@@ -19,7 +19,7 @@ void test_symtable() {
     symtable_node_ptr symtable;
     symtable_init(&symtable);
     printf("TEST 1: Insert single node\n");
-    symtable_insert(&symtable, "j", T_VAR_SYM);
+    symtable_insert(&symtable, "55", T_VAR_SYM);
     if (symtable_search(symtable, "j") == NULL) {
         printf("FAILED: Key1 not found after insertion.\n");
     } else {
@@ -27,11 +27,11 @@ void test_symtable() {
     }
 
     printf("TEST 2: Insert multiple nodes with balancing\n");
-    symtable_insert(&symtable, "k", T_VAR_SYM);
-    symtable_insert(&symtable, "i", T_VAR_SYM);
-    symtable_insert(&symtable, "l", T_VAR_SYM);
-    symtable_insert(&symtable, "h", T_VAR_SYM);
-    symtable_insert(&symtable, "g", T_VAR_SYM);
+    symtable_insert(&symtable, "54", T_VAR_SYM);
+    symtable_insert(&symtable, "56", T_VAR_SYM);
+    symtable_insert(&symtable, "53", T_VAR_SYM);
+    symtable_insert(&symtable, "57", T_VAR_SYM);
+    symtable_insert(&symtable, "52", T_VAR_SYM);
 
     // Check the balance factors for nodes
     if (update_balances(&symtable)) {
@@ -63,7 +63,8 @@ void test_symtable() {
     print_AVL(symtable);
 
     printf("TEST 6: Left imbalance (rotate right)\n");
-    symtable_insert(&symtable, "key2", T_VAR_SYM);
+    symtable_insert(&symtable, "51", T_VAR_SYM);
+    print_AVL(symtable);
 
     printf("TEST 7: Cleanup\n");
     symtable_dispose(&symtable);
@@ -75,6 +76,7 @@ void test_symtable() {
 }
 // Example usage
 int main() {
+    // test_symtable();
     circ_buff_ptr buffer = circ_buff_init();
     Parse(buffer);
     

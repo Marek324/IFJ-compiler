@@ -68,6 +68,8 @@ ASTNodeType convertToASTType(TokenType type, KeyWordType keyword) {
             case KW_AND: return T_AND;
             case KW_OR: return T_OR;
             case KW_ORELSE: return T_ORELSE;
+            case KW_TRUE: return T_TRUE;
+            case KW_FALSE: return T_FALSE;
 
             default: return 99;
         }

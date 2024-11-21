@@ -68,6 +68,8 @@ typedef enum {
     PIPE,
     QMARK,
     AT_AS,
+    T_TRUE,
+    T_FALSE,
 
     END_OF_FILE,
 

@@ -80,6 +80,8 @@ const char* getNodeName(ASTNodeType type) {
         case T_ORELSE: return "T_ORELSE";
         case T_AND: return "T_AND";
         case T_OR: return "T_OR";
+        case T_TRUE: return "T_TRUE";
+        case T_FALSE: return "T_FALSE";
         default: return "UNKNOWN";
     }
 }
