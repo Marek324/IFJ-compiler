@@ -321,11 +321,7 @@ void Statement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, statementRule);
         For(token, statementRule, buffer);
     }
-    else {
-        free_token(*token);
-        freeAST(ASTRoot);
-        error_exit(2, "SYNTAX ERROR: Not a statement\n"); 
-    }
+    
     // More statements
     if ((*token)->type == T_ID || ((*token)->type == T_KW && ((*token)->value.keyword == KW_CONST || (*token)->value.keyword == KW_VAR || (*token)->value.keyword == KW_WHILE || (*token)->value.keyword == KW_IF || (*token)->value.keyword == KW_RETURN || (*token)->value.keyword == KW_BREAK || (*token)->value.keyword == KW_CONTINUE || (*token)->value.keyword == KW_FOR))) {
         ASTNode *nextStatement = ruleNode(P_STATEMENT);
@@ -823,7 +819,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             OptionalStatements(token, optionalStatementsRule, buffer);
     // P_BLOCK
             ASTNode *blockRule = ruleNode(P_BLOCK);
-            insertRight(optionalStatementsRule, blockRule);
+            insertLeft(optionalStatementsRule, blockRule);
             Block(token, blockRule, buffer);
     // P_ELSE 
             if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
@@ -835,7 +831,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         else {
     // P_BLOCK
             ASTNode *blockRule = ruleNode(P_BLOCK);
-            insertRight(expressionRule, blockRule);
+            insertLeft(OptionalValueRule, blockRule);
             Block(token, blockRule, buffer);
         
     // P_ELSE
@@ -858,7 +854,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             OptionalStatements(token, optionalStatementsRule, buffer);
     // P_BLOCK
             ASTNode *blockRule = ruleNode(P_BLOCK);
-            insertRight(optionalStatementsRule, blockRule);
+            insertLeft(optionalStatementsRule, blockRule);
             Block(token, blockRule, buffer);
     // P_ELSE
             if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
@@ -870,7 +866,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         else {
     // P_BLOCK
             ASTNode *blockRule = ruleNode(P_BLOCK);
-            insertRight(expressionRule, blockRule);
+            insertLeft(expressionRule, blockRule);
             Block(token, blockRule, buffer);
     // P_ELSE
             if((*token)->type == T_KW && (*token)->value.keyword == KW_ELSE) {
@@ -949,7 +945,7 @@ void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     OptionalValue(token, OptionalValueRule, buffer);
     // P_BLOCK
     ASTNode *BlockRule = ruleNode(P_BLOCK);
-    insertRight(OptionalValueRule, BlockRule);
+    insertLeft(OptionalValueRule, BlockRule);
     Block(token, BlockRule, buffer);
 }
 void End(Token **token, ASTNode *ptr) {
