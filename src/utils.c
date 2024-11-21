@@ -123,5 +123,4 @@ void generate_d2_file(ASTNode *root, const char *filename) {
     fprintf(file, "}\n"); // End of D2 graph
 
     fclose(file);
-    printf("D2 file generated: %s\n", filename);
 }

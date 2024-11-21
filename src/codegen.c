@@ -1,7 +1,6 @@
-#include "codegen.h"
+#include "codegen_priv.h"
 
 
-void prog(ASTNode *root);
 
 void codegen()
 {
@@ -77,15 +76,11 @@ void codegen()
 
 }
 
-void function_def(ASTNode *node);
-
 void prog(ASTNode *root){
     root = root->right->left; // skip prolog
     function_def(root);
 }
 
-void param_list(ASTNode *node);
-void statement(ASTNode *node);
 
 void function_def(ASTNode *node){
     if (node == NULL)
@@ -133,14 +128,6 @@ void param_list(ASTNode *node){
 
 }
 
-void var_dec(ASTNode *node);
-void id_statement(ASTNode *node);
-void if_statement(ASTNode *node);
-void while_loop(ASTNode *node);
-void for_loop(ASTNode *node);
-void return_statement(ASTNode *node);
-void break_statement(ASTNode *node);
-void continue_statement(ASTNode *node);
 
 void statement(ASTNode *node){
     if (node == NULL)
@@ -187,7 +174,6 @@ void statement(ASTNode *node){
 
 }
 
-void expression(ASTNode *node);
 
 void var_dec(ASTNode *node){
     printf("var_dec ");
@@ -196,8 +182,8 @@ void var_dec(ASTNode *node){
 
     printf("%s\n", node->token->value.string_value);
 
-    printf("expression ");
-    expression(node->left->left->right->right); 
+    printf("expression \n");
+    expression(node->left->left->right->right->right); 
     
     
     statement(nextStatement);
@@ -206,70 +192,109 @@ void var_dec(ASTNode *node){
 void expression(ASTNode *node){
     if (node == NULL)
         return;
-
-    expression(node->left);
-    expression(node->right);
-    
+    // printf("node type %d\n", node->type);
     switch(node->type){
         case EQ:
+            expression(node->left);
+            expression(node->right);
             printf("eq\n");
             break;
         case BANG:
+            expression(node->left);
+            expression(node->right);
             printf("bang\n");
             break;
         case NEQ:
+            expression(node->left);
+            expression(node->right);
             printf("neq\n");
             break;
         case LESS:
+            expression(node->left);
+            expression(node->right);
             printf("less\n");
             break;
         case LEQ:
+            expression(node->left);
+            expression(node->right);
             printf("leq\n");
             break;
         case MORE:
+            expression(node->left);
+            expression(node->right);
             printf("more\n");
             break;
         case MEQ:
+            expression(node->left);
+            expression(node->right);
             printf("meq\n");
             break;
         case PLUS:
+            expression(node->left);
+            expression(node->right);
             printf("plus\n");
             break;
         case MINUS:
+            expression(node->left);
+            expression(node->right);
             printf("minus\n");
             break;
         case MUL:
+            expression(node->left);
+            expression(node->right);
             printf("mul\n");
             break;
         case DIV:
+            expression(node->left);
+            expression(node->right);
             printf("div\n");
+            break;
+        case T_AND:
+            expression(node->left);
+            expression(node->right);
+            printf("and\n");
+            break;
+        case T_OR:
+            expression(node->left);
+            expression(node->right);
+            printf("or\n");
+            break;
+        case T_ORELSE:
+            expression(node->left);
+            expression(node->right);
+            printf("orelse\n");
+            break;
+        case ID:
+            if (node->right == NULL){
+                printf("id %s\n", node->token->value.string_value);
+            } else {
+                printf("func_call %s\n", node->token->value.string_value);
+                func_call(node->right);
+                printf("end_func_call %s\n", node->token->value.string_value);
+            }
             break;
         case T_UNREACHABLE:
             printf("unreachable\n");
             break;
-        case T_AND:
-            printf("and\n");
+        case TYPE_INT:
+            printf("int %lld\n", node->token->value.int_value);
             break;
-        case T_OR:
-            printf("or\n");
+        case T_FLOAT:
+            printf("float %lf\n", node->token->value.float_value);
             break;
-        case T_ORELSE:
-            printf("orelse\n");
+        case T_TRUE:
+            printf("true\n");
             break;
-        case T_ID:
-            printf("id %s\n", node->token->value.string_value);
+        case T_FALSE:
+            printf("false\n");
             break;
-        case T__KW_I32:
-            printf("int %d\n", node->token->value.int_value);
-            break;
-        case T_KW_F64:
-            printf("float %f\n", node->token->value.float_value);
-            break;
-        case T_KW_BOOL:
-            
     }
 
     
+}
+
+void func_call(ASTNode *node){
+
 }
 
 void id_statement(ASTNode *node){
@@ -281,6 +306,8 @@ void id_statement(ASTNode *node){
     switch(node->type){
         case P_ASGN_FOUND:
             printf("asgn\n");
+            printf("expression\n");
+            expression(node->right->right);
             break;
 
         case ID:
