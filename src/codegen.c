@@ -168,6 +168,10 @@ void statement(ASTNode *node){
             for_loop(node);
             break;
 
+        default:
+            printf("unknown\n");
+            break;
+
     }
     
 
@@ -288,6 +292,9 @@ void expression(ASTNode *node){
         case T_FALSE:
             printf("false\n");
             break;
+        default:
+            printf("unknown\n");
+            break;
     }
 
     
@@ -320,6 +327,10 @@ void id_statement(ASTNode *node){
 
         case P_WHILE_LOOP:
             printf("while\n");
+            break;
+        
+        default:
+            printf("unknown\n");
             break;
     }
 
