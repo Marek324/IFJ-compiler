@@ -79,7 +79,9 @@ int main() {
     Parse(buffer);
     
     // Debug
+    #ifdef DEBUG
     generate_d2_file(ASTRoot, "tree.d2");
+    #endif
     
     codegen();
     
