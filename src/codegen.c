@@ -186,8 +186,15 @@ void var_dec(ASTNode *node){
 
     printf("%s\n", node->token->value.string_value);
 
+    node = node->left; // P_TYPE_COMPLETE | ASSGN
+
+    if(node->type == P_TYPE_COMPLETE)
+        node = node->left; // ASSGN
+
+ 
+
     printf("expression \n");
-    expression(node->left->left->right->right->right); 
+    expression(node->right->right->right); 
     
     
     statement(nextStatement);
