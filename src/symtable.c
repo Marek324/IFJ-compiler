@@ -20,16 +20,8 @@ symtable_entry_ptr symtable_entry_init(symtable_entry_type type) {
         error_exit(99, "ERROR: Unable to allocate memory for symtable_entry_ptr\n");
     }
     if(type == T_FUN_SYM) {
-        entry->param_nullable = malloc(sizeof(ret_type));
-        if(entry->param_nullable == NULL) {
-            freeAST(ASTRoot);
-            error_exit(99, "ERROR: Unable to allocate memory for entry->param_nullable\n");
-        }
-        entry->param_types =  malloc(sizeof(ret_type));
-        if(entry->param_types == NULL) {
-            freeAST(ASTRoot);
-            error_exit(99, "ERROR: Unable to allocate memory for entry->param_types\n");
-        }
+        entry->param_nullable = NULL;
+        entry->param_types =  NULL;
         entry->local_symtable = malloc(sizeof(symtable_node_t));
         if(entry->local_symtable == NULL) {
             freeAST(ASTRoot);
@@ -73,15 +65,21 @@ int get_balance (symtable_node_ptr node) {
 
 void symtable_free_entry(symtable_entry_ptr entry) {   
     if (entry != NULL) {
-        if(entry->param_nullable != NULL) {
-            free(entry->param_nullable);
-        }
+        if(entry->entry_type == T_FUN_SYM) {
+            if(entry->param_nullable != NULL) {
+                free(entry->param_nullable);
+                entry->param_nullable = NULL;
+            }
 
-        if(entry->param_types != NULL) {
-            free(entry->param_types);
+            if(entry->param_types != NULL) {
+                free(entry->param_types);
+                entry->param_types = NULL;
+            }
+            symtable_dispose(entry->local_symtable);
+            entry->local_symtable = NULL;    
         }
-        symtable_dispose(entry->local_symtable);
         free(entry);
+        entry = NULL;
     }
 }
 
@@ -108,8 +106,7 @@ void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type 
         freeAST(ASTRoot);
         error_exit(5, "ERROR: Redefinition of a variable or function!\n");
     }
-    int a = 99;
-    if((a = update_balances(tree)) == true) {
+    if(update_balances(tree)) {
         rebalance(tree);
     }
 }
@@ -139,6 +136,16 @@ void simple_left_rot(symtable_tree_ptr root) {
     new_root->left = *root;
     (*root)->right = old_root_child;
     *root = new_root;
+}
+
+void left_right_rot(symtable_tree_ptr root) {
+    simple_left_rot(&((*root)->left));
+    simple_right_rot(root);
+}
+
+void right_left_rot(symtable_tree_ptr root) {
+    simple_right_rot(&((*root)->right));
+    simple_left_rot(root);
 }
 
 symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key) {
@@ -181,10 +188,20 @@ void rebalance(symtable_tree_ptr tree) {
     rebalance(&((*tree)->left));
     rebalance(&((*tree)->right));
     if((*tree)->balance_factor > 1) {
-        simple_left_rot(tree);
+        if(((*tree)->right)->balance_factor < 0) {
+            right_left_rot(tree);
+        }
+        else {
+            simple_left_rot(tree);
+        }
     }
     else if((*tree)->balance_factor < -1) {
-        simple_right_rot(tree);
+        if(((*tree)->left)->balance_factor > 0) {
+            left_right_rot(tree);
+        }
+        else {
+            simple_right_rot(tree);
+        }
     }
     if(update_balances(tree)) {
         rebalance(tree);
@@ -200,6 +217,7 @@ void symtable_dispose(symtable_tree_ptr tree) {
     symtable_free_entry((*tree)->entry);
     if((*tree)->key != NULL) {
         free((*tree)->key);
+        (*tree)->key = NULL;
     }
     free(*tree);    
     *tree = NULL;
