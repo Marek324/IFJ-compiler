@@ -191,9 +191,10 @@ void TypeComplete(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
 }
 void QMark(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
+    (void) ptr;
     // ?
     ASTNode *qmarkFound = checkToken(token, T_QMARK, NO_KW, "SYNTAX ERROR: QMark expected ?");
-    insertRight(ptr, qmarkFound);
+    freeAST(qmarkFound);
     *token = get_token(buffer);
 }
 void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
@@ -236,7 +237,7 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
 void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_TYPE
     if((*token)->type == T_QMARK || (*token)->type == T_LBRACKET || ((*token)->type == T_KW && ((*token)->value.keyword == KW_I32 || (*token)->value.keyword == KW_F64 || (*token)->value.keyword == KW_BOOL) )) {
-        ASTNode *type_complete = ruleNode(P_TYPE);
+        ASTNode *type_complete = ruleNode(P_TYPE_COMPLETE);
         insertRight(ptr, type_complete);
         TypeComplete(token, type_complete, buffer);
     }

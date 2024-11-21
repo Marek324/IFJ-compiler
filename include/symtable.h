@@ -31,7 +31,7 @@ typedef struct symtable_entry_s{
     bool isDefined;
 
     // variables
-    bool isConst;
+    bool isConst; 
     bool hasExplicitType;
 
     // functions

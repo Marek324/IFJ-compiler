@@ -55,10 +55,12 @@ void test_symtable() {
         printf("PASSED: Symtable disposed successfully.\n");
     } else {
         printf("FAILED: Symtable disposal failed.\n");
-    }
+    } 
 }
 // Example usage
 int main() {
+    circ_buff_ptr buffer = circ_buff_init();
+    Parse(buffer);
     circ_buff_ptr buffer = circ_buff_init();
     Parse(buffer);
 
