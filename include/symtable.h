@@ -25,14 +25,13 @@ typedef struct symtable_entry_s{
     
     // common
     ret_type type;
-    bool isNullable;
     bool isUsed;
-    bool isChanged;
-    bool isDefined;
-
+    bool isNullable;
+    
     // variables
     bool isConst; 
     bool hasExplicitType;
+    bool isChanged;
 
     // functions
     int param_count;

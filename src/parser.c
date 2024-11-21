@@ -56,7 +56,14 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // ID 
     *token = get_token(buffer);
     ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: Prolog expected ID");
-    insertRight(ptr, idFound);
+    if (strcmp(idFound->token->value.string_value, "ifj") == 0 ) {
+        freeAST(idFound);
+    }
+    else {
+        free_token(*token);
+        freeAST(ASTRoot);
+        error_exit(2,"SYNTAX ERROR: WRONG PROLOG ID");
+    }
     // =
     *token = get_token(buffer);
     ASTNode *asgnFound = checkToken(token, T_ASGN, NO_KW, "SYNTAX ERROR: Prolog expected =");
@@ -71,13 +78,22 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     freeAST(lParenFound);
     // P_EXPRESSION
     ASTNode *expression = ruleNode(P_EXPRESSION);
-    insertLeft(idFound, expression);
+    insertLeft(ptr, expression);
     *token = get_token(buffer);
     Expression(token, expression, buffer);
     if (expression->right == NULL) {
         free_token(*token);
         freeAST(ASTRoot); 
         error_exit(2, "SYNTAX ERROR: Prolog (Expression)\n"); 
+    }
+    if (strcmp(expression->right->token->value.string_value, "ifj24.zig") == 0 ) {
+        freeAST(expression);
+        expression = NULL;
+    }
+    else {
+        free_token(*token);
+        freeAST(ASTRoot);
+        error_exit(2,"SYNTAX ERROR: HAS TO BE ifj24.zig");
     }
     // )
     ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: Prolog expected )");

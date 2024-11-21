@@ -80,7 +80,6 @@ void print_sym_node(symtable_node_ptr node)
     } else {
         printf("%d, ", node->entry->isConst);
         printf("%d, ", node->entry->hasExplicitType);
-        printf("%d", node->entry->isDefined);
     }
     printf("}]");
 }
