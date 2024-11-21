@@ -32,7 +32,7 @@ test: tests/TestsCheck.c $(OBJS)
 clean:
 	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test
 
-submit: purge
+submit: clean
 	mkdir xhricma00
 	cp -r src/* include/* docs/rozdeleni docs/rozsireni docs/dokumentace.pdf xhricma00
 	cat submit_make > xhricma00/Makefile
