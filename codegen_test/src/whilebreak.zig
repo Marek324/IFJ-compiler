@@ -5,6 +5,8 @@ pub fn main() void {
     while (a > 0) {
         ifj.write(a); ifj.write("\n");
         a = a - 1;
-        if(a == 1) break;
+        if(a == 1) {
+            break;
+        }
     }
 }

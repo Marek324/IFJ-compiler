@@ -133,6 +133,15 @@ void param_list(ASTNode *node){
 
 }
 
+void var_dec(ASTNode *node);
+void id(ASTNode *node);
+void if_statement(ASTNode *node);
+void while_loop(ASTNode *node);
+void for_loop(ASTNode *node);
+void return_statement(ASTNode *node);
+void break_statement(ASTNode *node);
+void continue_statement(ASTNode *node);
+
 void statement(ASTNode *node){
     if (node == NULL)
         return;
@@ -142,41 +151,99 @@ void statement(ASTNode *node){
 
     switch(node->type){
         case P_VAR_DECLARATION:
-            printf("var_decl\n");
+            var_dec(node);
             break;
 
         case ID:
-            node = node->left;
-            printf("id\n");
+            id(node);
             break;
 
         case P_IF_STATEMENT:
-            printf("if\n");
+            if_statement(node);
+            break;
+
+        case P_WHILE_LOOP:
+            while_loop(node);
+            break;
+        
+        case P_RETURN_STATEMENT:
+            return_statement(node);
+            break;
+
+        case P_BREAK:
+            break_statement(node);
+            break;
+
+        case P_CONTINUE:
+            continue_statement(node);
+            break;
+
+        case P_FOR_LOOP:
+            for_loop(node);
+            break;
+
+    }
+    
+
+
+}
+
+void var_dec(ASTNode *node){
+    printf("var_dec ");
+    printf("%s\n", node->right->left->token->value.string_value);
+    
+    statement(node->left);
+}
+
+void id(ASTNode *node){
+    printf("id %s ", node->token->value.string_value);
+    node = node->left; // ID_FOUND
+    ASTNode *nextStatement = node->left;
+
+    node = node->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
+    switch(node->type){
+        case P_ASGN_FOUND:
+            printf("asgn\n");
+            break;
+
+        case ID:
+            printf("%s\n", node->token->value.string_value);
+            break;
+
+        case LPAREN:
+            printf("l_paren\n");
             break;
 
         case P_WHILE_LOOP:
             printf("while\n");
             break;
-        
-        case P_RETURN_STATEMENT:
-            printf("return\n");
-            break;
-
-        case P_BREAK:
-            printf("break\n");
-            break;
-
-        case P_CONTINUE:
-            printf("continue\n");
-            break;
-
-        case P_FOR_LOOP:
-            printf("for\n");
-            break;
-
     }
-    
-    statement(node->left);
 
+
+    statement(nextStatement);
+}   
+
+void if_statement(ASTNode *node){
+
+}
+
+void while_loop(ASTNode *node){
+    printf("while ");
+
+}
+
+void for_loop(ASTNode *node){
+
+}
+
+void return_statement(ASTNode *node){
+
+}
+
+void break_statement(ASTNode *node){
+    
+}
+
+void continue_statement(ASTNode *node){
 
 }
