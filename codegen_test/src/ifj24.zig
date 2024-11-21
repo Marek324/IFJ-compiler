@@ -1,12 +1,14 @@
 // IFJ24 pro jazyk Zig (v0.13)
+// 2024-11-19 Oprava write, aby spravne vypisovala nullable promenne
 const std = @import("std");
 
 fn writef64(f: f64) void {
     std.fmt.formatFloatHexadecimal(f, std.fmt.FormatOptions{}, std.io.getStdOut().writer()) catch unreachable; // unreachable means ERROR: format error during writef64(f)!
 }
 
-pub fn write(value: anytype) void { 
+pub fn non_nullable_write(value: anytype) void {
     const stdout = std.io.getStdOut().writer();
+
     switch (@typeInfo(@TypeOf(value))) { // example from https://ziglang.org/documentation/0.13.0
         //.Int => {
         //    return stdout.print("{d}", .{value});
@@ -26,6 +28,23 @@ pub fn write(value: anytype) void {
         else => {
             return stdout.print("{}", .{value}) catch unreachable;
         },
+    }
+}
+
+pub fn write(value: anytype) void { 
+    const typeInfo = @typeInfo(@TypeOf(value));
+    const stdout = std.io.getStdOut().writer();
+
+    switch (typeInfo) {
+        .Optional => |_| {
+            // Check if value is null.
+            if (value) |nonOptional| {
+                return non_nullable_write(nonOptional);
+            } else {
+                return stdout.print("null", .{}) catch unreachable;
+            }
+        },
+        else => { return non_nullable_write(value); },
     }
 }
 
