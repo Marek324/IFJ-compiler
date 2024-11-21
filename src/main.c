@@ -61,9 +61,7 @@ void test_symtable() {
 int main() {
     circ_buff_ptr buffer = circ_buff_init();
     Parse(buffer);
-    circ_buff_ptr buffer = circ_buff_init();
-    Parse(buffer);
-
+    
     // Debug
     generate_d2_file(ASTRoot, "tree.d2");
     
