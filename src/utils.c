@@ -1,539 +1,125 @@
 #include "utils.h"
 
-void printToken(Token *token) {
-    if (token == NULL) return;
-
-    // Print based on the token type
-    switch (token->type) {
-        case T_ID: 
-            printf("ID(%s) ", token->value.string_value); 
-            break;
-
-        case T_KW: 
-            switch (token->value.keyword) {
-                case KW_CONST: printf("Keyword(const)"); break;
-                case KW_IF: printf("Keyword(if)"); break;
-                case KW_ELSE: printf("Keyword(else)"); break;
-                case KW_FN: printf("Keyword(fn)"); break;
-                case KW_I32: printf("Keyword(i32)"); break;
-                case KW_F64: printf("Keyword(f64)"); break;
-                case KW_BOOL: printf("Keyword(bool)"); break;
-                case KW_NULL: printf("Keyword(null)"); break;
-                case KW_PUB: printf("Keyword(pub)"); break;
-                case KW_RETURN: printf("Keyword(return)"); break;
-                case KW_U8: printf("Keyword(u8)"); break;
-                case KW_VAR: printf("Keyword(var)"); break;
-                case KW_VOID: printf("Keyword(void)"); break;
-                case KW_FOR: printf("Keyword(for)"); break;
-                case KW_WHILE: printf("Keyword(while)"); break;
-                case KW_UNREACHABLE: printf("Keyword(unreachable)"); break;
-                case KW_ORELSE: printf("Keyword(orelse)"); break;
-                default: printf("Unknown Keyword"); break;
-            }
-            break;
-
-        case T_AT_IMPORT: 
-            printf("@import"); 
-            break;
-
-        case T_AT_AS: 
-            printf("@as"); 
-            break;
-
-        case T_INT: 
-            printf("Int(%lld)", token->value.int_value); 
-            break;
-
-        case T_FLOAT: 
-            printf("Float(%lf)", token->value.float_value); 
-            break;
-
-        case T_STR: 
-            printf("String(\"%s\")", token->value.string_value); 
-            break;
-
-        case T_ASGN: 
-            printf("="); 
-            break;
-
-        case T_EQ: 
-            printf("=="); 
-            break;
-
-        case T_BANG: 
-            printf("!"); 
-            break;
-
-        case T_NEQ: 
-            printf("!="); 
-            break;
-
-        case T_LESS: 
-            printf("<"); 
-            break;
-
-        case T_LEQ: 
-            printf("<="); 
-            break;
-
-        case T_MORE: 
-            printf(">"); 
-            break;
-
-        case T_MEQ: 
-            printf(">="); 
-            break;
-
-        case T_PLUS: 
-            printf("+"); 
-            break;
-
-        case T_MINUS: 
-            printf("-"); 
-            break;
-
-        case T_MUL: 
-            printf("*"); 
-            break;
-
-        case T_DIV: 
-            printf("/"); 
-            break;
-
-        case T_LPAREN: 
-            printf("("); 
-            break;
-
-        case T_RPAREN: 
-            printf(")"); 
-            break;
-
-        case T_LBRACE: 
-            printf("{"); 
-            break;
-
-        case T_RBRACE: 
-            printf("}"); 
-            break;
-
-        case T_LBRACKET: 
-            printf("["); 
-            break;
-
-        case T_RBRACKET: 
-            printf("]"); 
-            break;
-
-        case T_COMMA: 
-            printf(","); 
-            break;
-
-        case T_DOT: 
-            printf("."); 
-            break;
-
-        case T_SEMICOL: 
-            printf(";"); 
-            break;
-
-        case T_COLON: 
-            printf(":"); 
-            break;
-
-        case T_PIPE: 
-            printf("|"); 
-            break;
-
-        case T_QMARK: 
-            printf("?"); 
-            break;
-
-        case T_EOF: 
-            printf("EOF"); 
-            break;
-
-        case T_ERROR: 
-            printf("Error"); 
-            break;
-
-        default: 
-            printf("Unknown"); 
-            break;
-    }
-}
-
-void printNodeType(ASTNodeType type){
+const char* getNodeName(ASTNodeType type) {
     switch (type) {
-        case P_PROG: 
-            printf("P_PROG"); 
-            break;
-
-        case P_PROLOG: 
-            printf("P_PROLOG"); 
-            break;
-
-        case P_END: 
-            printf("P_END"); 
-            break;
-
-        case P_FUNCTION_DEF: 
-            printf("P_FUNCTION_DEF"); 
-            break;
-
-        case P_PARAM_LIST: 
-            printf("P_PARAM_LIST"); 
-            break;
-
-        case P_COMMA_PAR_FOUND: 
-            printf("P_COMMA_PAR_FOUND"); 
-            break;
-
-        case P_BLOCK: 
-            printf("P_BLOCK"); 
-            break;
-
-        case P_STATEMENT: 
-            printf("P_STATEMENT"); 
-            break;
-
-        case P_ID_FOUND: 
-            printf("P_ID_FOUND"); 
-            break;
-
-        case P_VAR_DECLARATION:
-            printf("P_VAR_DECLARATION");
-            break;
-
-        case P_IF_STATEMENT:
-            printf("P_IF_STATEMENT");
-            break;
-
-        case P_IF_FOUND:
-            printf("P_IF_FOUND");
-            break;
-
-        case P_ELSE_STATEMENT:
-            printf("P_ELSE_STATEMENT");
-            break;
-
-        case P_OPTIONAL_VALUE:
-            printf("P_OPTIONAL_VALUE");
-            break;
-
-        case P_WHILE_LOOP:
-            printf("P_WHILE_LOOP");
-            break;
-        
-        case P_CONTINUE:
-            printf("P_CONTINUE");
-            break;
-
-        case P_BREAK:
-            printf("P_BREAK");
-            break;
-
-        case P_RETURN_STATEMENT:
-            printf("P_RETURN_STATEMENT");
-            break;
-
-        case P_EXPRESSION_LIST:
-            printf("P_EXPRESSION_LIST");
-            break;
-
-        case P_COMMA_EXPR_FOUND:     
-            printf("P_COMMA_EXPR_FOUND");
-            break;
-
-        case P_TYPE:
-            printf("P_TYPE");
-            break;
-
-        case P_FOR_LOOP:
-            printf("P_FOR_LOOP");
-            break;
-
-        case P_OPTIONAL_STATEMENTS:
-            printf("P_OPTIONAL_STATEMENTS");
-            break;
-
-        case P_TYPE_COMPLETE:
-            printf("P_TYPE_COMPLETE");
-            break;
-
-        case P_QUESTION_MARK:
-            printf("P_QUESTION_MARK");
-            break;
-
-        case P_SINGLE_STATEMENT:
-            printf("P_SINGLE_STATEMENT");
-            break;
-
-        case P_FUNCTION_TYPE:
-            printf("P_FUNCTION_TYPE");
-            break;
-
-        case P_EXPRESSION:
-            printf("P_EXPRESSION");
-            break;  
-        
-        case P_ASGN_FOUND:
-            printf("P_ASGN_FOUND");
-            break;
-
-        case ID:
-            printf("ID");
-            break;
-
-        
-        case AT_IMPORT:
-            printf("AT_IMPORT");
-            break;
-
-        case AT_AS:
-            printf("AT_AS");
-            break;
-
-        case TYPE_INT:
-            printf("TYPE_INT");
-            break;
-
-        case TYPE_F64:
-            printf("TYPE_F64");
-            break;
-
-        case TYPE_STR:
-            printf("TYPE_STR");
-            break;
-
-        case ASSGN:
-            printf("ASSGN");
-            break;
-
-        case EQ:
-            printf("EQ");
-            break;
-
-        case BANG:
-            printf("BANG");
-            break;
-
-        case NEQ:
-            printf("NEQ");
-            break;
-
-        case LESS:
-            printf("LESS");
-            break;
-
-        case LEQ:   
-            printf("LEQ");
-            break;
-        
-        case MORE:
-            printf("MORE");
-            break;
-
-        case MEQ:   
-            printf("MEQ");
-            break;
-
-        case PLUS:
-            printf("PLUS");
-            break;
-
-        case MINUS: 
-            printf("MINUS");
-            break;
-
-        case MUL:
-            printf("MUL");
-            break;
-
-        case DIV:
-            printf("DIV");
-            break;
-
-        case LPAREN:
-            printf("LPAREN");
-            break;
-
-        case RPAREN:
-            printf("RPAREN");
-            break;
-
-        case LBRACE:
-            printf("LBRACE");
-            break;
-
-        case RBRACE:
-            printf("RBRACE");
-            break;
-
-        case LBRACKET:
-            printf("LBRACKET");
-            break;
-        
-        case RBRACKET:  
-            printf("RBRACKET");
-            break;
-
-        case COMMA:
-            printf("COMMA");
-            break;
-
-        case DOT:
-            printf("DOT");
-            break;
-
-        case SEMICOLON:
-            printf("SEMICOLON");
-            break;
-
-        case COLON:
-            printf("COLON");
-            break; 
-
-        case PIPE:
-            printf("PIPE");
-            break;
-
-        case QMARK:
-            printf("QMARK");
-            break;
-
-        case END_OF_FILE:
-            printf("END_OF_FILE");
-            break;
-
-        case T_CONST:
-            printf("T_CONST");
-            break;
-
-        case T_IF:
-            printf("T_IF");
-            break;
-        
-        case T_ELSE:
-            printf("T_ELSE");
-            break;
-
-        case T_FN:
-            printf("T_FN");
-            break;
-
-        case T__KW_I32:
-            printf("T__KW_I32");
-            break;
-
-        
-        case T_KW_F64:
-            printf("T_KW_F64");
-            break;
-
-        case T_KW_BOOL:
-            printf("T_KW_BOOL");
-            break;
-
-        case T_NULL:   
-            printf("T_NULL");
-            break;
-
-        case T_PUB:
-            printf("T_PUB");
-            break;
-
-        case T_RETURN:
-            printf("T_RETURN");
-            break;
-
-        case T_U8:
-            printf("T_U8");
-            break;
-
-        case T_VAR:
-            printf("T_VAR");
-            break;
-
-        case T_VOID:
-            printf("T_VOID");
-            break;
-
-        case T_WHILE:
-            printf("T_WHILE");
-            break;
-
-        case T_UNREACHABLE:
-            printf("T_UNREACHABLE");
-            break;
-
-        case T_ORELSE:
-            printf("T_ORELSE");
-            break;
-
-        default: 
-            printf("Unknown"); 
-            break;
+        case P_PROG: return "P_PROG";
+        case P_PROLOG: return "P_PROLOG";
+        case P_END: return "P_END";
+        case P_FUNCTION_DEF: return "P_FUNCTION_DEF";
+        case P_PARAM_LIST: return "P_PARAM_LIST";
+        case P_COMMA_PAR_FOUND: return "P_COMMA_PAR_FOUND";
+        case P_BLOCK: return "P_BLOCK";
+        case P_STATEMENT: return "P_STATEMENT";
+        case P_ID_FOUND: return "P_ID_FOUND";
+        case P_VAR_DECLARATION: return "P_VAR_DECLARATION";
+        case P_IF_STATEMENT: return "P_IF_STATEMENT";
+        case P_IF_FOUND: return "P_IF_FOUND";
+        case P_ELSE_STATEMENT: return "P_ELSE_STATEMENT";
+        case P_OPTIONAL_VALUE: return "P_OPTIONAL_VALUE";
+        case P_WHILE_LOOP: return "P_WHILE_LOOP";
+        case P_CONTINUE: return "P_CONTINUE";
+        case P_BREAK: return "P_BREAK";
+        case P_RETURN_STATEMENT: return "P_RETURN_STATEMENT";
+        case P_EXPRESSION_LIST: return "P_EXPRESSION_LIST";
+        case P_COMMA_EXPR_FOUND: return "P_COMMA_EXPR_FOUND";
+        case P_TYPE: return "P_TYPE";
+        case P_FOR_LOOP: return "P_FOR_LOOP";
+        case P_OPTIONAL_STATEMENTS: return "P_OPTIONAL_STATEMENTS";
+        case P_TYPE_COMPLETE: return "P_TYPE_COMPLETE";
+        case P_QUESTION_MARK: return "P_QUESTION_MARK";
+        case P_SINGLE_STATEMENT: return "P_SINGLE_STATEMENT";
+        case P_FUNCTION_TYPE: return "P_FUNCTION_TYPE";
+        case P_EXPRESSION: return "P_EXPRESSION";
+        case P_ASGN_FOUND: return "P_ASGN_FOUND";
+        case ID: return "ID";
+        case AT_IMPORT: return "AT_IMPORT";
+        case AT_AS: return "AT_AS";
+        case TYPE_INT: return "TYPE_INT";
+        case TYPE_F64: return "TYPE_F64";
+        case TYPE_STR: return "TYPE_STR";
+        case ASSGN: return "ASSGN";
+        case EQ: return "EQ";
+        case BANG: return "BANG";
+        case NEQ: return "NEQ";
+        case LESS: return "LESS";
+        case LEQ: return "LEQ";
+        case MORE: return "MORE";
+        case MEQ: return "MEQ";
+        case PLUS: return "PLUS";
+        case MINUS: return "MINUS";
+        case MUL: return "MUL";
+        case DIV: return "DIV";
+        case LPAREN: return "LPAREN";
+        case RPAREN: return "RPAREN";
+        case LBRACE: return "LBRACE";
+        case RBRACE: return "RBRACE";
+        case LBRACKET: return "LBRACKET";
+        case RBRACKET: return "RBRACKET";
+        case COMMA: return "COMMA";
+        case DOT: return "DOT";
+        case SEMICOLON: return "SEMICOLON";
+        case COLON: return "COLON";
+        case PIPE: return "PIPE";
+        case QMARK: return "QMARK";
+        case END_OF_FILE: return "END_OF_FILE";
+        case T_CONST: return "T_CONST";
+        case T_IF: return "T_IF";
+        case T_ELSE: return "T_ELSE";
+        case T_FN: return "T_FN";
+        case T__KW_I32: return "T__KW_I32";
+        case T_KW_F64: return "T_KW_F64";
+        case T_KW_BOOL: return "T_KW_BOOL";
+        case T_NULL: return "T_NULL";
+        case T_PUB: return "T_PUB";
+        case T_RETURN: return "T_RETURN";
+        case T_U8: return "T_U8";
+        case T_VAR: return "T_VAR";
+        case T_VOID: return "T_VOID";
+        case T_WHILE: return "T_WHILE";
+        case T_UNREACHABLE: return "T_UNREACHABLE";
+        case T_ORELSE: return "T_ORELSE";
+        case T_AND: return "T_AND";
+        case T_OR: return "T_OR";
+        default: return "UNKNOWN";
     }
 }
 
-typedef enum direction { left, right, none } direction_t;
+// Recursive function to write the tree in D2 format
+void write_d2(ASTNode *node, FILE *file) {
+    if (node == NULL) return;
 
-void print_node(ASTNode *node)
-{
-    printf("[");
-    printNodeType(node->type);
-    printf(", ");
-    printToken(node->token);
-    printf("]");
-}
+    if (node != NULL) {
+        // Include token type, attributes, line, and column
+        fprintf(file, "Node%p: \"%s\"\n", 
+                (void*)node, 
+                getNodeName(node->type));
+    }
 
-const char *subtree_prefix = "  |";
-const char *space_prefix = "   ";
+    // Write the left child
+    if (node->left != NULL) {
+        fprintf(file, "Node%p -> Node%p: left\n", (void*)node, (void*)node->left);
+        write_d2(node->left, file);
+    }
 
-char *make_prefix(char *prefix, const char *suffix) {
-    char *result = (char *)malloc(strlen(prefix) + strlen(suffix) + 1);
-    strcpy(result, prefix);
-    result = strcat(result, suffix);
-    return result;
-}
-
-void print_subtree(ASTNode *tree, char *prefix, direction_t from) {
-    if (tree != NULL) {
-        char *current_subtree_prefix = make_prefix(prefix, subtree_prefix);
-        char *current_space_prefix = make_prefix(prefix, space_prefix);
-
-        if (from == left) {
-            printf("%s\n", current_subtree_prefix);
-        }
-
-        print_subtree(
-            tree->right,
-            from == left ? current_subtree_prefix : current_space_prefix, right);
-
-        printf("%s  +-", prefix);
-        print_node(tree);
-        printf("\n");
-
-        print_subtree(
-            tree->left,
-            from == right ? current_subtree_prefix : current_space_prefix, left);
-
-        if (from == right) {
-            printf("%s\n", current_subtree_prefix);
-        }
-
-        free(current_space_prefix);
-        free(current_subtree_prefix);
+    // Write the right child
+    if (node->right != NULL) {
+        fprintf(file, "Node%p -> Node%p: right\n", (void*)node, (void*)node->right);
+        write_d2(node->right, file);
     }
 }
 
-void print_tree(ASTNode *tree) {
-    printf("Binary tree structure:\n");
-    printf("\n");
-    if (tree != NULL) {
-        print_subtree(tree, "", none);
-    } else {
-        printf("Tree is empty\n");
+// Function to generate D2 file from AST
+void generate_d2_file(ASTNode *root, const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to open file");
+        return;
     }
-    printf("\n");
+
+    fprintf(file, "graph {\n"); // Start of D2 graph
+    write_d2(root, file);
+    fprintf(file, "}\n"); // End of D2 graph
+
+    fclose(file);
+    printf("D2 file generated: %s\n", filename);
 }

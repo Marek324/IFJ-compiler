@@ -1,7 +1,7 @@
 const ifj = @import("ifj24.zig");
 
 pub fn main() void {
-    const a = (add(add(1,2),3));
+    const a = 2+add(2+add(1+4,2, 3, 4, 5),3);
     ifj.write(a); ifj.write("\n");
 }
 

@@ -1,6 +1,6 @@
 # Compiler and Flags
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c99 -Iinclude -g
+CFLAGS = -Wall -Wextra -pedantic -std=c99 -Iinclude -g -fsanitize=address -fsanitize=undefined
 LDFLAGS =
 
 # Directories
@@ -17,9 +17,12 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 MAIN = $(SRC_DIR)/main.c
 TARGET = ifj24compiler
 
-.PHONY: all clean purge submit
+.PHONY: all clean purge submit tree
 
 all: $(TARGET)
+
+tree:
+	d2 tree.d2
 
 test: tests/TestsCheck.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@ -lcheck -lsubunit -lm

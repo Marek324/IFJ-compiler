@@ -1,3 +1,3 @@
 #include "parser.h"
 
-void print_tree(ASTNode *tree);
+void generate_d2_file(ASTNode *root, const char *filename);
