@@ -272,9 +272,7 @@ void expression(ASTNode *node){
             if (node->right == NULL){
                 printf("id %s\n", node->token->value.string_value);
             } else {
-                printf("func_call %s\n", node->token->value.string_value);
-                func_call(node->right);
-                printf("end_func_call %s\n", node->token->value.string_value);
+                func_call(node);
             }
             break;
         case T_UNREACHABLE:
@@ -301,6 +299,29 @@ void expression(ASTNode *node){
 }
 
 void func_call(ASTNode *node){
+    if (node == NULL)
+        return;
+    
+    printf("func_call %s\n", node->token->value.string_value);
+
+    expression_list(node);
+
+    printf("end_func_call %s\n", node->token->value.string_value);
+            
+
+}
+
+void expression_list(ASTNode *node){
+    if (node == NULL)
+        return;
+
+    printf("arg ");
+    expression(node->right->right);
+
+
+    if (node->left != NULL){
+        expression_list(node->left->left);
+    }
 
 }
 
