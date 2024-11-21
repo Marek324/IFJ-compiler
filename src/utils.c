@@ -118,7 +118,7 @@ void generate_d2_file(ASTNode *root, const char *filename) {
         return;
     }
 
-    fprintf(file, "graph {\n"); // Start of D2 graph
+    fprintf(file, "direction: right\ngraph {\n"); // Start of D2 graph
     write_d2(root, file);
     fprintf(file, "}\n"); // End of D2 graph
 

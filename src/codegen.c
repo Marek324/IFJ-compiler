@@ -191,13 +191,13 @@ void var_dec(ASTNode *node){
     if(node->type == P_TYPE_COMPLETE)
         node = node->left; // ASSGN
 
- 
-
-    printf("expression \n");
-    expression(node->right->right->right); 
-    
+    asgn_found(node->right);    
     
     statement(nextStatement);
+}
+
+void asgn_found(ASTNode *node){
+    
 }
 
 void expression(ASTNode *node){
@@ -340,9 +340,7 @@ void id_statement(ASTNode *node){
     node = node->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
     switch(node->type){
         case P_ASGN_FOUND:
-            printf("asgn\n");
-            printf("expression\n");
-            expression(node->right->right);
+            asgn_found(node);
             break;
 
         case ID:

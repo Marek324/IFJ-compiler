@@ -15,3 +15,4 @@ void continue_statement(ASTNode *node);
 void expression(ASTNode *node);
 void func_call(ASTNode *node);
 void expression_list(ASTNode *node);
+void asgn_found(ASTNode *node);
