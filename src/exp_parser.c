@@ -9,6 +9,7 @@ Implementation of the expression parser.
 #include "exp_parser.h"
 #include "scanner.h"
 #include "stack.h"
+#include "parser.h"
 
 #define P_TABLE_SIZE 12
 
@@ -48,6 +49,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
         ASTNode* node = NULL;
+        // for keywords
         if((*token)->type == T_KW) {
             node = nodeCreate(convertToASTType(T_KW, (*token)->value.keyword), *token);
         }
@@ -130,6 +132,77 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         }
         temp_type = (*token)->type;
         // -------------Function calls ----------------------------------------------------------------
+        // ============================================================================================
+        // -------------Ternary operator --------------------------------------------------------------
+        if(node->type == T_IF) {
+            stackPush(operand_stack, (long)node);
+            ASTNode* expression = ruleNode(P_EXPRESSION);
+            insertLeft(node, expression);
+            // gets token after "if" -> should be LPAREN
+            *token = get_token(buff);
+            if((*token)->type != T_LPAREN) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                error_exit(2, "SYNTAX ERROR: Ternary operator! Missing LPAREN after \"if\"\n");
+            }
+            free_token(*token);
+            // gets token after LPAREN -> should be 
+            *token = get_token(buff);
+            ASTNode* expressionFound = parseExpression(token, buff);
+            if(expressionFound == NULL) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                error_exit(2, "SYNTAX ERROR: Ternary operator! Missing expression after \n");
+            }
+            if((*token)->type != T_RPAREN) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                error_exit(2, "SYNTAX ERROR: Ternary operator! Missing RPAREN after expression\n");
+            }
+            free_token(*token);
+
+            expression = ruleNode(P_EXPRESSION);
+            insertLeft(expressionFound, expression);
+
+            // gets token after RPAREN -> should be expression
+            *token = get_token(buff);
+            expressionFound = parseExpression(token, buff);
+            if(expressionFound == NULL) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                error_exit(2, "SYNTAX ERROR: Ternary operator! Missing expression after RPAREN\n");
+            }
+            if((*token)->value.keyword != KW_ELSE) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                error_exit(2, "SYNTAX ERROR: Ternary operator! Missing ELSE after expression\n");
+            }
+            free_token(*token);
+
+            expression = ruleNode(P_EXPRESSION);
+            insertLeft(expressionFound, expression);
+
+            // gets token after ELSE -> should be expression
+            *token = get_token(buff);
+            expressionFound = parseExpression(token, buff);
+            if(expressionFound == NULL) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                error_exit(2, "SYNTAX ERROR: Ternary operator! Missing expression after RPAREN\n");
+            }
+
+            insertRight(expression, expressionFound);
+            // get token after expression -> should be an end character
+            *token = get_token(buff);
+        }
+        // -------------Ternary operator --------------------------------------------------------------
+
         if (isOperand(*token)) {
             stackPush(operand_stack, (long)node);
         }
@@ -334,14 +407,6 @@ bool isEnd(Token* token) {
         case T_SEMICOL:
         case T_COMMA:
             return true;
-            break;
-        case T_KW:
-            if(token->value.keyword == KW_ELSE) {
-                return true;
-            }
-            else {
-                return false;
-            }
         default:
             return false;
     }

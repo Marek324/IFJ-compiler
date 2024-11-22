@@ -5,6 +5,8 @@
 #include "scanner.h"
 #include "exp_parser.h"
 
+ASTNode *ruleNode(ASTNodeType rule);
+
 void Parse(circ_buff_ptr buffer);
 
 void Prog(Token **token,  ASTNode *ptr, circ_buff_ptr buffer);
