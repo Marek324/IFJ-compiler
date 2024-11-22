@@ -556,7 +556,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         Expression(token, expressionFound, buffer);
         if (expressionFound->right == NULL) {
             free_token(*token);
-            freeAST(ASTRoot); 
+            freeAST(ASTRoot);
             error_exit(2, "SYNTAX ERROR WRONG @AS FUNCTION ARG!\n"); 
         }
     //, 
