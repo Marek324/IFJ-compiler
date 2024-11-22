@@ -70,7 +70,7 @@ void param_list(ASTNode *node){
 
     // else is param
 
-    printf("DEFVAR ");
+    printf("DEFVAR TF@");
 
     node = node->right; // ID
     ASTNode *idNode = node;
@@ -158,11 +158,14 @@ void var_dec(ASTNode *node){
 void asgn_found(ASTNode *node, const char *var){
     expression(node->right->right);
     printf("POPS TF@%s\n", var);
+
+    
 }
 
 void expression(ASTNode *node){
     if (node == NULL)
         return;
+
     // printf("node type %d\n", node->type);
     switch(node->type){
         case EQ:
@@ -242,7 +245,47 @@ void expression(ASTNode *node){
             if (node->right == NULL){
                 printf("PUSHS TF@%s\n", node->token->value.string_value);
             } else {
-                func_call(node);
+                if (node->left != NULL) { // builtin function
+
+                    const char *builtin_func = node->left->token->value.string_value;
+                    if (!strcmp(builtin_func, "readstr")){
+                        printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\n");
+                        printf("READ TF@tmp string\nPUSHS TF@tmp\n");
+                        printf("POPFRAME\n");
+                    } else if (!strcmp(builtin_func, "readi32")){
+                        printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\n");
+                        printf("READ TF@tmp int\nPUSHS TF@tmp\n");
+                        printf("POPFRAME\n");
+                    } else if (!strcmp(builtin_func, "readf64")){
+                        printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\n");
+                        printf("READ TF@tmp float\nPUSHS TF@tmp\n");
+                        printf("POPFRAME\n");
+                    } else if (!strcmp(builtin_func, "i2f")){ // nebude fungovat pre literaly
+                        printf("PUSHS TF@%s\nINT2FLOATS\n", node->right->right->token->value.string_value);
+                    } else if (!strcmp(builtin_func, "f2i")){ // nebude fungovat pre literaly
+                        printf("PUSHS TF@%s\nFLOAT2INTS\n", node->right->right->token->value.string_value);
+                    } else if (!strcmp(builtin_func, "string")){
+                        dyn_str *str = dyn_str_init();
+                        convert_string(str, node->right->right->token->value.string_value);
+                        printf("PUSHS string@%s\n", str->str);
+                        dyn_str_free(str);
+                    } else if (!strcmp(builtin_func, "length")){ // check literal/id
+                        printf("ifj.length\n");
+                    } else if (!strcmp(builtin_func, "concat")){
+                        printf("ifj.concat\n");
+                    } else if (!strcmp(builtin_func, "substring")){
+                        func_call(node);
+                    } else if (!strcmp(builtin_func, "strcmp")){
+                        printf("ifj.strcmp\n");
+                    } else if (!strcmp(builtin_func, "ord")){
+                        printf("ifj.ord\n");
+                    } else if (!strcmp(builtin_func, "chr")){
+                        printf("ifj.chr\n");
+                    } else {
+                        printf ("unknown builtin function %s\n", builtin_func);
+                    }
+                } else
+                    func_call(node);
             }
             break;
         case T_UNREACHABLE:
@@ -283,7 +326,9 @@ void expression_list(ASTNode *node){
     if (node == NULL)
         return;
 
-    expression(node->right->right);
+    node = node->right;
+
+    expression(node->right);
 
 
     if (node->left != NULL){
@@ -305,40 +350,8 @@ void id_statement(ASTNode *node){
             break;
 
         case ID:
-            const char *builtin_func = node->token->value.string_value;
-
-            if (!strcmp(builtin_func, "readstr")){
-                printf("ifj.readstr\n");
-            } else if (!strcmp(builtin_func, "readi32")){
-                printf("ifj.readi32\n");
-            } else if (!strcmp(builtin_func, "readf64")){
-                printf("ifj.readf64\n");
-            } else if (!strcmp(builtin_func, "write")){
-                printf("WRITE ");
-                print_out(node->left->left->right->right);
-            } else if (!strcmp(builtin_func, "i2f")){
-                printf("ifj.i2f\n");
-            } else if (!strcmp(builtin_func, "f2i")){
-                printf("ifj.f2i\n");
-            } else if (!strcmp(builtin_func, "string")){
-                printf("ifj.string\n");
-            } else if (!strcmp(builtin_func, "length")){
-                printf("ifj.length\n");
-            } else if (!strcmp(builtin_func, "concat")){
-                printf("ifj.concat\n");
-            } else if (!strcmp(builtin_func, "substring")){
-                printf("ifj.substring\n");
-            } else if (!strcmp(builtin_func, "strcmp")){
-                printf("ifj.strcmp\n");
-            } else if (!strcmp(builtin_func, "ord")){
-                printf("ifj.ord\n");
-            } else if (!strcmp(builtin_func, "chr")){
-                printf("ifj.chr\n");
-            } else {
-                printf ("unknown builtin function %s\n", builtin_func);
-            }
-
-            
+            printf("WRITE ");
+            print_out(node->left->left->right->right);
             break;
 
         case LPAREN:
@@ -372,6 +385,11 @@ void for_loop(ASTNode *node){
 }
 
 void return_statement(ASTNode *node){
+    if (node->right != NULL) {
+        expression(node->right->right);
+    }
+
+    printf ("POPFRAME\nRETURN\n");
 
 }
 
@@ -400,6 +418,12 @@ void print_out(ASTNode *node){
             break;
         case ID:
             printf("TF@%s\n", node->token->value.string_value);
+            break;
+        case T_TRUE:
+            printf("bool@true\n");
+            break;
+        case T_FALSE:
+            printf("bool@false\n");
             break;
         default:
             break;
