@@ -17,7 +17,7 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 MAIN = $(SRC_DIR)/main.c
 TARGET = ifj24compiler
 
-.PHONY: all clean purge submit tree
+.PHONY: all clean submit tree test zig
 
 all: $(TARGET)
 
@@ -30,7 +30,7 @@ test: tests/TestsCheck.c $(OBJS)
 	@rm -f test
 
 clean:
-	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test
+	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test $(TARGET) tree.d2 tree.svg aa.out
 
 submit: clean
 	mkdir xhricma00
@@ -46,3 +46,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 
 $(OBJ_DIR):
 	mkdir -p $@
+
+S = hello
+SRCZIG = codegen_test/src/$(S).zig
+zig: $(TARGET)
+	@./$(TARGET) < $(SRCZIG) > aa.out
+	@codegen_test/ic24int aa.out

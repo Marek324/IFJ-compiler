@@ -1,64 +1,67 @@
 .IFJcode24
 CALL main
 EXIT int@0
-
 LABEL &strcmp
-DEFVAR TF@&strcmp_cnt
-
-LT TF@&strcmp_cnt TF@s1 TF@s2
-JUMPIFEQ &strcmp_smaller TF@&strcmp_cnt bool@true
-
-GT TF@&strcmp_cnt TF@s1 TF@s2
-JUMPIFEQ &strcmp_bigger TF@&strcmp_cnt bool@true
-
-MOVE TF@&strcmp_res int@0
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@s1
+DEFVAR TF@s2
+POPS TF@s2
+POPS TF@s1
+DEFVAR TF@cnt
+LT TF@cnt TF@s1 TF@s2
+JUMPIFEQ &strcmp_smaller TF@cnt bool@true
+GT TF@cnt TF@s1 TF@s
+JUMPIFEQ &strcmp_bigger TF@cnt bool@true
+MOVE TF@res int@0
 RETURN
-
 LABEL &strcmp_smaller
-MOVE TF@&strcmp_res int@-1
+MOVE TF@res int@-1
 RETURN
-
 LABEL &strcmp_bigger
-MOVE TF@&strcmp_res int@1
+MOVE TF@res int@1
+PUSHS TF@res
+POPFRAME
 RETURN
-
-
 LABEL &substring
-MOVE TF@&substring_res string@
-
-DEFVAR TF@&substring_err_cnt
-LT TF@&substring_err_cnt TF@i int@0
-JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
-LT TF@&substring_err_cnt TF@j int@0
-JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
-LT TF@&substring_err_cnt TF@j TF@i
-JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
-
-DEFVAR TF@&substring_strlen
-STRLEN TF@&substring_strlen TF@s
-
-GT TF@&substring_err_cnt TF@j TF@&substring_strlen
-JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
-
-LT TF@&substring_err_cnt TF@i TF@&substring_strlen
-NOT TF@&substring_err_cnt TF@&substring_err_cnt
-JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true
-
-DEFVAR TF@&substring_char
-
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@s
+DEFVAR TF@i
+DEFVAR TF@j
+POPS TF@j
+POPS TF@i
+POPS TF@s
+DEFVAR TF@res
+MOVE TF@res string@
+DEFVAR TF@cnt_err
+LT TF@cnt_err TF@i int@0
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+LT TF@cnt_err TF@j int@0
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+LT TF@cnt_err TF@j TF@i
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+DEFVAR TF@len
+STRLEN TF@len TF@s
+GT TF@cnt_err TF@j TF@len
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+LT TF@cnt_err TF@i TF@len
+NOT TF@cnt_err TF@cnt_err
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+DEFVAR TF@char
 LABEL &substring_loop
-
-GETCHAR TF@&substring_char TF@s TF@i
-
-CONCAT TF@&substring_res TF@&substring_res TF@&substring_char
-
+JUMPIFEQ &substring_loop_end TF@i TF@j
+GETCHAR TF@char TF@s TF@i
+CONCAT TF@res TF@res TF@char
 ADD TF@i TF@i int@1
-JUMPIFNEQ &substring_loop TF@i TF@j
-
+JUMP &substring_loop
+LABEL &substring_loop_end
+PUSHS TF@res
+POPFRAME
 RETURN
-
 LABEL &substring_err
-MOVE TF@&substring_res nil@nil
+PUSHS nil@nil
+POPFRAME
 RETURN
 
 LABEL main
@@ -70,21 +73,13 @@ MOVE TF@a string@abc
 DEFVAR TF@c
 
 
-PUSHFRAME
-CREATEFRAME
-DEFVAR TF@&substring_res
-DEFVAR TF@s
-DEFVAR TF@i
-DEFVAR TF@j
 
-MOVE TF@s LF@a
-MOVE TF@i int@1
-MOVE TF@j int@2
-
+PUSHS TF@a
+PUSHS int@2
+PUSHS int@2
 CALL &substring
 
-MOVE LF@c TF@&substring_res
-POPFRAME
+POPS TF@c
 
 WRITE TF@c
 WRITE string@\010

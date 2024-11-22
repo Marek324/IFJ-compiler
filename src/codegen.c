@@ -4,70 +4,20 @@
 
 void codegen()
 {
-//     printf("\
-// .IFJcode21\n\
-// CALL main\n\
-// EXIT int@0\n\
-// LABEL &strcmp\n\
-// DEFVAR TF@&strcmp_cnt\n\
-// LT TF@&strcmp_cnt TF@s1 TF@s2\n\
-// JUMPIFEQ &strcmp_smaller TF@&strcmp_cnt bool@true\n\
-// GT TF@&strcmp_cnt TF@s1 TF@s2\n\
-// JUMPIFEQ &strcmp_bigger TF@&strcmp_cnt bool@true\n\
-// MOVE TF@&strcmp_res int@0\n\
-// RETURN\n\
-// LABEL &strcmp_smaller\n\
-// MOVE TF@&strcmp_res int@-1\n\
-// RETURN\n\
-// LABEL &strcmp_bigger\n\
-// MOVE TF@&strcmp_res int@1\n\
-// RETURN\n\
-// LABEL &substring\n\
-// MOVE TF@&substring_res string@\n\
-// DEFVAR TF@&substring_err_cnt\n\
-// LT TF@&substring_err_cnt TF@i int@0\n\
-// JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true\n\
-// LT TF@&substring_err_cnt TF@j int@0\n\
-// JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true\n\
-// LT TF@&substring_err_cnt TF@j TF@i\n\
-// JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true\n\
-// DEFVAR TF@&substring_strlen\n\
-// STRLEN TF@&substring_strlen TF@s\n\
-// GT TF@&substring_err_cnt TF@j TF@&substring_strlen\n\
-// JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true\n\
-// LT TF@&substring_err_cnt TF@i TF@&substring_strlen\n\
-// NOT TF@&substring_err_cnt TF@&substring_err_cnt\n\
-// JUMPIFEQ &substring_err TF@&substring_err_cnt bool@true\n\
-// DEFVAR TF@&substring_char\n\
-// LABEL &substring_loop\n\
-// GETCHAR TF@&substring_char TF@s TF@i\n\
-// CONCAT TF@&substring_res TF@&substring_res TF@&substring_char\n\
-// ADD TF@i TF@i int@1\n\
-// JUMPIFNEQ &substring_loop TF@i TF@j\n\
-// RETURN\n\
-// LABEL &substring_err\n\
-// MOVE TF@&substring_res nil@nil\n\
-// RETURN\n\
-// ");
+    PROLOG;
 
     /*
     Volanie funkcii
 
-        PUSHFRAME
-        CREATEFRAME
-        DEFVAR TF@&strcmp_res -- vysledok
-        -- argumenty --
-        DEFVAR TF@arg1
-        MOVE TF@arg1 LF@a - a je argument
-        
-        DEFVAR TF@arg2 
-        MOVE TF@arg2 LF@b - b je argument
+    -- parametre --
+        PUSHS TF@a
+        PUSHS int@2
+        PUSHS int@2
 
-        CALL &strcmp
-        
-    c je premenna kde sa to uklada
-        MOVE LF@c TF@&strcmp_res
-        POPFRAME
+        CALL &substring
+
+    -- return --
+        POPS TF@c
     */
 
     prog(ASTRoot);
@@ -88,9 +38,11 @@ void function_def(ASTNode *node){
 
     // else is function def
 
-    printf("function ");
+    printf("LABEL ");
     node = node->right; // ID
     printf("%s\n", node->token->value.string_value);
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
 
     node = node->left->left; // params or RPAREN
     if (node->type == P_PARAM_LIST){
@@ -104,6 +56,9 @@ void function_def(ASTNode *node){
 
     statement(node->right);
 
+    printf("POPFRAME\n");
+    printf("RETURN\n");
+
     function_def(node->left);
 
 
@@ -115,9 +70,10 @@ void param_list(ASTNode *node){
 
     // else is param
 
-    printf("param ");
+    printf("DEFVAR ");
 
     node = node->right; // ID
+    ASTNode *idNode = node;
     printf("%s\n", node->token->value.string_value);
 
     node = node->left->left; // comma or null
@@ -125,6 +81,8 @@ void param_list(ASTNode *node){
     if (node != NULL){
         param_list(node->right);
     }
+
+    printf("POPS TF@%s\n", idNode->token->value.string_value);
 
 }
 
@@ -180,24 +138,26 @@ void statement(ASTNode *node){
 
 
 void var_dec(ASTNode *node){
-    printf("var_dec ");
+    printf("DEFVAR ");
     ASTNode *nextStatement = node->left;
     node = node->right->left; // ID
 
-    printf("%s\n", node->token->value.string_value);
+    printf("TF@%s\n", node->token->value.string_value);
+    ASTNode *idNode = node;
 
     node = node->left; // P_TYPE_COMPLETE | ASSGN
 
     if(node->type == P_TYPE_COMPLETE)
         node = node->left; // ASSGN
 
-    asgn_found(node->right);    
+    asgn_found(node->right, idNode->token->value.string_value);    
     
     statement(nextStatement);
 }
 
-void asgn_found(ASTNode *node){
-    
+void asgn_found(ASTNode *node, const char *var){
+    expression(node->right->right);
+    printf("POPS TF@%s\n", var);
 }
 
 void expression(ASTNode *node){
@@ -208,67 +168,70 @@ void expression(ASTNode *node){
         case EQ:
             expression(node->left);
             expression(node->right);
-            printf("eq\n");
+            printf("EQS\n");
             break;
         case BANG:
             expression(node->left);
             expression(node->right);
-            printf("bang\n");
+            printf("NOTS\n");
             break;
         case NEQ:
             expression(node->left);
             expression(node->right);
-            printf("neq\n");
+            printf("EQS\n");
+            printf("NOTS\n");
             break;
         case LESS:
             expression(node->left);
             expression(node->right);
-            printf("less\n");
+            printf("LTS\n");
             break;
         case LEQ:
             expression(node->left);
             expression(node->right);
-            printf("leq\n");
+            printf("LTS\n");
+            printf("NOTS\n");
             break;
         case MORE:
             expression(node->left);
             expression(node->right);
-            printf("more\n");
+            printf("GTS\n");
             break;
         case MEQ:
             expression(node->left);
             expression(node->right);
-            printf("meq\n");
+            printf("GTS\n");
+            printf("NOTS\n");
             break;
         case PLUS:
             expression(node->left);
             expression(node->right);
-            printf("plus\n");
+            printf("ADDS\n");
             break;
         case MINUS:
             expression(node->left);
             expression(node->right);
-            printf("minus\n");
+            printf("SUBS\n");
             break;
         case MUL:
             expression(node->left);
             expression(node->right);
-            printf("mul\n");
+            printf("MULS\n");
             break;
         case DIV:
             expression(node->left);
             expression(node->right);
-            printf("div\n");
+            printf("DIVS\n");
             break;
         case T_AND:
             expression(node->left);
             expression(node->right);
-            printf("and\n");
+            printf("ANDS\n");
             break;
         case T_OR:
             expression(node->left);
             expression(node->right);
-            printf("or\n");
+            printf("ORS\n");
             break;
         case T_ORELSE:
             expression(node->left);
@@ -277,7 +240,7 @@ void expression(ASTNode *node){
             break;
         case ID:
             if (node->right == NULL){
-                printf("id %s\n", node->token->value.string_value);
+                printf("PUSHS TF@%s\n", node->token->value.string_value);
             } else {
                 func_call(node);
             }
@@ -286,16 +249,16 @@ void expression(ASTNode *node){
             printf("unreachable\n");
             break;
         case TYPE_INT:
-            printf("int %lld\n", node->token->value.int_value);
+            printf("PUSHS int@%lld\n", node->token->value.int_value);
             break;
         case T_FLOAT:
-            printf("float %lf\n", node->token->value.float_value);
+            printf("PUSHS float@%lf\n", node->token->value.float_value);
             break;
         case T_TRUE:
-            printf("true\n");
+            printf("PUSHS bool@true\n");
             break;
         case T_FALSE:
-            printf("false\n");
+            printf("PUSHS bool@false\n");
             break;
         default:
             printf("unknown\n");
@@ -309,12 +272,10 @@ void func_call(ASTNode *node){
     if (node == NULL)
         return;
     
-    printf("func_call %s\n", node->token->value.string_value);
 
     expression_list(node);
+    printf("CALL %s\n", node->token->value.string_value);
 
-    printf("end_func_call %s\n", node->token->value.string_value);
-            
 
 }
 
@@ -322,7 +283,6 @@ void expression_list(ASTNode *node){
     if (node == NULL)
         return;
 
-    printf("arg ");
     expression(node->right->right);
 
 
@@ -333,22 +293,56 @@ void expression_list(ASTNode *node){
 }
 
 void id_statement(ASTNode *node){
-    printf("id_statement %s ", node->token->value.string_value);
+    // printf("id_statement %s ", node->token->value.string_value);
+    ASTNode *idNode = node;
     node = node->left; // ID_FOUND
     ASTNode *nextStatement = node->left;
 
     node = node->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
     switch(node->type){
         case P_ASGN_FOUND:
-            asgn_found(node);
+            asgn_found(node, idNode->token->value.string_value);
             break;
 
         case ID:
-            printf("%s\n", node->token->value.string_value);
+            const char *builtin_func = node->token->value.string_value;
+
+            if (!strcmp(builtin_func, "readstr")){
+                printf("ifj.readstr\n");
+            } else if (!strcmp(builtin_func, "readi32")){
+                printf("ifj.readi32\n");
+            } else if (!strcmp(builtin_func, "readf64")){
+                printf("ifj.readf64\n");
+            } else if (!strcmp(builtin_func, "write")){
+                printf("WRITE ");
+                print_out(node->left->left->right->right);
+            } else if (!strcmp(builtin_func, "i2f")){
+                printf("ifj.i2f\n");
+            } else if (!strcmp(builtin_func, "f2i")){
+                printf("ifj.f2i\n");
+            } else if (!strcmp(builtin_func, "string")){
+                printf("ifj.string\n");
+            } else if (!strcmp(builtin_func, "length")){
+                printf("ifj.length\n");
+            } else if (!strcmp(builtin_func, "concat")){
+                printf("ifj.concat\n");
+            } else if (!strcmp(builtin_func, "substring")){
+                printf("ifj.substring\n");
+            } else if (!strcmp(builtin_func, "strcmp")){
+                printf("ifj.strcmp\n");
+            } else if (!strcmp(builtin_func, "ord")){
+                printf("ifj.ord\n");
+            } else if (!strcmp(builtin_func, "chr")){
+                printf("ifj.chr\n");
+            } else {
+                printf ("unknown builtin function %s\n", builtin_func);
+            }
+
+            
             break;
 
         case LPAREN:
-            printf("l_paren\n");
+            func_call(idNode);
             break;
 
         case P_WHILE_LOOP:
@@ -387,4 +381,41 @@ void break_statement(ASTNode *node){
 
 void continue_statement(ASTNode *node){
 
+}
+
+
+void print_out(ASTNode *node){
+    switch(node->type){
+        case TYPE_STR:
+            dyn_str *str = dyn_str_init();
+            convert_string(str, node->token->value.string_value);
+            printf("string@%s\n", str->str);
+            dyn_str_free(str);
+            break;
+        case TYPE_INT:
+            printf("int@%lld\n", node->token->value.int_value);
+            break;
+        case TYPE_F64:
+            printf("float@%a\n", node->token->value.float_value);
+            break;
+        case ID:
+            printf("TF@%s\n", node->token->value.string_value);
+            break;
+        default:
+            break;
+
+
+    }
+}
+
+void convert_string(dyn_str *dyn_s, char *str){
+    for (int i = 0; i < (int) strlen(str); i++){
+        if (str[i] <= ' ' || str[i] == '#' || str[i] == '\\'){
+            dyn_str_append_str(dyn_s, "\\0");
+            dyn_str_append(dyn_s, '0' + (str[i] / 10));
+            dyn_str_append(dyn_s, '0' + (str[i] % 10));
+        } else {
+            dyn_str_append(dyn_s, str[i]);
+        }
+    }
 }

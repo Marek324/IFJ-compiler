@@ -83,7 +83,7 @@ int main() {
     generate_d2_file(ASTRoot, "tree.d2");
     #endif
     
-   // codegen();
+    codegen();
     
     // test_symtable();
     circ_buff_free(buffer);
