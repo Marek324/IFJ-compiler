@@ -28,6 +28,7 @@ typedef enum {
     T_MINUS,
     T_MUL,
     T_DIV,
+    T_IDIV,
 
     T_LPAREN, T_RPAREN,
     T_LBRACE, T_RBRACE,
@@ -41,7 +42,8 @@ typedef enum {
     T_QMARK,
  
     T_EOF,
-    T_ERROR
+    T_ERROR,
+    T_I2F
 
 } TokenType;
 

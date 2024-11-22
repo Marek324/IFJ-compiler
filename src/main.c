@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "symtable.h"
 #include "codegen.h"
+#include "sem_anal.h"
 
 // post-order printing 
 void print_AVL(symtable_node_ptr node) {
@@ -77,6 +78,7 @@ void test_symtable() {
 int main() {
     circ_buff_ptr buffer = circ_buff_init();
     Parse(buffer);
+    analyse(ASTRoot);
     
     // Debug
     #ifdef DEBUG

@@ -82,7 +82,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     // frees QMARK node
                     freeAST(node);
                     // create a new token for orelse
-                    Token *new_token = (Token *)malloc(sizeof(Token));
+                    Token* new_token = (Token*)malloc(sizeof(Token));
                     if (new_token == NULL){ 
                         freeAll(paren_depth, operand_stack, operator_stack);
                         error_exit(99, "Memory allocation failed"); 

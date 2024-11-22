@@ -57,6 +57,7 @@ typedef enum {
     MINUS,
     MUL,
     DIV,
+    IDIV,
     LPAREN, RPAREN,
     LBRACE, RBRACE,
     LBRACKET, RBRACKET,
@@ -90,7 +91,8 @@ typedef enum {
     T_UNREACHABLE,
     T_AND,
     T_OR,
-    T_ORELSE
+    T_ORELSE,
+    I2F
 
 } ASTNodeType;
 
