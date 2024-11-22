@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "exp_parser.h"
-           
+#include "symtable.h"
+
 ASTNode * checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWord, const char *error) {
     ASTNode *ptr = NULL;
     if ((*token)->type == T_KW) {
@@ -34,6 +35,7 @@ void Parse(circ_buff_ptr buffer) {
     ASTNode *progFound = ruleNode(P_PROG);
     ASTRoot = progFound;
     Prog(&token, progFound, buffer);
+    //symtable_init(&SymFunctionTree);
 }
 void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_PROLOG
@@ -110,6 +112,7 @@ void Expression(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, expressionFound);
     }
 }
+
 void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // PUB
     ASTNode *pubFound = checkToken(token, T_KW, KW_PUB, "SYNTAX ERROR: FuncDef expected PUB");
@@ -122,6 +125,8 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     *token = get_token(buffer);
     ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: FuncDef expected ID");
     insertRight(ptr, idFound);
+    // insert function into symtable 
+    //symtable_insert(&SymFunctionTree, idFound->token->value.string_value, T_FUN_SYM);
     // (
     *token = get_token(buffer);
     ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected (");
@@ -131,10 +136,12 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     ASTNode *rParenFound = NULL;
     if((*token)->type == T_ID) {
         ASTNode *paramList = ruleNode(P_PARAM_LIST);
-        insertLeft(lParenFound,paramList);
+        insertLeft(lParenFound, paramList);
         ParamList(token, paramList, buffer);
+    // insert function info into symtable
+    //symtable_get_function_param_info(SymFunctionTree, idFound->token->value.string_value, paramList, DEFAULT_INDEX_SIZE, DEFAULT_FUNCTION_PARAM_SIZE);
     // )
-         rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected )");
+        rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected )");
         insertLeft(paramList, rParenFound);
         *token = get_token(buffer);
     } else {
@@ -143,10 +150,12 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertLeft(lParenFound, rParenFound);
     *token = get_token(buffer);
     }
-    // P_TYPE_COMPLETE
+    // P_FUNCTION_TYPE
     ASTNode *function_type = ruleNode(P_FUNCTION_TYPE);
     insertLeft(rParenFound, function_type);
     FunctionType(token, function_type, buffer);
+    // insert function type into symtable
+    //symtable_get_function_type(SymFunctionTree, idFound->token->value.string_value, function_type);
     // P_BLOCK
     ASTNode *block = ruleNode(P_BLOCK);
     insertLeft(function_type, block);
@@ -524,53 +533,8 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
     }
 }
 void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-    if ((*token)->type == T_KW && (*token)->value.keyword == KW_IF) {
-        //IF
-        ASTNode *ifFound = checkToken(token, T_KW, KW_IF, "SYNTAX ERROR: AsgnFound expected IF");
-        insertRight(ptr, ifFound);
-        *token = get_token(buffer);
-        // (
-        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected (");
-        freeAST(lParenFound);
-        *token = get_token(buffer);
-        //P_EXPRESSION
-        ASTNode *expressionRule = ruleNode(P_EXPRESSION);
-        insertLeft(ifFound, expressionRule);
-        Expression(token, expressionRule, buffer);
-        if (expressionRule->right == NULL) {
-            free_token(*token);
-            freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR wrong condition in ternary\n");
-        }
-        // )
-        ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected )");
-        freeAST(rParenFound);
-        *token = get_token(buffer);
-        // P_EXPRESSION
-        ASTNode *expressionRule2 = ruleNode(P_EXPRESSION);
-        insertLeft(expressionRule, expressionRule2);
-        Expression(token, expressionRule2, buffer);
-        if (expressionRule2->right == NULL) {
-            free_token(*token);
-            freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR wrong expression 1 in ternary!\n");
-        }
-        // ELSE
-        ASTNode *elseFound = checkToken(token, T_KW, KW_ELSE, "SYNTAX ERROR: AsgnFound expected ELSE");
-        freeAST(elseFound);
-        *token = get_token(buffer);
-        // P_EXPRESSION
-        ASTNode *expressionRule3 = ruleNode(P_EXPRESSION);
-        insertLeft(expressionRule2, expressionRule3);
-        Expression(token, expressionRule3, buffer);
-        if (expressionRule3->right == NULL) {
-            free_token(*token);
-            freeAST(ASTRoot);
-            error_exit(2, "SYNTAX ERROR wrong expression 2 in ternary!\n");
-        }
-    }
     // @AS
-    else if ((*token)->type == T_AT_AS) {
+    if ((*token)->type == T_AT_AS) {
         ASTNode *atASFound = checkToken(token, T_AT_AS, NO_KW, "SYNTAX ERROR: AsgnFound expected @AS");
         insertRight(ptr, atASFound);
         *token = get_token(buffer);

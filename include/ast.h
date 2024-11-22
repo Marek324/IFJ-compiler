@@ -94,19 +94,15 @@ typedef enum {
 
 } ASTNodeType;
 
-
-
 typedef struct ASTNode {
     ASTNodeType type;
     struct ASTNode *left;
     struct ASTNode *right;
     Token *token;
-
 }ASTNode;
 
 //ASTRoot globally initialized in case of internal or scanner errors 
 extern ASTNode *ASTRoot;
-
 
 ASTNode *nodeCreate(ASTNodeType type, Token *token);
 

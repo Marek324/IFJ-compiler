@@ -1,8 +1,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include "ast.h"
 
 #ifndef SYMTABLE_H
 #define SYMTABLE_H
+
+
+#define DEFAULT_FUNCTION_PARAM_SIZE 4
+#define DEFAULT_INDEX_SIZE 0
 
 typedef enum {
     T_VAR_SYM,
@@ -17,8 +22,11 @@ typedef enum {
     T_NULL_RET
 } ret_type;
 
+struct symtable_node_s;
 typedef struct symtable_node_s *symtable_node_ptr;
 typedef struct symtable_node_s **symtable_tree_ptr;
+
+extern symtable_node_ptr SymFunctionTree;
 
 typedef struct symtable_entry_s{
     symtable_entry_type entry_type;
@@ -27,7 +35,7 @@ typedef struct symtable_entry_s{
     ret_type type;
     bool isUsed;
     bool isNullable;
-    
+
     // variables
     bool isConst; 
     bool hasExplicitType;
@@ -52,7 +60,13 @@ symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type);
 
 void symtable_dispose(symtable_tree_ptr tree);
 
+ret_type get_ret_type(ASTNodeType type);
+
 char* my_str_dup(char* key);
+
+void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity);
+
+void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
 
 int max(int a, int b);
 

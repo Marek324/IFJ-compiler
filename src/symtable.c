@@ -1,7 +1,9 @@
 #include <string.h>
 #include "symtable.h"
 #include "error.h"
-#include "ast.h"
+
+
+symtable_node_ptr SymFunctionTree = NULL;
 
 char* my_str_dup(char* key) {
     char* newStr = (char*)malloc(strlen(key) + 1);
@@ -20,8 +22,9 @@ symtable_entry_ptr symtable_entry_init(symtable_entry_type type) {
         error_exit(99, "ERROR: Unable to allocate memory for symtable_entry_ptr\n");
     }
     if(type == T_FUN_SYM) {
+        entry->param_count = 0;
         entry->param_nullable = NULL;
-        entry->param_types =  NULL;
+        entry->param_types = NULL;
         entry->local_symtable = malloc(sizeof(symtable_node_t));
         if(entry->local_symtable == NULL) {
             freeAST(ASTRoot);
@@ -47,7 +50,86 @@ symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type) {
 
     return node;
 }
+void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity) {
+    symtable_node_ptr node = symtable_search(tree, key);
+    
+    if (node->entry->param_nullable == NULL && node->entry->param_types == NULL) {
+        node->entry->param_nullable = malloc(capacity*sizeof(bool));
+        node->entry->param_types = malloc(capacity*sizeof(ret_type));
+        if (node->entry->param_nullable == NULL || node->entry->param_types == NULL) {
+            freeAST(ASTRoot);
+            error_exit(99, "ERROR: Unable to allocate memory\n");
+        }
+    }
 
+    if (i == capacity - 1) {
+        capacity = 2 * capacity;
+        node->entry->param_nullable = realloc(node->entry->param_nullable, capacity * sizeof(bool));
+        node->entry->param_types = realloc(node->entry->param_types, capacity * sizeof(ret_type));
+        if (node->entry->param_nullable == NULL || node->entry->param_types == NULL) {
+            freeAST(ASTRoot);
+            error_exit(99, "ERROR: Unable to allocate memory\n");
+        }
+    }
+    // move to ID
+    ParamList = ParamList->right;
+    if (ParamList != NULL) {
+        (node->entry->param_count)++;
+    }
+    // move to P_TYPE_COMPLETE
+    ParamList = ParamList->left;
+
+    if (ParamList->right->type == P_QUESTION_MARK) {
+        node->entry->param_nullable[i] = true;
+        node->entry->param_types[i] = get_ret_type(convertToASTType(T_KW, ParamList->right->left->right->token->value.keyword));
+        i++;
+    } else if (ParamList->right->type == P_TYPE) {
+        node->entry->param_nullable[i] = false;
+        node->entry->param_types[i] = get_ret_type(convertToASTType(T_KW, ParamList->right->right->token->value.keyword));
+        i++;
+    }
+    if (ParamList->left != NULL) {
+        if (ParamList->left->right != NULL) {
+            symtable_get_function_param_info(tree, key, ParamList->left->right, i, capacity);
+        }
+    }
+}
+
+void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *FunctionType) {
+
+    symtable_node_ptr node = symtable_search(tree, key);
+
+    if (FunctionType->right->type == T_VOID) {
+        node->entry->type = get_ret_type(T_VOID);
+        node->entry->returnsValue = false;
+
+    } else {
+        // Move to P_TYPE_COMPLETE
+        FunctionType = FunctionType->right;
+
+        if (FunctionType->right->type == P_QUESTION_MARK) {
+            node->entry->isNullable = true;
+            node->entry->returnsValue = true;
+            node->entry->type = get_ret_type(convertToASTType(T_KW, FunctionType->right->left->right->token->value.keyword));
+
+        } else if (FunctionType->right->type == P_TYPE) {
+            node->entry->isNullable = false;
+            node->entry->returnsValue = true;
+            node->entry->type = get_ret_type(convertToASTType(T_KW, FunctionType->right->right->token->value.keyword));
+        }
+    }
+}
+
+ret_type get_ret_type(ASTNodeType type) {
+    switch(type) {
+        case T__KW_I32: return T_INT_RET;
+        case T_KW_F64: return T_FLOAT_RET;
+        case T_KW_BOOL: return T_BOOL_RET;
+        case T_U8: return T_STR_RET;
+        case T_VOID: return T_NULL_RET;
+        default: return 99;
+    }
+}
 int max(int a, int b) {
     return a > b ? a : b;
 }
