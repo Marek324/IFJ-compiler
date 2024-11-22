@@ -1,1 +1,26 @@
-abcd :koteseni:
+# Compiler and Flags
+CC = gcc
+CFLAGS = -Wall -Wextra -pedantic -std=c99
+LDFLAGS =
+
+# Source files
+SRCS = $(wildcard *.c)
+SRCS := $(filter-out main.c, $(SRCS))
+# Object files
+OBJS = $(SRCS:/%.c=%.o)
+MAIN = main.c
+TARGET = ifj24compiler
+
+.PHONY: all clean 
+
+all: $(TARGET)
+
+clean:
+	rm -f $(TARGET) 
+
+
+$(TARGET): $(OBJS) $(MAIN)
+	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o $(TARGET) $(LDFLAGS)
+
+%.o: %.c 
+	$(CC) $(CFLAGS) -c $< -o $@
