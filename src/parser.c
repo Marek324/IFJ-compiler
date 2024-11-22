@@ -35,7 +35,6 @@ void Parse(circ_buff_ptr buffer) {
     ASTNode *progFound = ruleNode(P_PROG);
     ASTRoot = progFound;
     Prog(&token, progFound, buffer);
-    //symtable_init(&SymFunctionTree);
 }
 void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // P_PROLOG
@@ -125,7 +124,7 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     *token = get_token(buffer);
     ASTNode *idFound = checkToken(token, T_ID, NO_KW, "SYNTAX ERROR: FuncDef expected ID");
     insertRight(ptr, idFound);
-    // insert function into symtable 
+    // insert function into symtable
     //symtable_insert(&SymFunctionTree, idFound->token->value.string_value, T_FUN_SYM);
     // (
     *token = get_token(buffer);
@@ -823,7 +822,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         } 
     }
     else {
-    // :
+    // : 
         if ((*token)->type == T_COLON) {
             ASTNode *colonFound = checkToken(token, T_COLON, NO_KW, "SYNTAX ERROR: While expected :");
             freeAST(colonFound);

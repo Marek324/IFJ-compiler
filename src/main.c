@@ -14,6 +14,14 @@ void print_AVL(symtable_node_ptr node) {
     print_AVL(node->left);
     print_AVL(node->right);
     printf("%s,", node->key);
+    /*printf("%d", node->entry->type);
+    printf("%i", node->entry->isNullable);
+    printf("%d", node->entry->param_nullable[0]);
+    printf("%d", node->entry->param_types[0]);
+    printf("%d", node->entry->param_nullable[1]);
+    printf("%d", node->entry->param_types[1]);
+    printf("%d", node->entry->param_nullable[5]);
+    printf("%d", node->entry->param_types[5]);*/
 }
 
 void test_symtable() {
@@ -77,17 +85,19 @@ void test_symtable() {
 // Example usage
 int main() {
     circ_buff_ptr buffer = circ_buff_init();
+    //symtable_init(&SymFunctionTree);
     Parse(buffer);
     analyse(ASTRoot);
     
+    //print_AVL(SymFunctionTree);
     // Debug
     #ifdef DEBUG
     generate_d2_file(ASTRoot, "tree.d2");
     #endif
     
-    codegen();
+    //codegen();
     
-    // test_symtable();
+    //test_symtable();
     circ_buff_free(buffer);
     freeAST(ASTRoot);
     //symtable_dispose(&SymFunctionTree);

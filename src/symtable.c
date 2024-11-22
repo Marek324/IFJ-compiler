@@ -9,6 +9,7 @@ char* my_str_dup(char* key) {
     char* newStr = (char*)malloc(strlen(key) + 1);
     if(newStr == NULL) {
         freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);
         error_exit(99, "ERROR: Unable to allocate memory for newStr\n");
     }
     strcpy(newStr, key);
@@ -57,6 +58,7 @@ void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode
         node->entry->param_nullable = malloc(capacity*sizeof(bool));
         node->entry->param_types = malloc(capacity*sizeof(ret_type));
         if (node->entry->param_nullable == NULL || node->entry->param_types == NULL) {
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(99, "ERROR: Unable to allocate memory\n");
         }
@@ -67,6 +69,7 @@ void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode
         node->entry->param_nullable = realloc(node->entry->param_nullable, capacity * sizeof(bool));
         node->entry->param_types = realloc(node->entry->param_types, capacity * sizeof(ret_type));
         if (node->entry->param_nullable == NULL || node->entry->param_types == NULL) {
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(99, "ERROR: Unable to allocate memory\n");
         }
