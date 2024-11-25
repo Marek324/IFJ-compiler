@@ -243,8 +243,10 @@ void expression(ASTNode *node){
             break;
         case T_ORELSE:
             expression(node->left);
+            printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\nPOPS TF@tmp\nPUSHS TF@tmp\n");
+            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_end\n");
             expression(node->right);
-            printf("orelse\n");
+            printf("LABEL &orelse_end\n");
             break;
         case ID:
             if (node->right == NULL){
@@ -285,20 +287,20 @@ void expression(ASTNode *node){
                         printf("STRLEN TF@tmp TF@tmp\nPUSHS TF@tmp\nPOPFRAME\n");
                     } else if (!strcmp(builtin_func, "concat")){
                         printf("# concat\n");
-                        expression_list(node->right->right); 
+                        expression_list(node); 
                         printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp1\nDEFVAR TF@tmp2\n");
                         printf("POPS TF@tmp2\nPOPS TF@tmp1\nCONCAT TF@tmp1 TF@tmp1 TF@tmp2\nPUSHS TF@tmp1\nPOPFRAME\n");
                     } else if (!strcmp(builtin_func, "substring")){
                         printf("# substring\n");
-                        expression_list(node->right->right); 
+                        expression_list(node); 
                         printf("CALL &substring\n");
                     } else if (!strcmp(builtin_func, "strcmp")){
                         printf("# strcmp\n");
-                        expression_list(node->right->right); 
+                        expression_list(node); 
                         printf("CALL &strcmp\n");
                     } else if (!strcmp(builtin_func, "ord")){
                         printf("# ord\n");
-                        expression_list(node->right->right); 
+                        expression_list(node); 
                         printf("STRI2INTS\n");
                     } else if (!strcmp(builtin_func, "chr")){
                         printf("# chr\n");
@@ -327,11 +329,11 @@ void expression(ASTNode *node){
             printf("PUSHS bool@false\n");
             break;
         case TYPE_STR:
-            dyn_str *str = dyn_str_init();
+            {dyn_str *str = dyn_str_init();
             convert_string(str, node->token->value.string_value);
             printf("PUSHS string@%s\n", str->str);
             dyn_str_free(str);
-            break;
+            break;}
         default:
             printf("unknown\n");
             break;
@@ -380,7 +382,7 @@ void id_statement(ASTNode *node){
 
         case ID:
             expression(node->left->left->right->right);
-            printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\n");
+            printf("# id_statement\nPUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\n");
             printf("WRITE TF@out\nPOPFRAME\n");
             break;
 
