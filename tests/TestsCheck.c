@@ -8,6 +8,8 @@
 #include "symtable.h"
 #include "parser.h"
 #include "exp_parser.h"
+#include "utils.h"
+#include "circ_buff.h"
 
 ////////////////////////////// COMPONENTS ////////////////////////////////////////////////
 circ_buff_ptr buffer = NULL;
@@ -593,77 +595,33 @@ START_TEST(test_NULL)
     scanner_teardown();
 }
 END_TEST
-////////////////////////////// TESTS EXP PARSER ////////////////////////////////////////////////
 
-//Test for singular token
-// START_TEST(test_EXP_EMPTY)
-// {
-//     scanner_setup(); 
-//     setup_stdin(" ");
-    
-//     Token *token = get_token(buffer);
-//     ASTNode *root = parseExpression(&token, buffer);
-
-//     ck_assert_int_eq( END_OF_FILE , root->type);
-//     // ck_assert_mem_eq( token, root->Token);
-
-//     free_token(token);
-//     freeAST(root);
-
-//     scanner_teardown();
-// }
-// END_TEST
-
-//Test for longer stuff
-// START_TEST(test_EXP_Prolog)
-// {
-//     scanner_setup(); 
-//     setup_stdin("const ifj = @import(\"ifj24.zig\");"); // This is the input you are testing
-    
-//     Token *token = get_token(buffer);
-//     ASTNode *root = parseExpression(&token, buffer); // Create the EXP tree
-
-//     FILE *output_file = fopen("test_EXP_Prolog.out", "r"); // This is a file with the expected output, needs to be created (add space at the end (if needed))
-//     FILE *output_file_EXP = fopen("tempTreeLR.txt", "w+"); // File with the output from our prog
-//     tree_to_file_Left_Right(root, output_file_EXP); // Writes tree to file
-
-
-//     ck_assert_int_eq(1 , compare_files_line_by_line(output_file,output_file_EXP));
-
-//     fclose(output_file); // Start cleaning up and closing all the stuff
-//     fclose(output_file_EXP);
-//     remove("tempTreeLR.txt");
-//     free_token(token);
-//     freeAST(root);
-
-//     scanner_teardown();
-// }
 ////////////////////////////// TESTS PARSER ////////////////////////////////////////////////
-// START_TEST(test_Parse_Prolog)
-// {
-//     scanner_setup(); 
-//     setup_stdin("const ifj = @import(\"ifj24.zig\");"); // This is the input you are testing
+START_TEST(test_Parse_Prolog)
+{
+    scanner_setup(); 
+    setup_stdin("const ifj = @import(\"ifj24.zig\");"); // This is the input you are testing
     
-//     Token *token = get_token(buffer);
-//     ASTNode *root = parseExpression(&token, buffer); // Create the EXP tree
+    Token *token = get_token(buffer);
+    ASTNode *root = parseExpression(&token, buffer); // Create the EXP tree
 
-//     ////// IMPORTANT NEED TO RUN PARSER AS IS :D (will add it later)
+    ////// IMPORTANT NEED TO RUN PARSER AS IS :D (will add it later)
 
-//     FILE *output_file = fopen("test_Parse_Prolog.out", "r"); // This is a file with the expected output, needs to be created (add space at the end (if needed))
-//     FILE *output_file_EXP = fopen("tempTreeRL.txt", "w+"); // File with the output from our prog
-//     tree_to_file_Left_Right(root, output_file_EXP); // Writes tree to file
+    FILE *output_file = fopen("test_Parse_Prolog.out", "r"); // This is a file with the expected output, needs to be created (add space at the end (if needed))
+    FILE *output_file_EXP = fopen("tempTreeRL.txt", "w+"); // File with the output from our prog
+    tree_to_file_Left_Right(root, output_file_EXP); // Writes tree to file
 
 
-//     ck_assert_int_eq(1 , compare_files_line_by_line(output_file,output_file_EXP));
+    ck_assert_int_eq(1 , compare_files_line_by_line(output_file,output_file_EXP));
 
-//     fclose(output_file); // Start cleaning up and closing all the stuff
-//     fclose(output_file_EXP);
-//     remove("tempTreeRL.txt");
-//     free_token(token);
-//     freeAST(root);
+    fclose(output_file); // Start cleaning up and closing all the stuff
+    fclose(output_file_EXP);
+    remove("tempTreeRL.txt");
+    free_token(token);
+    freeAST(root);
 
-//     scanner_teardown();
-// }
+    scanner_teardown();
+}
 ////////////////////////////// TESTS SYMTABLE ////////////////////////////////////////////////
 START_TEST(test_SYM_Empty)
 {
@@ -731,24 +689,6 @@ char* suiteToRun = "all";
     tcase_add_test(tc_core, test_NULL);
     tcase_add_test(tc_core, test_UNREACHABLE);
 
-
-    suite_add_tcase(s, tc_core);
-
-    return s;
-}
-
-Suite * EXParseSuite()
-{
-    Suite *s;
-    TCase *tc_core;
-
-    s = suite_create("EXPParserTests");
-
-    /* Core test case */
-    tc_core = tcase_create("Core3");
-
-    //tcase_add_test(tc_core, test_EXP_EMPTY);
-    //tcase_add_test(tc_core, test_EXP_Prolog);
 
     suite_add_tcase(s, tc_core);
 
