@@ -1,7 +1,7 @@
 #include "utils.h"
 
-const char* getNodeName(ASTNodeType type) {
-    switch (type) {
+const char* getNodeName(ASTNode *node) {
+    switch (node->type) {
         case P_PROG: return "P_PROG";
         case P_PROLOG: return "P_PROLOG";
         case P_END: return "P_END";
@@ -31,7 +31,7 @@ const char* getNodeName(ASTNodeType type) {
         case P_FUNCTION_TYPE: return "P_FUNCTION_TYPE";
         case P_EXPRESSION: return "P_EXPRESSION";
         case P_ASGN_FOUND: return "P_ASGN_FOUND";
-        case ID: return "ID";
+        case ID: return node->token->value.string_value;
         case AT_IMPORT: return "AT_IMPORT";
         case AT_AS: return "AT_AS";
         case TYPE_INT: return "TYPE_INT";
@@ -96,7 +96,7 @@ void write_d2(ASTNode *node, FILE *file) {
         // Include token type, attributes, line, and column
         fprintf(file, "Node%p: \"%s\"\n", 
                 (void*)node, 
-                getNodeName(node->type));
+                getNodeName(node));
     }
 
     // Write the left child
