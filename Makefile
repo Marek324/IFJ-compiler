@@ -36,7 +36,9 @@ submit: clean
 	mkdir xhricma00
 	cp -r src/* include/* docs/rozdeleni docs/rozsireni docs/dokumentace.pdf xhricma00
 	cat submit_make > xhricma00/Makefile
-	zip xhricma00.zip xhricma00/*
+	(cd xhricma00 && zip -r ../xhricma00.zip .)
+	rm -r xhricma00
+
 
 $(TARGET): $(OBJS) $(MAIN)
 	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o $(TARGET) $(LDFLAGS)
