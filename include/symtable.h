@@ -28,7 +28,7 @@ typedef struct symtable_node_s **symtable_tree_ptr;
 
 extern symtable_node_ptr SymFunctionTree;
 
-typedef struct symtable_entry_s{
+typedef struct symtable_entry_s {
     symtable_entry_type entry_type;
     
     // common

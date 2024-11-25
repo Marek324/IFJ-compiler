@@ -26,21 +26,38 @@ void checkTernTypes();
 void checkDiv(ASTNode* node);
 // gets ret_type
 ret_type getRetType(ASTNodeType type);
+// gets function
+void getFunction(symtable_node_ptr tree, char *key);
 // gets function param info during funcDef
 void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity);
 // gets function type
 void getFunctionType(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
 // check for main
-void checkForMain(symtable_node_ptr tree);
+void checkForMain();
 // check for function
-void checkForFunction(symtable_node_ptr tree, char *key);
+void checkIfIdExits(symtable_node_ptr tree, char *key);
 
-void funcDef(ASTNode* node);
+void symFuncDef(ASTNode* node);
 
+void symParamList(ASTNode* node, symtable_tree_ptr tree);
 
+void symStatement(ASTNode* node, symtable_tree_ptr tree);
 
+void symVarDec(ASTNode* node, symtable_tree_ptr tree);
 
+void symIdStatement(ASTNode* node, symtable_tree_ptr tree);
 
+void symIfStatement(ASTNode* node, symtable_tree_ptr tree);
+
+void symWhileLoop(ASTNode* node, symtable_tree_ptr tree);
+
+void symReturnStatement(ASTNode* node, symtable_tree_ptr tree);
+
+void symBreakStatement(ASTNode* node, symtable_tree_ptr tree);
+
+void symContinueStatement(ASTNode* node, symtable_tree_ptr tree);
+
+void symForLoop(ASTNode* node, symtable_tree_ptr tree);
 
 
 #endif // SEM_ANAL_H

@@ -51,7 +51,7 @@ void function_def(ASTNode *node){
 
         node = node->left; // RPAREN
     }
-
+    
     node = node->left->left; // block
 
     statement(node->right);

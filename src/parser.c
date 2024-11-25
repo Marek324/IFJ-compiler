@@ -2,6 +2,11 @@
 #include "exp_parser.h"
 #include "sem_anal.h"
 
+void Free(Token **token) {
+    symtable_dispose(&SymFunctionTree);
+    free_token(*token);
+    freeAST(ASTRoot);
+}
 ASTNode *checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWord, const char *error) {
     ASTNode *ptr = NULL;
     if ((*token)->type == T_KW) {
@@ -13,8 +18,7 @@ ASTNode *checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWo
         ptr = nodeCreate(convertToASTType(wantedType, NO_KW), *token);
         return ptr;
     }
-    free_token(*token);
-    freeAST(ASTRoot);
+    Free(token);
     error_exit(2, "%s\n", error); 
     return NULL;
 }
@@ -22,6 +26,7 @@ ASTNode *checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWo
 ASTNode *ruleNode(ASTNodeType rule) {
    ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
+        symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
         error_exit(99, "Malloc failed\n");
     }
@@ -63,8 +68,7 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     else {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2,"SYNTAX ERROR: WRONG PROLOG ID");
     }
     // =
@@ -86,8 +90,7 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     Expression(token, expression, buffer);
     if (expression->right == NULL) {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot); 
+        Free(token);
         error_exit(2, "SYNTAX ERROR: Prolog (Expression)\n"); 
     }
     if (strcmp(expression->right->token->value.string_value, "ifj24.zig") == 0 ) {
@@ -96,8 +99,7 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     else {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2,"SYNTAX ERROR: HAS TO BE ifj24.zig");
     }
     // )
@@ -142,7 +144,7 @@ void FunctionDef(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertLeft(lParenFound, paramList);
         ParamList(token, paramList, buffer);
     // insert function info into symtable
-    getFunctionParamInfo(SymFunctionTree, idFound->token->value.string_value, paramList, DEFAULT_INDEX_SIZE, DEFAULT_FUNCTION_PARAM_SIZE);
+        getFunctionParamInfo(SymFunctionTree, idFound->token->value.string_value, paramList, DEFAULT_INDEX_SIZE, DEFAULT_FUNCTION_PARAM_SIZE);
     // )
         rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: FuncDef expected )");
         insertLeft(paramList, rParenFound);
@@ -256,8 +258,7 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
         else {
             checkForT_Error(*token);
-            free_token(*token);
-            freeAST(ASTRoot);
+            Free(token);
             error_exit(2, "SYNTAX ERROR: Type unknown type\n"); 
         }
     }
@@ -278,8 +279,7 @@ void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             }
     else {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2, "SYNTAX ERROR: Unknown func type\n"); 
     }
 }
@@ -457,8 +457,7 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
     }
     else {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2, "SYNTAX ERROR: NOT CONST OR VAR\n");
     }
 }
@@ -562,8 +561,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         Expression(token, expressionFound, buffer);
         if (expressionFound->right == NULL) {
             checkForT_Error(*token);
-            free_token(*token);
-            freeAST(ASTRoot);
+            Free(token);
             error_exit(2, "SYNTAX ERROR WRONG @AS FUNCTION ARG!\n"); 
         }
     //, 
@@ -584,8 +582,7 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         Expression(token, expressionFound, buffer);
         if (expressionFound->right == NULL) {
             checkForT_Error(*token);
-            free_token(*token);
-            freeAST(ASTRoot); 
+            Free(token);
             error_exit(2, "SYNTAX ERROR assigning wrong expression!\n"); 
         }
     }
@@ -620,8 +617,7 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2, "SYNTAX ERROR wrong if condition!\n");
     }
     // )
@@ -664,8 +660,7 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     }
     else {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2, "SYNTAX ERROR: after if condition\n");
     }
 }
@@ -725,8 +720,7 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool sem
     }
     else {
         checkForT_Error(*token);
-        free_token(*token);
-        freeAST(ASTRoot);
+        Free(token);
         error_exit(2, "SYNTAX ERROR not a statement!\n");
     }
     
@@ -787,8 +781,7 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
             checkForT_Error(*token);
-            free_token(*token);
-            freeAST(ASTRoot); 
+            Free(token);
             error_exit(2, "SYNTAX ERROR wrong while condition!\n"); 
     }
     // )
@@ -924,8 +917,7 @@ void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
             checkForT_Error(*token);
-            free_token(*token);
-            freeAST(ASTRoot); 
+            Free(token);
             error_exit(2, "SYNTAX ERROR wrong for condition!\n"); 
     }
     // )
