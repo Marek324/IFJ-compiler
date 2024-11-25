@@ -1,0 +1,3 @@
+[submodule "IFJ24-tests"]
+	path = IFJ24-tests
+	url = git@github.com:jansko03/IFJ24-tests.git
