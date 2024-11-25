@@ -1,12 +1,13 @@
 const ifj = @import("ifj24.zig");
 
 pub fn main() void {
+    const maybeVal : ?i32 = 42;
     const noVal : ?i32 = null;
-    const x = noVal orelse 42;
-    const y = ifj.readi32();
-    var z = noVal orelse y orelse noVal orelse y.?;
+    const x = maybeVal orelse unreachable;
+    const y = maybeVal.?;
+    const z = noVal orelse unreachable;
 
-    z = 2;
-
-    ifj.write(x); ifj.write("\n");
+    ifj.write(y);
+    ifj.write(z);
+    ifj.write(x); 
 }
