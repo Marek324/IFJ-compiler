@@ -10,6 +10,7 @@ Implementation of the expression parser.
 #include "scanner.h"
 #include "stack.h"
 #include "parser.h"
+#include "symtable.h"
 
 #define P_TABLE_SIZE 12
 
@@ -36,9 +37,16 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     if (*token == NULL) {
         return NULL; // Error: unexpected end of input
     }
+    if((*token)->type == T_ERROR) {
+        freeAST(ASTRoot);
+        symtable_dispose(SymFunctionTree);
+        error_exit(1, "LEXICAL ERROR.\n");
+    }
 
     int* paren_depth = malloc(sizeof(int));
     if (paren_depth == NULL) {
+        freeAST(ASTRoot);
+        symtable_dispose(SymFunctionTree);
         error_exit(99, "ERROR: Unable to allocate memory for paren_depth!\n");
         return NULL;
     }
@@ -48,6 +56,12 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     TokenType temp_type = (*token)->type;
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
+        if((*token)->type == T_ERROR) {
+            freeAST(ASTRoot);
+            freeAll(paren_depth, operand_stack, operator_stack);
+            symtable_dispose(SymFunctionTree);
+            error_exit(1, "LEXICAL ERROR.\n");
+        }
         ASTNode* node = NULL;
         // for keywords
         if((*token)->type == T_KW) {
@@ -62,7 +76,9 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 freeAST(node);
                 ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
                 if(id_node == NULL || id_node->type != ID) {
+                    freeAST(ASTRoot);
                     freeAll(paren_depth, operand_stack, operator_stack);
+                    symtable_dispose(SymFunctionTree);
                     error_exit(2, "ERROR: Unexpected LPAREN in expression!\n");
                     return NULL;
                 }
@@ -75,6 +91,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
                 if(node->type != ID && node->type != QMARK) {
                     freeAll(paren_depth, operand_stack, operator_stack);
+                    symtable_dispose(SymFunctionTree);
                     error_exit(2, "ERROR: Unexpected DOT in expression!\n");
                     return NULL;
                 }
@@ -85,6 +102,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     Token* new_token = (Token*)malloc(sizeof(Token));
                     if (new_token == NULL){ 
                         freeAll(paren_depth, operand_stack, operator_stack);
+                        freeAST(ASTRoot);
+                        symtable_dispose(SymFunctionTree);
                         error_exit(99, "Memory allocation failed"); 
                     }
                     new_token->type = T_KW;
@@ -93,6 +112,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     node = nodeCreate(convertToASTType(T_KW, new_token->value.keyword), new_token);
                     if(stackIsEmpty(operand_stack)) {
                         freeAll(paren_depth, operand_stack, operator_stack);
+                        freeAST(ASTRoot);
+                        symtable_dispose(SymFunctionTree);
                         error_exit(2, "ERROR: Unexpected QMARK in expression!\n");
                     }
                     ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
@@ -103,6 +124,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     new_token = (Token *)malloc(sizeof(Token));
                     if (new_token == NULL){ 
                         freeAll(paren_depth, operand_stack, operator_stack);
+                        freeAST(ASTRoot);
+                        symtable_dispose(SymFunctionTree);
                         error_exit(99, "Memory allocation failed"); 
                     }
                     new_token->type = T_KW;
@@ -122,6 +145,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             }
             if((*token)->type != T_RPAREN) {
                 freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "ERROR: Unexpected token in expression!\n");
                 return NULL;
             }
@@ -144,6 +169,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Ternary operator! Missing LPAREN after \"if\"\n");
             }
             free_token(*token);
@@ -154,6 +180,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Ternary operator! Missing expression after LPAREN\n");
             }
             insertRight(expression1, expressionFound);
@@ -162,6 +189,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Ternary operator! Missing RPAREN after expression\n");
             }
             free_token(*token);
@@ -176,6 +204,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Ternary operator! Missing expression after RPAREN\n");
             }
             insertRight(expression2, expressionFound);
@@ -184,6 +213,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Ternary operator! Missing ELSE after expression\n");
             }
             free_token(*token);
@@ -198,6 +228,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
+                symtable_dispose(SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Ternary operator! Missing expression after ELSE\n");
             }
 
@@ -252,6 +283,13 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         }
         *token = get_token(buff); // Update token
     }
+    if((*token)->type == T_ERROR) {
+        free_token(*token);
+        freeAST(ASTRoot);
+        freeAll(paren_depth, operand_stack, operator_stack);
+        symtable_dispose(SymFunctionTree);
+        error_exit(1, "LEXICAL ERROR.\n");
+    }
     ASTNode* root = reduceAll(paren_depth, operand_stack, operator_stack);
     if(!stackIsEmpty(operand_stack) || !stackIsEmpty(operator_stack)) {
         freeAll(paren_depth, operand_stack, operator_stack);
@@ -272,6 +310,8 @@ void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
             if(root->type != BANG) {
                 if(stackIsEmpty(operand_stack)) {
                     freeAll(paren_depth, operand_stack, operator_stack);
+                    freeAST(ASTRoot);
+                    symtable_dispose(SymFunctionTree);
                     error_exit(2, "ERROR: Not enough operands!\n");
                 }
                 child = (ASTNode*)stackGetTop(operand_stack);
@@ -283,6 +323,8 @@ void reduce(int* paren_depth, stack_t* operand_stack, stack_t* operator_stack) {
         }
         else {
             freeAll(paren_depth, operand_stack, operator_stack);
+            freeAST(ASTRoot);
+            symtable_dispose(SymFunctionTree);
             error_exit(2, "ERROR: Not enough operands!\n");
         }
     }
