@@ -21,7 +21,7 @@ void checkBinTypes(ASTNode* node);
 // check variable types in a unary function
 void checkUnTypes(ASTNode* node);
 // check variable types in a ternary function
-void checkTernTypes();
+void checkTernTypes(ASTNode* node);
 // check types in division (convert to whole number division if necessary)
 void checkDiv(ASTNode* node);
 // gets ret_type

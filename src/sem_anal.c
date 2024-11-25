@@ -213,3 +213,7 @@ void checkUnTypes(ASTNode* node) {
             error_exit(7, "ERROR: Wrong type in unary operation!\n");
     }
 }
+
+// void checkTernTypes() {
+    
+// }
