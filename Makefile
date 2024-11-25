@@ -30,7 +30,7 @@ tree:
 #	@rm -f test
 
 test: $(TARGET)
-	./tests/IFJ24-tests-master/test.sh ./tests/IFJ24-tests-master ./$(TARGET) ./codegen_test/ic24int
+	./IFJ24-tests/test.sh ./IFJ24-tests ./$(TARGET) ./codegen_test/ic24int
 
 clean:
 	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test $(TARGET) tree.d2 tree.svg aa.out
