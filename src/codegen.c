@@ -244,9 +244,12 @@ void expression(ASTNode *node){
         case T_ORELSE:
             expression(node->left);
             printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\nPOPS TF@tmp\nPUSHS TF@tmp\n");
-            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_end\n");
+            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_not_null\n");
             expression(node->right);
-            printf("LABEL &orelse_end\n");
+            printf("JUMP &orelse_end\n");
+            printf("LABEL &orelse_not_null\n");
+            printf("PUSHS TF@tmp\n");
+            printf("LABEL &orelse_end\nPOPFRAME\n");
             break;
         case ID:
             if (node->right == NULL){
@@ -334,6 +337,9 @@ void expression(ASTNode *node){
             printf("PUSHS string@%s\n", str->str);
             dyn_str_free(str);
             break;}
+        case T_NULL:
+            printf("PUSHS nil@nil\n");
+            break;
         default:
             printf("unknown\n");
             break;
