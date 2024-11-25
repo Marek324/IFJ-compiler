@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "ast.h"
+#include "symtable.h"
 // main semantic analyzer function
 void analyse(ASTNode* node);
 // checks if the variable or function was already declared

@@ -1,6 +1,5 @@
 #include "sem_anal.h"
 #include "ast.h"
-#include "symtable.h"
 #include "error.h"
 
 // TODO: implicit conversion and IDIV/DIV
