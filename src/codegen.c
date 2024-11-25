@@ -221,6 +221,11 @@ void expression(ASTNode *node){
             expression(node->right);
             printf("MULS\n");
             break;
+        case IDIV:
+            expression(node->left);
+            expression(node->right);
+            printf("IDIVS\n");
+            break;
         case DIV:
             expression(node->left);
             expression(node->right);
@@ -260,10 +265,18 @@ void expression(ASTNode *node){
                         printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\n");
                         printf("READ TF@tmp float\nPUSHS TF@tmp\n");
                         printf("POPFRAME\n");
-                    } else if (!strcmp(builtin_func, "i2f")){ // nebude fungovat pre literaly
-                        printf("PUSHS TF@%s\nINT2FLOATS\n", node->right->right->token->value.string_value);
-                    } else if (!strcmp(builtin_func, "f2i")){ // nebude fungovat pre literaly
-                        printf("PUSHS TF@%s\nFLOAT2INTS\n", node->right->right->token->value.string_value);
+                    } else if (!strcmp(builtin_func, "i2f")){ 
+                        ASTNode *tmp = node->right->right;
+                        if (tmp->type == ID)
+                            printf("PUSHS TF@%s\nINT2FLOATS\n", tmp->token->value.string_value);
+                        else
+                            printf("PUSHS int@%lld\nINT2FLOATS\n", tmp->token->value.int_value);
+                    } else if (!strcmp(builtin_func, "f2i")){ 
+                        ASTNode *tmp = node->right->right;
+                        if (tmp->type == ID)
+                            printf("PUSHS TF@%s\nFLOAT2INTS\n", tmp->token->value.string_value);
+                        else
+                            printf("PUSHS float@%lf\nFLOAT2INTS\n", tmp->token->value.float_value);
                     } else if (!strcmp(builtin_func, "string")){
                         dyn_str *str = dyn_str_init();
                         convert_string(str, node->right->right->token->value.string_value);
