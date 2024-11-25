@@ -150,6 +150,8 @@ void var_dec(ASTNode *node){
     if(node->type == P_TYPE_COMPLETE)
         node = node->left; // ASSGN
 
+    node = node->right; // P_ASGN_FOUND
+
     asgn_found(node->right, idNode->token->value.string_value);    
     
     statement(nextStatement);
@@ -388,7 +390,7 @@ void id_statement(ASTNode *node){
 
         case ID:
             expression(node->left->left->right->right);
-            printf("# id_statement\nPUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\n");
+            printf("# id_statement\nPUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\nPUSHS TF@out\n");
             printf("WRITE TF@out\nPOPFRAME\n");
             break;
 
@@ -410,16 +412,16 @@ void id_statement(ASTNode *node){
 }   
 
 void if_statement(ASTNode *node){
-
+    
 }
 
 void while_loop(ASTNode *node){
-    printf("while ");
+    printf("while\n");
 
 }
 
 void for_loop(ASTNode *node){
-
+    printf("for\n");
 }
 
 void return_statement(ASTNode *node){
