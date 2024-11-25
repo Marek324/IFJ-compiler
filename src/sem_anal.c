@@ -55,7 +55,7 @@ void checkDiv(ASTNode* node) {
 
 void checkBinTypes(ASTNode* node) {
     if(node->left == NULL || node->right == NULL) {
-        symtable_dispose(SymFunctionTree);
+        symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
         error_exit(7, "ERROR: Missing operand in binary operation!\n");
         return;
@@ -64,7 +64,7 @@ void checkBinTypes(ASTNode* node) {
         ASTNode* temp = node->left;
         Token* new_token = (Token*)malloc(sizeof(Token));
         if (new_token == NULL){ 
-            symtable_dispose(SymFunctionTree);
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(99, "Memory allocation failed"); 
         }
@@ -78,7 +78,7 @@ void checkBinTypes(ASTNode* node) {
         ASTNode* temp = node->right;
         Token* new_token = (Token*)malloc(sizeof(Token));
         if (new_token == NULL){ 
-            symtable_dispose(SymFunctionTree);
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(99, "Memory allocation failed"); 
         }
@@ -89,7 +89,7 @@ void checkBinTypes(ASTNode* node) {
         node->right = new_node;
     }
     if(node->left->type != node->right->type) {
-        symtable_dispose(SymFunctionTree);
+        symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
         error_exit(7, "ERROR: Wrong types in binary operation!\n");
     }
@@ -103,7 +103,7 @@ void checkUnTypes(ASTNode* node) {
         case BANG:
             return;
         default:
-            symtable_dispose(SymFunctionTree);
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(7, "ERROR: Wrong type in unary operation!\n");
     }
