@@ -60,13 +60,7 @@ symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type);
 
 void symtable_dispose(symtable_tree_ptr tree);
 
-ret_type get_ret_type(ASTNodeType type);
-
 char* my_str_dup(char* key);
-
-void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity);
-
-void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
 
 int max(int a, int b);
 
