@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "error.h"
 
+<<<<<<< Updated upstream
 // INT + INT CONVERSION FOR SOME REASON
 void analyse (ASTNode* node) {
     if(node == NULL) {
@@ -12,6 +13,18 @@ void analyse (ASTNode* node) {
     }
     analyse(node->left);
     analyse(node->right);
+=======
+// TODO: implicit conversion and IDIV/DIV
+void analyse (ASTNode* root) {
+    root = root->right->left; // skip prolog
+    funcDef(root);
+}
+
+void funcDef(ASTNode* root){
+    //function Sym node 
+    symtable_node_ptr node = symtable_search(SymFunctionTree, root->right->token->value.string_value);
+    (void) node;
+>>>>>>> Stashed changes
 }
 
 void checkExpr(ASTNode* node) {
@@ -43,7 +56,32 @@ void checkExpr(ASTNode* node) {
     checkExpr(node->left);
     checkExpr(node->right);
 }
-void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity) {
+
+void checkForMain(symtable_node_ptr tree) {
+    symtable_node_ptr node = symtable_search(tree, "main");
+    if (node == NULL) {
+        symtable_dispose(&SymFunctionTree);
+        freeAST(ASTRoot);
+        error_exit(3, "ERROR: Missing main!\n");
+    }
+    if (node->entry->param_count != 0 || node->entry->returnsValue != false) {
+        symtable_dispose(&SymFunctionTree);
+        freeAST(ASTRoot);
+        error_exit(4, "ERROR: Wrong main params or type!\n");
+    }
+}
+
+void checkForFunction(symtable_node_ptr tree, char *key) {
+    symtable_node_ptr node = symtable_search(tree, key);
+
+    if (node == NULL) {
+        symtable_dispose(&SymFunctionTree);
+        freeAST(ASTRoot);
+        error_exit(3, "ERROR: Missing func definition!\n");
+    }
+}
+
+void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity) {
     symtable_node_ptr node = symtable_search(tree, key);
     
     if (node->entry->param_nullable == NULL && node->entry->param_types == NULL) {
@@ -76,25 +114,25 @@ void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode
 
     if (ParamList->right->type == P_QUESTION_MARK) {
         node->entry->param_nullable[i] = true;
-        node->entry->param_types[i] = get_ret_type(convertToASTType(T_KW, ParamList->right->left->right->token->value.keyword));
+        node->entry->param_types[i] = getRetType(convertToASTType(T_KW, ParamList->right->left->right->token->value.keyword));
         i++;
     } else if (ParamList->right->type == P_TYPE) {
         node->entry->param_nullable[i] = false;
-        node->entry->param_types[i] = get_ret_type(convertToASTType(T_KW, ParamList->right->right->token->value.keyword));
+        node->entry->param_types[i] = getRetType(convertToASTType(T_KW, ParamList->right->right->token->value.keyword));
         i++;
     }
     if (ParamList->left != NULL) {
         if (ParamList->left->right != NULL) {
-            symtable_get_function_param_info(tree, key, ParamList->left->right, i, capacity);
+            getFunctionParamInfo(tree, key, ParamList->left->right, i, capacity);
         }
     }
 }
 
-void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *FunctionType) {
+void getFunctionType(symtable_node_ptr tree, char *key, ASTNode *FunctionType) {
     symtable_node_ptr node = symtable_search(tree, key);
 
     if (FunctionType->right->type == T_VOID) {
-        node->entry->type = get_ret_type(T_VOID);
+        node->entry->type = getRetType(T_VOID);
         node->entry->returnsValue = false;
 
     } else {
@@ -104,17 +142,17 @@ void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *Func
         if (FunctionType->right->type == P_QUESTION_MARK) {
             node->entry->isNullable = true;
             node->entry->returnsValue = true;
-            node->entry->type = get_ret_type(convertToASTType(T_KW, FunctionType->right->left->right->token->value.keyword));
+            node->entry->type = getRetType(convertToASTType(T_KW, FunctionType->right->left->right->token->value.keyword));
 
         } else if (FunctionType->right->type == P_TYPE) {
             node->entry->isNullable = false;
             node->entry->returnsValue = true;
-            node->entry->type = get_ret_type(convertToASTType(T_KW, FunctionType->right->right->token->value.keyword));
+            node->entry->type = getRetType(convertToASTType(T_KW, FunctionType->right->right->token->value.keyword));
         }
     }
 }
 
-ret_type get_ret_type(ASTNodeType type) {
+ret_type getRetType(ASTNodeType type) {
     switch(type) {
         case T__KW_I32: return T_INT_RET;
         case T_KW_F64: return T_FLOAT_RET;

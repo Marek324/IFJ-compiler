@@ -74,7 +74,6 @@ void symtable_free_entry(symtable_entry_ptr entry) {
                 free(entry->param_nullable);
                 entry->param_nullable = NULL;
             }
-
             if(entry->param_types != NULL) {
                 free(entry->param_types);
                 entry->param_types = NULL;

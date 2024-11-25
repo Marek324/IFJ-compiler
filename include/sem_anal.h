@@ -5,6 +5,7 @@
 
 #include "ast.h"
 #include "symtable.h"
+
 // main semantic analyzer function
 void analyse(ASTNode* node);
 // checks if the variable or function was already declared
@@ -24,12 +25,17 @@ void checkTernTypes();
 // check types in division (convert to whole number division if necessary)
 void checkDiv(ASTNode* node);
 // gets ret_type
-ret_type get_ret_type(ASTNodeType type);
+ret_type getRetType(ASTNodeType type);
 // gets function param info during funcDef
-void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity);
+void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity);
 // gets function type
-void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
+void getFunctionType(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
+// check for main
+void checkForMain(symtable_node_ptr tree);
+// check for function
+void checkForFunction(symtable_node_ptr tree, char *key);
 
+void funcDef(ASTNode* node);
 
 
 

@@ -2,14 +2,17 @@
 
 ASTNode *ASTRoot = NULL;
 
+void checkForT_Error(Token *token) {
+    if (token->type == T_ERROR) {
+            int exit_code = token->value.int_value;
+            free_token(token);
+            freeAST(ASTRoot);
+            error_exit(exit_code, "Scanner failed\n");
+    }
+}
 // Function to create and initialize a new ASTNode
 ASTNode * nodeCreate(ASTNodeType type, Token *token) {
-    if (token->type == T_ERROR) {
-        int exit_code = token->value.int_value;
-        free_token(token);
-        freeAST(ASTRoot);
-        error_exit(exit_code, "Scanner failed\n");
-    }
+    checkForT_Error(token);
     ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
         free_token(token);
