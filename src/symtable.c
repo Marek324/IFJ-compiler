@@ -26,11 +26,7 @@ symtable_entry_ptr symtable_entry_init(symtable_entry_type type) {
         entry->param_count = 0;
         entry->param_nullable = NULL;
         entry->param_types = NULL;
-        entry->local_symtable = malloc(sizeof(symtable_node_t));
-        if(entry->local_symtable == NULL) {
-            freeAST(ASTRoot);
-            error_exit(99, "ERROR: Unable to allocate memory for entry->local_symtable\n");
-        }
+        entry->local_symtable = (symtable_tree_ptr)malloc(sizeof(symtable_node_t));
         symtable_init(entry->local_symtable);
     }
     entry->entry_type = type;
@@ -74,12 +70,17 @@ void symtable_free_entry(symtable_entry_ptr entry) {
                 free(entry->param_nullable);
                 entry->param_nullable = NULL;
             }
-            if(entry->param_types != NULL) {
+        if(entry->param_types != NULL) {
                 free(entry->param_types);
                 entry->param_types = NULL;
             }
-            symtable_dispose(entry->local_symtable);
-            entry->local_symtable = NULL;    
+            if (*entry->local_symtable == NULL) {
+                free(entry->local_symtable);
+            }
+            else {
+                symtable_dispose(entry->local_symtable);
+                entry->local_symtable = NULL;
+            } 
         }
         free(entry);
         entry = NULL;

@@ -2,20 +2,9 @@
 #include "ast.h"
 #include "error.h"
 
-<<<<<<< Updated upstream
-// INT + INT CONVERSION FOR SOME REASON
-void analyse (ASTNode* node) {
-    if(node == NULL) {
-        return;
-    }
-    if(node->type == P_EXPRESSION) {
-        checkExpr(node->right);
-    }
-    analyse(node->left);
-    analyse(node->right);
-=======
 // TODO: implicit conversion and IDIV/DIV
 void analyse (ASTNode* root) {
+    checkForMain(SymFunctionTree);
     root = root->right->left; // skip prolog
     funcDef(root);
 }
@@ -24,7 +13,6 @@ void funcDef(ASTNode* root){
     //function Sym node 
     symtable_node_ptr node = symtable_search(SymFunctionTree, root->right->token->value.string_value);
     (void) node;
->>>>>>> Stashed changes
 }
 
 void checkExpr(ASTNode* node) {
