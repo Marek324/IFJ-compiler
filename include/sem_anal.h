@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "ast.h"
+#include "symtable.h"
 // main semantic analyzer function
 void analyse(ASTNode* node);
 // checks if the variable or function was already declared
@@ -22,6 +23,12 @@ void checkUnTypes(ASTNode* node);
 void checkTernTypes();
 // check types in division (convert to whole number division if necessary)
 void checkDiv(ASTNode* node);
+// gets ret_type
+ret_type get_ret_type(ASTNodeType type);
+// gets function param info during funcDef
+void symtable_get_function_param_info(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity);
+// gets function type
+void symtable_get_function_type(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
 
 
 
