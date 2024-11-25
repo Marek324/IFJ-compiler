@@ -92,7 +92,8 @@ typedef enum {
     T_AND,
     T_OR,
     T_ORELSE,
-    I2F
+    I2F,
+    F2I
 
 } ASTNodeType;
 

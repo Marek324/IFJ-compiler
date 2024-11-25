@@ -82,6 +82,8 @@ const char* getNodeName(ASTNodeType type) {
         case T_OR: return "T_OR";
         case T_TRUE: return "T_TRUE";
         case T_FALSE: return "T_FALSE";
+        case I2F: return "I2F";
+        case F2I: return "F2I";
         default: return "UNKNOWN";
     }
 }
