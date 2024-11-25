@@ -14,12 +14,12 @@ void checkDec();
 void checkArgs();
 // checks the type of a function or variable
 void checkType();
-// check expression
+// check expression, check for P_EXPRESSION and pass in its right child (the expression itself)
 void checkExpr(ASTNode* node);
 // check variable types in a binary function
 void checkBinTypes(ASTNode* node);
 // check variable types in a unary function
-void checkUnTypes(ASTNode* node);
+void checkUnType(ASTNode* node);
 // check variable types in a ternary function
 void checkTernTypes(ASTNode* node);
 // check types in division (convert to whole number division if necessary)

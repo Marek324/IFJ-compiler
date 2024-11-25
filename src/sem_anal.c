@@ -1,6 +1,7 @@
 #include "sem_anal.h"
 #include "ast.h"
 #include "error.h"
+#include "exp_parser.h"
 
 // TODO: implicit conversion and IDIV/DIV
 void analyse (ASTNode* root) {
@@ -19,27 +20,19 @@ void checkExpr(ASTNode* node) {
     if(node == NULL) {
         return;
     }
-    switch(node->type) {
-        case DIV:
+    if(isOperator(node->token)) {
+        if(node->type == BANG) {
+            checkUnType(node);
+            return;
+        }
+        if(node->type == T_IF) {
+            checkTernTypes(node->left);
+            return;
+        }
+        if(node->type == DIV) {
             checkDiv(node);
-            checkBinTypes(node);
-            break;
-        case EQ:
-        case NEQ:
-        case LESS:
-        case LEQ:
-        case MORE:
-        case MEQ:
-        case PLUS:
-        case MINUS:
-        case MUL:
-            checkBinTypes(node);
-            break;
-        case BANG:
-            checkUnTypes(node);
-            break;
-        default:
-            break;
+        }
+        checkBinTypes(node);
     }
     checkExpr(node->left);
     checkExpr(node->right);
@@ -165,7 +158,21 @@ void checkBinTypes(ASTNode* node) {
         error_exit(7, "ERROR: Missing operand in binary operation!\n");
         return;
     }
-    if(node->left->type == TYPE_INT && node->right->type == TYPE_F64) {
+    ASTNodeType left_type;
+    ASTNodeType right_type;
+    if(node->left->type == ID) {
+        // get return_type
+    }
+    else {
+        left_type = node->left->type;
+    }
+    if(node->right->type == ID) {
+        // get return type
+    }
+    else {
+        right_type = node->right->type;
+    }
+    if(left_type == TYPE_INT && right_type == TYPE_F64) {
         ASTNode* temp = node->left;
         Token* new_token = (Token*)malloc(sizeof(Token));
         if (new_token == NULL){ 
@@ -179,7 +186,7 @@ void checkBinTypes(ASTNode* node) {
         new_node->right = temp;
         node->left = new_node;
     }
-    if(node->right->type == TYPE_INT && node->left->type == TYPE_F64) {
+    else if(right_type == TYPE_INT && left_type == TYPE_F64) {
         ASTNode* temp = node->right;
         Token* new_token = (Token*)malloc(sizeof(Token));
         if (new_token == NULL){ 
@@ -188,7 +195,7 @@ void checkBinTypes(ASTNode* node) {
             error_exit(99, "Memory allocation failed"); 
         }
         new_token->type = T_I2F;
-        // create node for orelse
+        // create node for I2F
         ASTNode* new_node = nodeCreate(I2F, new_token);
         new_node->right = temp;
         node->right = new_node;
@@ -200,12 +207,14 @@ void checkBinTypes(ASTNode* node) {
     }
 }
 
-void checkUnTypes(ASTNode* node) {
+void checkUnType(ASTNode* node) {
+    if(isOperator(node->right->token)) {
+        checkExpr(node->right);
+    }
     switch(node->right->type) {
         case TYPE_INT:
         case TYPE_F64:
         case ID:
-        case BANG:
             return;
         default:
             symtable_dispose(&SymFunctionTree);
@@ -214,6 +223,12 @@ void checkUnTypes(ASTNode* node) {
     }
 }
 
-// void checkTernTypes() {
-    
-// }
+void checkTernTypes(ASTNode* node) {
+    if(node == NULL) {
+        return;
+    }
+    if(node->type == P_EXPRESSION) {
+        checkExpr(node->right);
+    }
+    checkTernTypes(node->left);
+}
