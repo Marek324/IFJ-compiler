@@ -19,7 +19,8 @@ typedef enum {
     T_FLOAT_RET,
     T_BOOL_RET,
     T_STR_RET,
-    T_NULL_RET
+    T_NULL_RET,
+    T_ERROR_RET,
 } ret_type;
 
 struct symtable_node_s;

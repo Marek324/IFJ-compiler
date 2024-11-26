@@ -16,23 +16,74 @@ void funcDef(ASTNode* root){
     (void) node;
 }
 
-void checkExpr(ASTNode* node) {
+ret_type checkExpr(ASTNode* node) {
     if(node == NULL) {
         return;
     }
     if(isOperator(node->token)) {
+        ret_type node_type;
+        // unary boolean operation
         if(node->type == BANG) {
-            checkUnType(node);
-            return;
+            if(checkUnType(node) == T_BOOL_RET) {
+                return T_BOOL_RET;
+            }
+            else {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong type for unary boolean operation!\n");
+            }
         }
+        // ternary operation
         if(node->type == T_IF) {
-            checkTernTypes(node->left);
-            return;
+            return checkTernTypes(node->left);
         }
+        // binary boolean operations
+        if(node->type == T_AND || node->type == T_OR) {
+            if(checkBool(node) == T_BOOL_RET) {
+                return T_BOOL_RET;
+            }
+            else {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong type for binary boolean operation!\n");
+            }
+        }
+        // relation operation
+        if(isRel(node->type)) {
+            if(checkRel(node) == T_BOOL_RET) {
+                return T_BOOL_RET;
+            }
+            else {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong type for binary relation operation!\n");
+            }
+        }
+        // binary arithmetic division
         if(node->type == DIV) {
-            checkDiv(node);
+            ret_type node_type = checkDiv(node);
+            if(node_type == T_INT_RET || node_type == T_FLOAT) {
+                return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
+            }
+            else {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong type for binary aritmetic operation!\n");
+            }
         }
-        checkBinTypes(node);
+        // all other binary operations (arithmetic)
+        node_type = checkAritTypes(node);
+        if(node_type == T_INT_RET || node_type == T_FLOAT_RET) {
+            return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Wrong type for binary aritmetic operation!\n");
+        }
+    }
+    else if(isOperand(node->token)){
+        // functions and IDs
     }
     checkExpr(node->left);
     checkExpr(node->right);
@@ -144,35 +195,69 @@ ret_type getRetType(ASTNodeType type) {
     }
 }
 
-void checkDiv(ASTNode* node) {    
-    if(node->left->type == TYPE_INT && node->right->type == TYPE_INT) {
-        node->token->type = T_IDIV;
-        node->type = IDIV;
-    }
-}
-
-void checkBinTypes(ASTNode* node) {
-    if(node->left == NULL || node->right == NULL) {
-        symtable_dispose(&SymFunctionTree);
-        freeAST(ASTRoot);
-        error_exit(7, "ERROR: Missing operand in binary operation!\n");
-        return;
-    }
-    ASTNodeType left_type;
-    ASTNodeType right_type;
+ret_type checkDiv(ASTNode* node) { 
+    ret_type left_type;
+    ret_type right_type;
     if(node->left->type == ID) {
-        // get return_type
+        // get return_type, check if variable or function was defined
+    }
+    else if(isOperator(node->left->token)) {
+        left_type = checkExpr(node->left);
     }
     else {
-        left_type = node->left->type;
+        left_type = convertToRetType(node->left->type);
     }
+    // right node
     if(node->right->type == ID) {
         // get return type
     }
-    else {
-        right_type = node->right->type;
+    else if(isOperator(node->right->token)) {
+        right_type = checkExpr(node->right);
     }
-    if(left_type == TYPE_INT && right_type == TYPE_F64) {
+    else {
+        right_type = convertToRetType(node->right->type);
+    }
+    if(left_type == T_INT_RET && right_type == T_INT_RET) {
+        node->token->type = T_IDIV;
+        node->type = IDIV;
+        return T_INT_RET;
+    }
+    else if((left_type == T_INT_RET || left_type == T_FLOAT_RET) && (right_type == T_INT_RET || right_type == T_FLOAT_RET)) {
+        return checkAritTypes(node);
+    }
+    else {
+        return T_ERROR_RET;
+    }
+}
+
+ret_type checkAritTypes(ASTNode* node) {
+    if(node->left == NULL || node->right == NULL) {
+        return T_ERROR_RET;
+    }
+    ASTNodeType left_type;
+    ASTNodeType right_type;
+    // left node
+    if(node->left->type == ID) {
+        // get return_type, check if variable or function was defined
+    }
+    else if(isOperator(node->left->token)) {
+        left_type = checkExpr(node->left);
+    }
+    else {
+        left_type = convertToRetType(node->left->type);
+    }
+    // right node
+    if(node->right->type == ID) {
+        // get return type
+    }
+    else if(isOperator(node->right->token)) {
+        right_type = checkExpr(node->right);
+    }
+    else {
+        right_type = convertToRetType(node->right->type);
+    }
+    // create i2f conversion node for left operand
+    if(left_type == T_INT_RET && right_type == T_FLOAT_RET) {
         ASTNode* temp = node->left;
         Token* new_token = (Token*)malloc(sizeof(Token));
         if (new_token == NULL){ 
@@ -181,12 +266,13 @@ void checkBinTypes(ASTNode* node) {
             error_exit(99, "Memory allocation failed"); 
         }
         new_token->type = T_I2F;
-        // create node for orelse
+        // create node for I2F
         ASTNode* new_node = nodeCreate(I2F, new_token);
         new_node->right = temp;
         node->left = new_node;
     }
-    else if(right_type == TYPE_INT && left_type == TYPE_F64) {
+    // create i2f conversion node for right operand
+    else if(right_type == T_INT_RET && left_type == T_FLOAT_RET) {
         ASTNode* temp = node->right;
         Token* new_token = (Token*)malloc(sizeof(Token));
         if (new_token == NULL){ 
@@ -200,30 +286,41 @@ void checkBinTypes(ASTNode* node) {
         new_node->right = temp;
         node->right = new_node;
     }
-    if(node->left->type != node->right->type) {
-        symtable_dispose(&SymFunctionTree);
-        freeAST(ASTRoot);
-        error_exit(7, "ERROR: Wrong types in binary operation!\n");
+    else if(left_type != right_type) {
+        return T_ERROR_RET;
+    }
+    else {
+        // only int or float values are allowed in arithmetic types
+        if(left_type == T_INT_RET && right_type == T_INT_RET) {
+            return T_INT_RET;
+        }
+        else if(left_type == T_FLOAT_RET && right_type == T_FLOAT_RET) {
+            return T_FLOAT_RET;
+        }
+        else {
+            return T_ERROR_RET;
+        }
     }
 }
 
-void checkUnType(ASTNode* node) {
+ret_type checkUnType(ASTNode* node) {
     if(isOperator(node->right->token)) {
-        checkExpr(node->right);
+        return (checkExpr(node->right) == T_BOOL_RET) ? T_BOOL_RET : T_ERROR_RET;
     }
-    switch(node->right->type) {
-        case TYPE_INT:
-        case TYPE_F64:
-        case ID:
-            return;
-        default:
-            symtable_dispose(&SymFunctionTree);
-            freeAST(ASTRoot);
-            error_exit(7, "ERROR: Wrong type in unary operation!\n");
+    // ret_type of node
+    ret_type node_type;
+    if(node->left->type == ID) {
+        // get return_type
+        // node_type = ...
     }
+    else {
+        node_type = convertToRetType(node->type);
+    }
+    return (node_type == T_BOOL_RET) ? T_BOOL_RET : T_ERROR_RET;
+            
 }
 
-void checkTernTypes(ASTNode* node) {
+ret_type checkTernTypes(ASTNode* node) {
     if(node == NULL) {
         return;
     }
@@ -231,4 +328,77 @@ void checkTernTypes(ASTNode* node) {
         checkExpr(node->right);
     }
     checkTernTypes(node->left);
+}
+
+ret_type checkBool(ASTNode* node) {
+    ret_type left_type;
+    ret_type right_type;
+    if(node->left->type == ID) {
+        // get return_type
+    }
+    else {
+        left_type = convertToRetType(node->left->type);
+    }
+    if(node->right->type == ID) {
+        // get return type
+    }
+    else {
+        right_type = convertToRetType(node->right->type);
+    }
+    // checks if left node is an operator
+    if(isOperator(node->left->token)) {
+        if(checkExpr(node->left) == T_BOOL_RET) {
+            left_type = T_BOOL_RET;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Wrong type in boolean operation (left operand)!\n");
+        }
+    }
+    // checks if right node is an operator
+    if(isOperator(node->right->token)) {
+        if(checkExpr(node->right) == T_BOOL_RET) {
+            right_type = T_BOOL_RET;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Wrong type in boolean operation (right operand)!\n");
+        }
+    }
+    if(left_type != T_KW_BOOL || right_type != T_KW_BOOL) {
+        symtable_dispose(&SymFunctionTree);
+        freeAST(ASTRoot);
+        error_exit(7, "ERROR: Wrong type in boolean operation!\n");
+    }
+}
+
+bool isRel(ASTNodeType type) {
+    switch(type) {
+        case EQ:
+        case NEQ:
+        case LESS:
+        case LEQ:
+        case MORE:
+        case MEQ:
+            return true;
+        default:
+            return false;
+    }
+}
+
+ret_type convertToRetType(ASTNodeType node_type) {
+    switch(node_type) {
+        case TYPE_INT:
+            return T_INT_RET;
+        case TYPE_F64:
+            return T_FLOAT_RET;
+        case T_KW_BOOL:
+            return T_BOOL_RET;
+        case TYPE_STR:
+            return T_STR_RET;
+        default:
+            return T_ERROR_RET;
+    }
 }
