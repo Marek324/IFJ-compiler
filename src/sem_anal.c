@@ -190,7 +190,7 @@ void symForLoop(ASTNode* node, symtable_tree_ptr tree){
     
 }
 
-ret_type checkExpr(ASTNode* node) {
+ret_type checkExpr(ASTNode* node, bool* is_nullable) {
     if(node == NULL) {
         return T_ERROR_RET;
     }
@@ -198,7 +198,7 @@ ret_type checkExpr(ASTNode* node) {
         ret_type node_type;
         // unary boolean operation
         if(node->type == BANG) {
-            if(checkUnType(node) == T_BOOL_RET) {
+            if(checkUnType(node, is_nullable) == T_BOOL_RET) {
                 return T_BOOL_RET;
             }
             else {
@@ -209,7 +209,7 @@ ret_type checkExpr(ASTNode* node) {
         }
         // ternary operation
         if(node->type == T_IF) {
-            ret_type node_type = checkTernTypes(node->left);
+            ret_type node_type = checkTernTypes(node->left, is_nullable);
             if(node_type == T_ERROR_RET) {
                 symtable_dispose(&SymFunctionTree);
                 freeAST(ASTRoot);
@@ -219,7 +219,7 @@ ret_type checkExpr(ASTNode* node) {
         }
         // binary boolean operations
         if(node->type == T_AND || node->type == T_OR) {
-            if(checkBool(node) == T_BOOL_RET) {
+            if(checkBool(node, is_nullable) == T_BOOL_RET) {
                 return T_BOOL_RET;
             }
             else {
@@ -241,7 +241,7 @@ ret_type checkExpr(ASTNode* node) {
         }
         // binary arithmetic division
         if(node->type == DIV) {
-            ret_type node_type = checkDiv(node);
+            ret_type node_type = checkDiv(node, is_nullable);
             if(node_type == T_INT_RET || node_type == T_FLOAT) {
                 return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
             }
@@ -252,7 +252,7 @@ ret_type checkExpr(ASTNode* node) {
             }
         }
         // all other binary operations (arithmetic)
-        node_type = checkAritTypes(node);
+        node_type = checkAritTypes(node, is_nullable);
         if(node_type == T_INT_RET || node_type == T_FLOAT_RET) {
             return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
         }
@@ -375,14 +375,14 @@ ret_type getRetType(ASTNodeType type) {
     }
 }
 
-ret_type checkDiv(ASTNode* node) { 
+ret_type checkDiv(ASTNode* node, bool* is_nullable) { 
     ret_type left_type;
     ret_type right_type;
     if(node->left->type == ID) {
         // get return_type, check if variable or function was defined
     }
     else if(isOperator(node->left->token)) {
-        left_type = checkExpr(node->left);
+        left_type = checkExpr(node->left, is_nullable);
     }
     else {
         left_type = convertToRetType(node->left->type);
@@ -392,7 +392,7 @@ ret_type checkDiv(ASTNode* node) {
         // get return type
     }
     else if(isOperator(node->right->token)) {
-        right_type = checkExpr(node->right);
+        right_type = checkExpr(node->right, is_nullable);
     }
     else {
         right_type = convertToRetType(node->right->type);
@@ -403,14 +403,14 @@ ret_type checkDiv(ASTNode* node) {
         return T_INT_RET;
     }
     else if((left_type == T_INT_RET || left_type == T_FLOAT_RET) && (right_type == T_INT_RET || right_type == T_FLOAT_RET)) {
-        return checkAritTypes(node);
+        // f64 to i32 if the decimal part is 0 (only literals and constants)
     }
     else {
         return T_ERROR_RET;
     }
 }
 
-ret_type checkAritTypes(ASTNode* node) {
+ret_type checkAritTypes(ASTNode* node, bool* is_nullable) {
     if(node->left == NULL || node->right == NULL) {
         return T_ERROR_RET;
     }
@@ -421,7 +421,7 @@ ret_type checkAritTypes(ASTNode* node) {
         // get return_type, check if variable or function was defined
     }
     else if(isOperator(node->left->token)) {
-        left_type = checkExpr(node->left);
+        left_type = checkExpr(node->left, is_nullable);
     }
     else {
         left_type = convertToRetType(node->left->type);
@@ -431,44 +431,48 @@ ret_type checkAritTypes(ASTNode* node) {
         // get return type
     }
     else if(isOperator(node->right->token)) {
-        right_type = checkExpr(node->right);
+        right_type = checkExpr(node->right, is_nullable);
     }
     else {
         right_type = convertToRetType(node->right->type);
     }
     // create i2f conversion node for left operand
     if(left_type == T_INT_RET && right_type == T_FLOAT_RET) {
-        ASTNode* temp = node->left;
-        Token* new_token = (Token*)malloc(sizeof(Token));
-        if (new_token == NULL){ 
-            symtable_dispose(&SymFunctionTree);
-            freeAST(ASTRoot);
-            error_exit(99, "Memory allocation failed"); 
+        if(1==1/*get bool isConst, variables cannot be converted*/) {
+            ASTNode* temp = node->left;
+            Token* new_token = (Token*)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_I2F;
+            // create node for I2F
+            ASTNode* new_node = nodeCreate(I2F, new_token);
+            new_node->right = temp;
+            node->left = new_node;
+            return T_FLOAT_RET;
         }
-        new_token->type = T_I2F;
-        // create node for I2F
-        ASTNode* new_node = nodeCreate(I2F, new_token);
-        new_node->right = temp;
-        node->left = new_node;
-        return T_FLOAT_RET;
     }
     // create i2f conversion node for right operand
     else if(right_type == T_INT_RET && left_type == T_FLOAT_RET) {
-        ASTNode* temp = node->right;
-        Token* new_token = (Token*)malloc(sizeof(Token));
-        if (new_token == NULL){ 
-            symtable_dispose(&SymFunctionTree);
-            freeAST(ASTRoot);
-            error_exit(99, "Memory allocation failed"); 
+        if(1==1/*get bool isConst, variables cannot be converted*/) {
+            ASTNode* temp = node->right;
+            Token* new_token = (Token*)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_I2F;
+            // create node for I2F
+            ASTNode* new_node = nodeCreate(I2F, new_token);
+            new_node->right = temp;
+            node->right = new_node;
+            return T_FLOAT_RET;
         }
-        new_token->type = T_I2F;
-        // create node for I2F
-        ASTNode* new_node = nodeCreate(I2F, new_token);
-        new_node->right = temp;
-        node->right = new_node;
-        return T_FLOAT_RET;
     }
-    else if(left_type != right_type) {
+    if(left_type != right_type) {
         return T_ERROR_RET;
     }
     else {
@@ -485,9 +489,9 @@ ret_type checkAritTypes(ASTNode* node) {
     }
 }
 
-ret_type checkUnType(ASTNode* node) {
+ret_type checkUnType(ASTNode* node, bool* is_nullable) {
     if(isOperator(node->right->token)) {
-        return (checkExpr(node->right) == T_BOOL_RET) ? T_BOOL_RET : T_ERROR_RET;
+        return (checkExpr(node->right, is_nullable) == T_BOOL_RET) ? T_BOOL_RET : T_ERROR_RET;
     }
     // ret_type of node
     ret_type node_type;
@@ -502,18 +506,18 @@ ret_type checkUnType(ASTNode* node) {
             
 }
 
-ret_type checkTernTypes(ASTNode* node) {
+ret_type checkTernTypes(ASTNode* node, bool* is_nullable) {
     if(node == NULL) {
         return T_ERROR_RET;
     }
     if(node->type != P_EXPRESSION) {
         return T_ERROR_RET;
     }
-    if(checkExpr(node->right) != T_BOOL_RET) {
+    if(checkExpr(node->right, is_nullable) != T_BOOL_RET) {
         return T_ERROR_RET;
     }
-    ret_type if_type = checkExpr(node->left->right);
-    ret_type else_type = checkExpr(node->left->left->right);
+    ret_type if_type = checkExpr(node->left->right, is_nullable);
+    ret_type else_type = checkExpr(node->left->left->right, is_nullable);
     if(if_type != else_type) {
         return T_ERROR_RET;
     }
@@ -522,7 +526,7 @@ ret_type checkTernTypes(ASTNode* node) {
     }
 }
 
-ret_type checkBool(ASTNode* node) {
+ret_type checkBool(ASTNode* node, bool* is_nullable) {
     ret_type left_type;
     ret_type right_type;
     if(node->left->type == ID) {
@@ -539,7 +543,7 @@ ret_type checkBool(ASTNode* node) {
     }
     // checks if left node is an operator
     if(isOperator(node->left->token)) {
-        if(checkExpr(node->left) == T_BOOL_RET) {
+        if(checkExpr(node->left, is_nullable) == T_BOOL_RET) {
             left_type = T_BOOL_RET;
         }
         else {
@@ -550,7 +554,7 @@ ret_type checkBool(ASTNode* node) {
     }
     // checks if right node is an operator
     if(isOperator(node->right->token)) {
-        if(checkExpr(node->right) == T_BOOL_RET) {
+        if(checkExpr(node->right, is_nullable) == T_BOOL_RET) {
             right_type = T_BOOL_RET;
         }
         else {
@@ -570,7 +574,9 @@ ret_type checkBool(ASTNode* node) {
 }
 
 ret_type checkRel(ASTNode* node) {
-    
+    if(node->type) {
+    //    TODO
+    }
 }
 
 bool isRel(ASTNodeType type) {

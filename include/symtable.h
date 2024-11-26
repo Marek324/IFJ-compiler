@@ -41,7 +41,6 @@ typedef struct symtable_entry_s {
     bool isConst; 
     bool hasExplicitType;
     bool isChanged;
-    bool isKnown;
 
     // functions
     int param_count;
