@@ -97,15 +97,10 @@ FUNEXP\\
 
 \newpage
 
- \Large \textbf{Technicke detaily}\normalsize \\
-\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
-
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
-
  \Large \textbf{Lexikalna analyza} \normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
+\paragraph{\indent Riesenie lexikalnej analyzy sme zacali vytvorenim diagramu deterministickeho konecneho automatu. Nasledne sme na jeho zaklade zacali vypracovavat implementaciu. Implementacia sa nachadza v subore \textit{scanner.c,} ktory pracuje s tokenmi deklarovanymi v subore \textit{token.h}. Hlavnou funkciou \textit{scanner.c} je funkcia \textit{get\_token}. Pre ulahcenie prace a prehladnosti kodu sme si deklarovali niekolko makier, ktore su extensivne pouzivane v hlavnej funkcii. Funkcia \textit{get\_token} berie postupne znaky z standardneho vstupu a vytvara token. Tokenu je priradeny jeho typ a hodnota ktora mu odpoveda. Funkcia zacina urcovanim jednoznakovych tokenov, ktore vie urcite hned na zaciatku. Pokracuje identifikaciou komentarov, ktore nasledne ignoruje. Po identifikacii komentarov zistuje ci sa jedna o ID alebo Keyword, pri klucovych slovach sa nasledne urcuje aj ich typ. Ak sa nejedna ani o jedno pokracuje kontrolov datovych typov pri ktorych uklada aj ich hodnoty.  \newline \\}
 
  \Large \textbf{Syntakticka analyza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
@@ -125,20 +120,16 @@ FUNEXP\\
  \Large \textbf{Datove struktury}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{\large \textbf{AST} \\ Implementovane v suboroch \textit{ast.c, ast.h}. \\ \newline
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+\paragraph{\large \underline{Circular Buffer} \\ Implementovane v suboroch \textit{circ\_buff.c circ\_buff.h}. \\ \newline
+Implementacia Circular Buffer je vyuzita hlavne v casti Scanner kde sluzi na bezpreblemove ziskavanie dat a ich naslednu validaciu. Na pracu so scannerom ho neskor vyuzivaju aj casti Parser a Expression Parser. Struktura obsahuje klasicke funkcie \textit{circ\_buff\_init, circ\_buff\_free, circ\_buff\_enqueue, circ\_buff\_dequeue, circ\_buff\_is\_empty}. 
 \newline \\}
 
-\paragraph{\large \textbf{Circular Buffer} \\ Implementovane v suboroch \textit{circ\_buff.c circ\_buff.h}. \\ \newline
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+\paragraph{\large \underline{Dynamic String} \\ Implementovane v suboroch \textit{dyn\_str.c, dyn\_str.h}. \\ \newline
+Implementacia dynamickeho retazca je vyuzita hlavne v Scanner casti programu kde sprostredkuvava validaciu a uschovavanie dat, neskor je pouzita aj v casti Codegen kde sluzi na ulahcenie validacie dat. Struktura dynamickeho retazca obsahuje klasicke funkcie \textit{dyn\_str\_init, dyn\_str\_grow, dyn\_str\_append, dyn\_str\_append\_str a dyn\_str\_free}.  
 \newline \\}
 
-\paragraph{\large \textbf{Dynamic String} \\ Implementovane v suboroch \textit{dyn\_str.c, dyn\_str.h}. \\ \newline
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-\newline \\}
-
-\paragraph{\large \textbf{Stack} \\ Implementovane v suboroch \textit{stack.c, stack.h}. \\ \newline
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+\paragraph{\large \underline{Stack} \\ Implementovane v suboroch \textit{stack.c, stack.h}. \\ \newline
+Implementaciu nasho zasobniku vyuzivame  v Expression Parser casti programu. Struktura zasobniku je implementovana s klasickymi funkciami \textit{stackInit, stackPush, stackPop, stackIsEmpty, stackClear a stackGetTop}. Zasobnik sme zvolili pre jeho optimalny pristup k datam a zachovanie jednoduchosti kodu.
 \newline \\}
 
 \end{document}
