@@ -2,6 +2,7 @@
 
 #define PROLOG do {printf("\
 .IFJcode24\n\
+DEFVAR GF@&discard\n\
 CREATEFRAME\n\
 CALL main\n\
 EXIT int@0\n\

@@ -161,7 +161,11 @@ void var_dec(ASTNode *node){
 
 void asgn_found(ASTNode *node, const char *var){
     expression(node->right->right);
-    printf("POPS TF@%s\n", var);
+    printf("POPS ");
+    if(!strcmp(var, "_")) // discard
+        printf("GF@&discard\n");
+    else
+        printf("TF@%s\n", var);
 }
 
 void expression(ASTNode *node){ // @as
@@ -333,11 +337,14 @@ void expression(ASTNode *node){ // @as
         case T_FALSE:
             printf("PUSHS bool@false\n");
             break;
-        case TYPE_STR:
-            {dyn_str *str = dyn_str_init();
-            convert_string(str, node->token->value.string_value);
-            printf("PUSHS string@%s\n", str->str);
-            dyn_str_free(str);
+        case TYPE_STR:{
+            if(!strcmp(node->token->value.string_value, "")) {
+                printf("PUSHS string@\n");
+            } else {
+                dyn_str *str = dyn_str_init();
+                convert_string(str, node->token->value.string_value);
+                printf("PUSHS string@%s\n", str->str);
+                dyn_str_free(str);}
             break;}
         case T_NULL:
             printf("PUSHS nil@nil\n");
@@ -350,6 +357,19 @@ void expression(ASTNode *node){ // @as
             expression(node->right);
             printf("FLOAT2INTS\n");
             break;
+        case T_IF:{
+            node = node->left; // P_EXPRESSION
+            expression(node->right); 
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS &if_%d_else\n", if_counter);
+            node = node->left; 
+            expression(node->right); // value if true
+            printf("JUMP &if_%d_end\n", if_counter);
+            printf("LABEL &if_%d_else\n", if_counter);
+            node = node->left;
+            expression(node->right); // value if false
+            printf("LABEL &if_%d_end\n", if_counter++);
+            break;}
         default:
             printf("expression unknown\n");
             break;
