@@ -118,9 +118,42 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
     node = node->left; // ASSGN OR P_TYPE_COMPLETE
     key->entry->isConst = isconst;
     key->entry->isUsed = false;
-    if (node == P_TYPE_COMPLETE) {
+    key->entry->isChanged = false;
+    ASTNode *Jozef = node->right;
+    if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
+        if(Jozef->type == P_TYPE) {
+            key->entry->isNullable = false;
+            Jozef = Jozef->right;
+            key->entry->type = getRetType(convertToASTType(T_KW, Jozef->token->value.keyword));
+        }
+        else {
+            key->entry->isNullable = true;
+            Jozef = Jozef->left->right;
+            key->entry->type = getRetType(convertToASTType(T_KW, Jozef->token->value.keyword));
+        }
+        node = node->left; // ASSGN
     }
+    node = node->right->right; //P_EXPRESSION
+
+    if (key->entry->hasExplicitType == true) {
+        if (key->entry->type == checkExpr(node->right)) {
+            return;
+        } 
+        freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);        
+        error_exit(7, "ERROR: assigning wrong type\n");
+    }
+    else {
+        key->entry->type = checkExpr(node->right);
+        if (key->entry->type == T_NULL_RET) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);        
+            error_exit(8, "ERROR: cannot get type\n");
+        }
+        return;
+    }
+    
 }
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
