@@ -608,65 +608,14 @@ void insertBuiltInFun() {
         .local_symtable = NULL,
     };
     *key->entry = entry;
-
     symtable_insert(&SymFunctionTree,"ifj.readi32",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.readi32");
-    free(key->entry);
-    key->entry = malloc(sizeof(symtable_entry_t));
-    if (key->entry == NULL) {
-        error_exit(99,"malloc failed");
-    }
-    entry = {
-        .entry_type = T_FUN_SYM,
-        .type = T_INT_RET,
-        .isUsed = true,
-        .isNullable = true,
-        .returnsValue = true,
-        .param_count = 0,
-        .param_nullable = NULL,
-        .param_types = NULL,
-        .local_symtable = NULL,
-    };
-    *key->entry = entry;
+   
     symtable_insert(&SymFunctionTree,"ifj.readf64",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.readf64");
-    free(key->entry);
-    key->entry = malloc(sizeof(symtable_entry_t));
-    if (key->entry == NULL) {
-        error_exit(99,"malloc failed");
-    }
-    entry = {
-        .entry_type = T_FUN_SYM,
-        .type = T_FLOAT_RET,
-        .isUsed = true,
-        .isNullable = true,
-        .returnsValue = true,
-        .param_count = 0,
-        .param_nullable = NULL,
-        .param_types = NULL,
-        .local_symtable = NULL,
-    };
-    *key->entry = entry;
     
     symtable_insert(&SymFunctionTree,"ifj.write",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.write");
-    free(key->entry);
-    key->entry = malloc(sizeof(symtable_entry_t));
-    if (key->entry == NULL) {
-        error_exit(99,"malloc failed");
-    }
-    entry = {
-        .entry_type = T_FUN_SYM,
-        .type = T_NULL_RET,
-        .isUsed = true,
-        .isNullable = false,
-        .returnsValue = false,
-        .param_count = 1,
-        .param_nullable = malloc(sizeof(bool)),
-        .param_types = NULL,
-        .local_symtable = NULL,
-    };
-    *key->entry = entry;
     
     symtable_insert(&SymFunctionTree,"ifj.i2f",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.i2f");
