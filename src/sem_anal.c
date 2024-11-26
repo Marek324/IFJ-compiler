@@ -461,10 +461,14 @@ ret_type checkTernTypes(ASTNode* node) {
     if(node == NULL) {
         return T_ERROR_RET;
     }
-    if(node->type == P_EXPRESSION) {
-        checkExpr(node->right);
+    if(node->type != P_EXPRESSION) {
+        return T_ERROR_RET;
     }
-    checkTernTypes(node->left);
+    if(checkExpr(node->right) != T_BOOL_RET) {
+        return T_ERROR_RET;
+    }
+    ret_type if_type = checkTernTypes(node->left);
+    ret_type else_type = checkTernTypes(node->right);
 }
 
 ret_type checkBool(ASTNode* node) {
