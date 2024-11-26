@@ -1,6 +1,8 @@
 #include "codegen_priv.h"
 
-
+int if_counter = 0;
+int while_counter = 0;
+int for_counter = 0;
 
 void codegen()
 {
@@ -86,14 +88,13 @@ void param_list(ASTNode *node){
 
 }
 
-
 void statement(ASTNode *node){
     if (node == NULL)
         return;
 
-
     node = node->right;
-    ASTNode *nextStatement = node->left;
+
+    ASTNode *nextStatement = node->left != NULL ? node->left : NULL;
 
     switch(node->type){
         case P_VAR_DECLARATION:
@@ -133,7 +134,8 @@ void statement(ASTNode *node){
             break;
 
         default:
-            printf("unknown\n");
+            // printf("statement unknown\n");
+            printf("%s\n", node->type);
             break;
 
     }
@@ -197,7 +199,7 @@ void expression(ASTNode *node){
         case LEQ:
             expression(node->left);
             expression(node->right);
-            printf("LTS\n");
+            printf("GTS\n");
             printf("NOTS\n");
             break;
         case MORE:
@@ -208,7 +210,7 @@ void expression(ASTNode *node){
         case MEQ:
             expression(node->left);
             expression(node->right);
-            printf("GTS\n");
+            printf("LTS\n");
             printf("NOTS\n");
             break;
         case PLUS:
@@ -354,7 +356,7 @@ void expression(ASTNode *node){
             printf("FLOAT2INTS\n");
             break;
         default:
-            printf("unknown\n");
+            printf("expression unknown\n");
             break;
     }
 
@@ -411,14 +413,29 @@ void id_statement(ASTNode *node){
             break;
         
         default:
-            printf("unknown\n");
+            printf("id unknown\n");
             break;
     }
 
 }   
 
-void if_statement(ASTNode *node){
-    
+void if_statement(ASTNode *node){ // chyba opt value, segfault else
+    int if_count = if_counter++;
+    node = node->right; // P_EXPRESSION
+    expression(node->right);
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS &if_%d_else\n", if_count);
+    node = node->left->right; // P_BLOCK
+    statement(node->right);
+    printf("JUMP &if_%d_end\n", if_count);
+    printf("LABEL &if_%d_else\n", if_count);
+    if(node->left != NULL){
+        node = node->left; // P_ELSE_STATEMENT
+        if(node->right->type == P_BLOCK)
+            node = node->right->right;
+        statement(node);
+    }
+    printf("LABEL &if_%d_end\n", if_count);
 }
 
 void while_loop(ASTNode *node){

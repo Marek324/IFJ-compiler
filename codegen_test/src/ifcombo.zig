@@ -21,4 +21,9 @@ pub fn main() void {
     ifj.write("nic");
   }
   ifj.write("\n");
+
+  if(a) |c|{
+    ifj.write(c);
+  }
+  ifj.write("\n");
 }
