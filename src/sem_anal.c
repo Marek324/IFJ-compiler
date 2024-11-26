@@ -588,7 +588,7 @@ bool isRel(ASTNodeType type) {
 }
 void insertBuiltInFun() {
     symtable_node_ptr key = NULL;
-
+    // ifj.readstr
     symtable_insert(&SymFunctionTree, "ifj.readstr", T_FUN_SYM);
     key = symtable_search(SymFunctionTree, "ifj.readstr");
     free(key->entry);
@@ -608,33 +608,359 @@ void insertBuiltInFun() {
         .local_symtable = NULL,
     };
     *key->entry = entry;
+    // ifj.readi32
     symtable_insert(&SymFunctionTree,"ifj.readi32",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.readi32");
-   
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry2 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = true,
+        .param_count = 0,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry2;
+    // ifj.readi64
     symtable_insert(&SymFunctionTree,"ifj.readf64",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.readf64");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry3 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_FLOAT_RET,
+        .isUsed = true,
+        .isNullable = true,
+        .param_count = 0,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry3;
+    // ifj.write
     symtable_insert(&SymFunctionTree,"ifj.write",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.write");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    //will need changes - term
+    symtable_entry_t entry4 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_NULL_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = false,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry4;
+    // ifj.i2f
     symtable_insert(&SymFunctionTree,"ifj.i2f",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.i2f");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    //will need changes - term
+    symtable_entry_t entry5 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_FLOAT_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry5.param_nullable = malloc(sizeof(bool));
+    if (entry5.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry5.param_nullable[0] = false;
+
+    entry5.param_types = malloc(sizeof(ret_type));
+    if (entry5.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry5.param_types[0] = T_FLOAT_RET;
+    *key->entry = entry5;
+    // ifj.f2i
     symtable_insert(&SymFunctionTree,"ifj.f2i",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.f2i");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    //will need changes - term
+    symtable_entry_t entry6 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry6.param_nullable = malloc(sizeof(bool));
+    if (entry6.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry6.param_nullable[0] = false;
+
+    entry6.param_types = malloc(sizeof(ret_type));
+    if (entry6.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry6.param_types[0] = T_INT_RET;
+    *key->entry = entry6;
+    // ifj.string
     symtable_insert(&SymFunctionTree,"ifj.string",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.string");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry7 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_STR_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry7.param_nullable = malloc(sizeof(bool));
+    if (entry7.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry7.param_nullable[0] = false;
+
+    entry7.param_types = malloc(sizeof(ret_type));
+    if (entry7.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry7.param_types[0] = T_STR_RET;
+    *key->entry = entry7;
+    // ifj.length
     symtable_insert(&SymFunctionTree,"ifj.length",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.length");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry8 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry8.param_nullable = malloc(sizeof(bool));
+    if (entry8.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry8.param_nullable[0] = false;
+
+    entry8.param_types = malloc(sizeof(ret_type));
+    if (entry8.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry8.param_types[0] = T_STR_RET;
+    *key->entry = entry8;
+    // ifj.concat
     symtable_insert(&SymFunctionTree,"ifj.concat",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.concat");
-   
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry9 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_STR_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 2,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry9.param_nullable = malloc(2 * sizeof(bool));
+    if (entry9.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry9.param_nullable[0] = false;
+    entry9.param_nullable[1] = false;
+
+    entry9.param_types = malloc(2 * sizeof(ret_type));
+    if (entry9.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry9.param_types[0] = T_STR_RET;
+    entry9.param_types[1] = T_STR_RET;
+    *key->entry = entry9;
+    // ifj.substring
     symtable_insert(&SymFunctionTree,"ifj.substring",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.substring");
-    
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry10 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_STR_RET,
+        .isUsed = true,
+        .isNullable = true,
+        .param_count = 3,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry10.param_nullable = malloc(3 * sizeof(bool));
+    if (entry10.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry10.param_nullable[0] = false;
+    entry10.param_nullable[1] = false;
+    entry10.param_nullable[2] = false;
+
+    entry10.param_types = malloc(3 * sizeof(ret_type));
+    if (entry10.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry10.param_types[0] = T_STR_RET;
+    entry10.param_types[1] = T_INT_RET;
+    entry10.param_types[2] = T_INT_RET;
+    *key->entry = entry10;
+    // ifj.strcmp
+    symtable_insert(&SymFunctionTree,"ifj.strcmp",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.strcmp");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry11 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 2,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry11.param_nullable = malloc(2 * sizeof(bool));
+    if (entry11.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry11.param_nullable[0] = false;
+    entry11.param_nullable[1] = false;
+
+    entry11.param_types = malloc(2 * sizeof(ret_type));
+    if (entry11.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry11.param_types[0] = T_STR_RET;
+    entry11.param_types[1] = T_STR_RET;
+    *key->entry = entry11;
+    // ifj.ord
+    symtable_insert(&SymFunctionTree,"ifj.ord",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.ord");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry12 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 2,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry12.param_nullable = malloc(2 * sizeof(bool));
+    if (entry12.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry12.param_nullable[0] = false;
+    entry12.param_nullable[1] = false;
+
+    entry12.param_types = malloc(2 * sizeof(ret_type));
+    if (entry12.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry12.param_types[0] = T_STR_RET;
+    entry12.param_types[1] = T_INT_RET;
+    *key->entry = entry12;
+    // ifj.chr
+    symtable_insert(&SymFunctionTree,"ifj.chr",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.chr");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry13 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_STR_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry13.param_nullable = malloc(1 * sizeof(bool));
+    if (entry13.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry13.param_nullable[0] = false;
+
+    entry13.param_types = malloc(1 * sizeof(ret_type));
+    if (entry13.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry13.param_types[0] = T_INT_RET;
+
+    *key->entry = entry13;
 }
 ret_type convertToRetType(ASTNodeType node_type) {
     switch(node_type) {
