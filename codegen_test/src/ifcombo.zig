@@ -13,6 +13,7 @@ pub fn main() void {
   }
   ifj.write("\n");
 
+  ifj.write("cislo: ");
   const a = ifj.readi32();
   if (a) |b|{
     ifj.write(b);

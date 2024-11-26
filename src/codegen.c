@@ -94,7 +94,7 @@ void statement(ASTNode *node){
 
     node = node->right;
 
-    ASTNode *nextStatement = node->left != NULL ? node->left : NULL;
+    ASTNode *nextStatement = node->left;
 
     switch(node->type){
         case P_VAR_DECLARATION:
@@ -134,18 +134,13 @@ void statement(ASTNode *node){
             break;
 
         default:
-            // printf("statement unknown\n");
-            printf("%s\n", node->type);
+            printf("statement unknown\n");
             break;
 
     }
 
     statement(nextStatement);
-    
-
-
 }
-
 
 void var_dec(ASTNode *node){
     printf("DEFVAR ");
@@ -169,7 +164,7 @@ void asgn_found(ASTNode *node, const char *var){
     printf("POPS TF@%s\n", var);
 }
 
-void expression(ASTNode *node){
+void expression(ASTNode *node){ // @as
     if (node == NULL)
         return;
 
@@ -423,9 +418,17 @@ void if_statement(ASTNode *node){ // chyba opt value, segfault else
     int if_count = if_counter++;
     node = node->right; // P_EXPRESSION
     expression(node->right);
-    printf("PUSHS bool@true\n");
-    printf("JUMPIFNEQS &if_%d_else\n", if_count);
-    node = node->left->right; // P_BLOCK
+    node = node->left->right; // P_BLOCK | P_OPTIONAL_VALUE
+    if (node->type == P_OPTIONAL_VALUE){
+        printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+        printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value);
+        printf("PUSHS nil@nil\n");
+        printf("JUMPIFEQS &if_%d_else\n", if_count);
+        node = node->left; // P_BLOCK
+    } else {
+        printf("PUSHS bool@true\n");
+        printf("JUMPIFNEQS &if_%d_else\n", if_count);
+    }
     statement(node->right);
     printf("JUMP &if_%d_end\n", if_count);
     printf("LABEL &if_%d_else\n", if_count);
