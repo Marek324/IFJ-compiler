@@ -65,7 +65,7 @@ int get_balance (symtable_node_ptr node) {
 
 void symtable_free_entry(symtable_entry_ptr entry) {   
     if (entry != NULL) {
-        if(entry->entry_type == T_FUN_SYM) {
+        //if(entry->entry_type == T_FUN_SYM) {
             if(entry->param_nullable != NULL) {
                 free(entry->param_nullable);
                 entry->param_nullable = NULL;
@@ -81,7 +81,7 @@ void symtable_free_entry(symtable_entry_ptr entry) {
                 symtable_dispose(entry->local_symtable);
                 entry->local_symtable = NULL;
             } 
-        }
+        //}
         free(entry);
         entry = NULL;
     }
