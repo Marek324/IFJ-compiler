@@ -69,6 +69,61 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         }
         else {
             node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);    
+        }
+        // for @as(i32, id) ------------------------------------------------------------------------
+        if((*token)->type == T_AT_AS) {
+            // get token after AT_AS (@as) [should be LPAREN]
+            *token = get_token(buff);
+            if((*token)->type != T_LPAREN) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(2, "SYNTAX ERROR: Missing LPAREN after \"@as\"\n");
+            }
+            free_token(*token);
+            // get token after LPAREN (should be i32)
+            *token = get_token(buff);
+            if((*token)->value.keyword != KW_I32) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(2, "SYNTAX ERROR: Missing i32 after \"(\"\n");
+            }
+            free_token(*token);
+            // get token after i32 (should be comma)
+            *token = get_token(buff);
+            if((*token)->type != T_COMMA) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(2, "SYNTAX ERROR: Missing COMMA after \"i32\"\n");
+            }
+            free_token(*token);
+            ASTNode* expression = ruleNode(P_EXPRESSION);
+            insertLeft(node, expression);
+            stackPush(operand_stack, (long)node);
+            // get token after COMMA (should be expression)
+            *token = get_token(buff);
+            ASTNode* expressionFound = parseExpression(token, buff);
+            if(expressionFound == NULL) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(2, "SYNTAX ERROR: Missing expression after COMMA\n");
+            }
+            insertRight(expression, expressionFound);
+            if((*token)->type != T_RPAREN) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(2, "SYNTAX ERROR: Missing RPAREN after expression\n");
+            }
+            continue;
         } 
         // for function calls ----------------------------------------------------------------------
         if((temp_type == T_ID) && ((*token)->type == T_LPAREN || (*token)->type == T_DOT)) {
@@ -431,6 +486,7 @@ bool isOperand(Token* token) {
         case T_INT:
         case T_FLOAT:
         case T_STR:
+        case T_AT_AS:
             return true;
         case T_KW:
             switch(token->value.keyword) {

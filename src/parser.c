@@ -547,55 +547,17 @@ void IdFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semic) {
     }
 }
 void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
-    // @AS
-    if ((*token)->type == T_AT_AS) {
-        ASTNode *atASFound = checkToken(token, T_AT_AS, NO_KW, "SYNTAX ERROR: AsgnFound expected @AS");
-        insertRight(ptr, atASFound);
-        *token = get_token(buffer);
-    // (
-        ASTNode *lParenFound = checkToken(token, T_LPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected (");
-        freeAST(lParenFound);
-        *token = get_token(buffer);
-    //i32
-        ASTNode *i32Found = checkToken(token, T_KW, KW_I32, "SYNTAX ERROR: AsgnFound expected Type i32");
-        freeAST(i32Found);
-        *token = get_token(buffer);
-    //, 
-        ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: AsgnFound expected ,");
-        freeAST(commaFound);
-        *token = get_token(buffer);
-    //P_EXPRESSION
-        ASTNode *expressionFound = ruleNode(P_EXPRESSION);
-        insertLeft(atASFound, expressionFound);
-        Expression(token, expressionFound, buffer);
-        if (expressionFound->right == NULL) {
-            checkForT_Error(*token);
-            Free(token);
-            error_exit(2, "SYNTAX ERROR WRONG @AS FUNCTION ARG!\n"); 
-        }
-    //, 
-        if ((*token)->type == T_COMMA) {
-            ASTNode *commaFound = checkToken(token, T_COMMA, NO_KW, "SYNTAX ERROR: AsgnFound expected ,");
-            freeAST(commaFound);
-            *token = get_token(buffer);
-        }
-    // )
-            ASTNode *rParenFound = checkToken(token, T_RPAREN, NO_KW, "SYNTAX ERROR: AsgnFound expected )");
-            freeAST(rParenFound);
-            *token = get_token(buffer);
-     }
     // P_EXPRESSION
-    else {
-        ASTNode *expressionFound = ruleNode(P_EXPRESSION);
-        insertRight(ptr, expressionFound);
-        Expression(token, expressionFound, buffer);
-        if (expressionFound->right == NULL) {
-            checkForT_Error(*token);
-            Free(token);
-            error_exit(2, "SYNTAX ERROR assigning wrong expression!\n"); 
-        }
+    ASTNode *expressionFound = ruleNode(P_EXPRESSION);
+    insertRight(ptr, expressionFound);
+    Expression(token, expressionFound, buffer);
+    if (expressionFound->right == NULL) {
+        checkForT_Error(*token);
+        Free(token);
+        error_exit(2, "SYNTAX ERROR assigning wrong expression!\n"); 
     }
 }
+
 void ExpressionList(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     //P_EXPRESSION
     ASTNode *expressionFound = parseExpression(token, buffer);

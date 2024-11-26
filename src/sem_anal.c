@@ -153,7 +153,7 @@ void symForLoop(ASTNode* node, symtable_tree_ptr tree){
 
 ret_type checkExpr(ASTNode* node) {
     if(node == NULL) {
-        return;
+        return T_ERROR_RET;
     }
     if(isOperator(node->token)) {
         ret_type node_type;
@@ -218,10 +218,8 @@ ret_type checkExpr(ASTNode* node) {
         }
     }
     else if(isOperand(node->token)){
-        // functions and IDs
+        // functions and IDs and literals
     }
-    checkExpr(node->left);
-    checkExpr(node->right);
 }
 
 void checkForMain() {
@@ -371,8 +369,8 @@ ret_type checkAritTypes(ASTNode* node) {
     if(node->left == NULL || node->right == NULL) {
         return T_ERROR_RET;
     }
-    ASTNodeType left_type;
-    ASTNodeType right_type;
+    ret_type left_type;
+    ret_type right_type;
     // left node
     if(node->left->type == ID) {
         // get return_type, check if variable or function was defined
@@ -407,6 +405,7 @@ ret_type checkAritTypes(ASTNode* node) {
         ASTNode* new_node = nodeCreate(I2F, new_token);
         new_node->right = temp;
         node->left = new_node;
+        return T_FLOAT_RET;
     }
     // create i2f conversion node for right operand
     else if(right_type == T_INT_RET && left_type == T_FLOAT_RET) {
@@ -422,6 +421,7 @@ ret_type checkAritTypes(ASTNode* node) {
         ASTNode* new_node = nodeCreate(I2F, new_token);
         new_node->right = temp;
         node->right = new_node;
+        return T_FLOAT_RET;
     }
     else if(left_type != right_type) {
         return T_ERROR_RET;
@@ -459,7 +459,7 @@ ret_type checkUnType(ASTNode* node) {
 
 ret_type checkTernTypes(ASTNode* node) {
     if(node == NULL) {
-        return;
+        return T_ERROR_RET;
     }
     if(node->type == P_EXPRESSION) {
         checkExpr(node->right);
@@ -504,11 +504,15 @@ ret_type checkBool(ASTNode* node) {
             error_exit(7, "ERROR: Wrong type in boolean operation (right operand)!\n");
         }
     }
-    if(left_type != T_KW_BOOL || right_type != T_KW_BOOL) {
+    if(left_type != T_BOOL_RET || right_type != T_BOOL_RET) {
         symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
         error_exit(7, "ERROR: Wrong type in boolean operation!\n");
     }
+}
+
+ret_type checkRel(ASTNode* node) {
+    // TODO
 }
 
 bool isRel(ASTNodeType type) {

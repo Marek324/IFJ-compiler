@@ -4,10 +4,10 @@ ASTNode *ASTRoot = NULL;
 
 void checkForT_Error(Token *token) {
     if (token->type == T_ERROR) {
-            int exit_code = token->value.int_value;
-            free_token(token);
-            freeAST(ASTRoot);
-            error_exit(exit_code, "Scanner failed\n");
+        int exit_code = token->value.int_value;
+        free_token(token);
+        freeAST(ASTRoot);
+        error_exit(exit_code, "Scanner failed\n");
     }
 }
 // Function to create and initialize a new ASTNode
