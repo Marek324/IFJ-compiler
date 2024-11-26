@@ -15,7 +15,7 @@ void symFuncDef(ASTNode* node){
     node = node->right; // ID
     symtable_node_ptr tree = symtable_search(SymFunctionTree, node->token->value.string_value);
     tree = *tree->entry->local_symtable;
-
+    
     node = node->left->left; // params or RPAREN
     if (node->type == P_PARAM_LIST){
 
@@ -33,11 +33,7 @@ void symFuncDef(ASTNode* node){
 void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     if (node == NULL)
         return;
-    
-    if (node->type == ID) {
-        symIdStatement(node, tree);
-    }
-    
+
     node = node->right;
 
     switch(node->type){
