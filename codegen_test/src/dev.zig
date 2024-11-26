@@ -4,8 +4,12 @@ pub fn main() void {
     const y = ifj.readi32();
     const i : i32 = 3 + 3;
     const f : ?i32 = 3 + 3;
-    i = 1;
+    const s : i32 = 3 + 3;
+    i = 1 + 1;
     ifj.write("s");
+    fu(s);
+    id : while(s) {
+    }
 }
 
 pub fn fu(ast: i32) i32 {

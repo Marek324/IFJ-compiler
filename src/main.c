@@ -97,8 +97,7 @@ int main() {
     #endif
     
     // codegen();
-    
-    //test_symtable();
+     
     circ_buff_free(buffer);
     freeAST(ASTRoot); 
     symtable_dispose(&SymFunctionTree);

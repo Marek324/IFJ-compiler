@@ -41,10 +41,12 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     switch(node->type){
 
         case P_VAR_DECLARATION:
+            printf("1\n");
             symVarDec(node, tree);
             break;
 
         case ID:
+            printf("2\n");
             symIdStatement(node, tree);
             nextStatement = node->right;
             break;
@@ -54,7 +56,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
             break;
 
         case P_WHILE_LOOP:
-            symWhileLoop(node, tree);
+            symWhileLoop(node, tree, NULL);
             break;
         
         case P_RETURN_STATEMENT:
@@ -136,9 +138,9 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
         node = node->left; // ASSGN
     }
     node = node->right->right; //P_EXPRESSION
-
+    bool isNullable = false;
     if (key->entry->hasExplicitType == true) {
-        if (key->entry->type == checkExpr(node->right)) {
+        if (key->entry->type == checkExpr(node->right, &isNullable)) {
             return;
         } 
         
@@ -147,7 +149,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
         error_exit(7, "ERROR: assigning wrong type\n");
     }
     else {
-        key->entry->type = checkExpr(node->right);
+        key->entry->type = checkExpr(node->right, &isNullable);
         if (key->entry->type == T_NULL_RET) {
             freeAST(ASTRoot);
             symtable_dispose(&SymFunctionTree);        
@@ -159,18 +161,54 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
 }
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
+    ASTNode *id = node; // save id 
+    symtable_node_ptr key = NULL;
     bool ifjFound = false;
     if (strcmp(node->token->value.string_value, "ifj") == 0){
         ifjFound = true;
     }
+    node = node->left->right; // LPAREN or ID or P_WHILE_LOOP or P_ASGN_FOUND
+    if (node->type == LPAREN) {
+        checkIfIdExits(SymFunctionTree, id->token->value.string_value);
+        key = symtable_search(SymFunctionTree, id->token->value.string_value);
+        node = node->left; //P_EXPRESSION_LIST
+        if (node->right != NULL) {
+            node = node->right; //P_EXPRESSION
+            bool isNullable = false;
+            for (int i = 0; i < key->entry->param_count; i++) {
+                if (!(key->entry->param_types[i] == checkExpr(node, &isNullable) && key->entry->param_nullable[i] == isNullable)) {
+                    freeAST(ASTRoot);
+                    symtable_dispose(&SymFunctionTree);
+                    error_exit(7, "ERROR: assigning wrong type\n");
+                }
 
+            }
+        }
+    }
+    else if (node->type == ID) {
+        
+    }
+    else if (node->type == P_WHILE_LOOP){
+        symWhileLoop(node, tree, id);
+    }
+    else if (node->type == P_ASGN_FOUND) {
+        checkIfIdExits(*tree, id->token->value.string_value);
+        key = symtable_search(*tree, id->token->value.string_value);
+        node = node->right; // P_EXPRESSION
+        bool isNullable = false;
+        if (!(key->entry->type == checkExpr(node->right, &isNullable) && key->entry->isNullable == isNullable)) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);        
+            error_exit(7, "ERROR: assigning wrong type\n");
+        }
+    }   
 }
 
 void symIfStatement(ASTNode* node, symtable_tree_ptr tree){
 
 }
 
-void symWhileLoop(ASTNode* node, symtable_tree_ptr tree){
+void symWhileLoop(ASTNode* node, symtable_tree_ptr tree, ASTNode* id){
     
 }
 

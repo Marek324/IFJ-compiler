@@ -51,7 +51,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree);
 
 void symIfStatement(ASTNode* node, symtable_tree_ptr tree);
 
-void symWhileLoop(ASTNode* node, symtable_tree_ptr tree);
+void symWhileLoop(ASTNode* node, symtable_tree_ptr tree, ASTNode* id);
 // check types for boolean operation
 ret_type checkBool(ASTNode* node, bool* is_nullable);
 // true if relation operation, false otherwise. (EQ, NEQ, MORE, LESS, MEQ, LEQ)
