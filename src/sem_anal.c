@@ -209,7 +209,13 @@ ret_type checkExpr(ASTNode* node) {
         }
         // ternary operation
         if(node->type == T_IF) {
-            return checkTernTypes(node->left);
+            ret_type node_type = checkTernTypes(node->left);
+            if(node_type == T_ERROR_RET) {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong types for ternary operation!\n");
+            }
+            return node_type;
         }
         // binary boolean operations
         if(node->type == T_AND || node->type == T_OR) {
@@ -506,8 +512,14 @@ ret_type checkTernTypes(ASTNode* node) {
     if(checkExpr(node->right) != T_BOOL_RET) {
         return T_ERROR_RET;
     }
-    ret_type if_type = checkTernTypes(node->left);
-    ret_type else_type = checkTernTypes(node->right);
+    ret_type if_type = checkExpr(node->left->right);
+    ret_type else_type = checkExpr(node->left->left->right);
+    if(if_type != else_type) {
+        return T_ERROR_RET;
+    }
+    else {
+        return if_type;
+    }
 }
 
 ret_type checkBool(ASTNode* node) {
@@ -552,10 +564,13 @@ ret_type checkBool(ASTNode* node) {
         freeAST(ASTRoot);
         error_exit(7, "ERROR: Wrong type in boolean operation!\n");
     }
+    else {
+        return T_BOOL_RET;
+    }
 }
 
 ret_type checkRel(ASTNode* node) {
-    // TODO
+    
 }
 
 bool isRel(ASTNodeType type) {
