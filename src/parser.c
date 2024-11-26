@@ -49,14 +49,21 @@ void Prog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     *token = get_token(buffer);
     Prolog(token, prolog, buffer);
     // P_FUNCTION_DEF
-    if (token->type != T_EOF){
+    if ((*token)->type != T_EOF){
         ASTNode *function_def = ruleNode(P_FUNCTION_DEF); 
         insertLeft(prolog, function_def);
         FunctionDef(token, function_def, buffer);
+    // P_END
+        ASTNode *end = ruleNode(P_END); 
+        insertLeft(function_def, end);
+        End(token, end);
     }
-    ASTNode *end = ruleNode(P_END); 
-    insertLeft(function_def, end);
-    End(token, end);
+    else {
+        ASTNode *end = ruleNode(P_END); 
+        insertLeft(prolog, end);
+        End(token, end);
+    }
+
 }
 void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     // CONST
