@@ -6,6 +6,6 @@
 
 symtable_node_ptr stackUtilCopy(symtable_node_ptr tree);
 
-symtable_tree_ptr stackUtilPop(stack_t* stack);
+symtable_node_ptr stackUtilPop(stack_t* stack);
 
 #endif
