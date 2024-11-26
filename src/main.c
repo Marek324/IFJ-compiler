@@ -87,6 +87,7 @@ int main() {
     circ_buff_ptr buffer = circ_buff_init();
     symtable_init(&SymFunctionTree);
     Parse(buffer);
+    // 
     analyse(ASTRoot);
     
     // print_AVL(SymFunctionTree);
@@ -95,11 +96,11 @@ int main() {
     generate_d2_file(ASTRoot, "tree.d2");
     #endif
     
-    codegen();
+    // codegen();
     
     //test_symtable();
     circ_buff_free(buffer);
-    freeAST(ASTRoot);
+    freeAST(ASTRoot); 
     symtable_dispose(&SymFunctionTree);
     return 0;
 }

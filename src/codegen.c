@@ -1,6 +1,8 @@
 #include "codegen_priv.h"
 
-
+int if_counter = 0;
+int while_counter = 0;
+int for_counter = 0;
 
 void codegen()
 {
@@ -51,7 +53,7 @@ void function_def(ASTNode *node){
 
         node = node->left; // RPAREN
     }
-
+    
     node = node->left->left; // block
 
     statement(node->right);
@@ -86,12 +88,13 @@ void param_list(ASTNode *node){
 
 }
 
-
 void statement(ASTNode *node){
     if (node == NULL)
         return;
 
     node = node->right;
+
+    ASTNode *nextStatement = node->left != NULL ? node->left : NULL;
 
     switch(node->type){
         case P_VAR_DECLARATION:
@@ -100,6 +103,7 @@ void statement(ASTNode *node){
 
         case ID:
             id_statement(node);
+            nextStatement = nextStatement->left;
             break;
 
         case P_IF_STATEMENT:
@@ -109,28 +113,34 @@ void statement(ASTNode *node){
         case P_WHILE_LOOP:
             while_loop(node);
             break;
-        
-        case P_RETURN_STATEMENT:
-            return_statement(node);
-            break;
-
-        case P_BREAK:
-            break_statement(node);
-            break;
-
-        case P_CONTINUE:
-            continue_statement(node);
-            break;
 
         case P_FOR_LOOP:
             for_loop(node);
             break;
+        
+        case P_RETURN_STATEMENT:
+            return_statement(node);
+            nextStatement = NULL; // unreachable code
+            break;
+
+        case P_BREAK: 
+            break_statement(node);
+            nextStatement = NULL; // unreachable code
+            break;
+
+        case P_CONTINUE: 
+            continue_statement(node);
+            nextStatement = NULL; // unreachable code
+            break;
 
         default:
-            printf("unknown\n");
+            // printf("statement unknown\n");
+            printf("%s\n", node->type);
             break;
 
     }
+
+    statement(nextStatement);
     
 
 
@@ -139,7 +149,6 @@ void statement(ASTNode *node){
 
 void var_dec(ASTNode *node){
     printf("DEFVAR ");
-    ASTNode *nextStatement = node->left;
     node = node->right->left; // ID
 
     printf("TF@%s\n", node->token->value.string_value);
@@ -150,16 +159,14 @@ void var_dec(ASTNode *node){
     if(node->type == P_TYPE_COMPLETE)
         node = node->left; // ASSGN
 
+    // node = node->right; // P_ASGN_FOUND
+
     asgn_found(node->right, idNode->token->value.string_value);    
-    
-    statement(nextStatement);
 }
 
 void asgn_found(ASTNode *node, const char *var){
     expression(node->right->right);
     printf("POPS TF@%s\n", var);
-
-    
 }
 
 void expression(ASTNode *node){
@@ -192,7 +199,7 @@ void expression(ASTNode *node){
         case LEQ:
             expression(node->left);
             expression(node->right);
-            printf("LTS\n");
+            printf("GTS\n");
             printf("NOTS\n");
             break;
         case MORE:
@@ -203,7 +210,7 @@ void expression(ASTNode *node){
         case MEQ:
             expression(node->left);
             expression(node->right);
-            printf("GTS\n");
+            printf("LTS\n");
             printf("NOTS\n");
             break;
         case PLUS:
@@ -244,12 +251,15 @@ void expression(ASTNode *node){
         case T_ORELSE:
             expression(node->left);
             printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\nPOPS TF@tmp\nPUSHS TF@tmp\n");
-            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_end\n");
+            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_not_null\n");
             expression(node->right);
-            printf("LABEL &orelse_end\n");
+            printf("JUMP &orelse_end\n");
+            printf("LABEL &orelse_not_null\n");
+            printf("PUSHS TF@tmp\n");
+            printf("LABEL &orelse_end\nPOPFRAME\n");
             break;
         case ID:
-            if (node->right == NULL){
+            if (node->right == NULL && node->left == NULL){
                 printf("PUSHS TF@%s\n", node->token->value.string_value);
             } else {
                 if (node->left != NULL) { // builtin function
@@ -319,8 +329,8 @@ void expression(ASTNode *node){
         case TYPE_INT:
             printf("PUSHS int@%lld\n", node->token->value.int_value);
             break;
-        case T_FLOAT:
-            printf("PUSHS float@%lf\n", node->token->value.float_value);
+        case TYPE_F64:
+            printf("PUSHS float@%a\n", node->token->value.float_value);
             break;
         case T_TRUE:
             printf("PUSHS bool@true\n");
@@ -334,8 +344,19 @@ void expression(ASTNode *node){
             printf("PUSHS string@%s\n", str->str);
             dyn_str_free(str);
             break;}
+        case T_NULL:
+            printf("PUSHS nil@nil\n");
+            break;
+        case I2F:
+            expression(node->right);
+            printf("INT2FLOATS\n");
+            break;
+        case F2I:
+            expression(node->right);
+            printf("FLOAT2INTS\n");
+            break;
         default:
-            printf("unknown\n");
+            printf("expression unknown\n");
             break;
     }
 
@@ -371,10 +392,7 @@ void expression_list(ASTNode *node){
 void id_statement(ASTNode *node){
     // printf("id_statement %s ", node->token->value.string_value);
     ASTNode *idNode = node;
-    node = node->left; // ID_FOUND
-    ASTNode *nextStatement = node->left;
-
-    node = node->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
+    node = node->left->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
     switch(node->type){
         case P_ASGN_FOUND:
             asgn_found(node, idNode->token->value.string_value);
@@ -382,7 +400,7 @@ void id_statement(ASTNode *node){
 
         case ID:
             expression(node->left->left->right->right);
-            printf("# id_statement\nPUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\n");
+            printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\nPUSHS TF@out\n");
             printf("WRITE TF@out\nPOPFRAME\n");
             break;
 
@@ -395,25 +413,38 @@ void id_statement(ASTNode *node){
             break;
         
         default:
-            printf("unknown\n");
+            printf("id unknown\n");
             break;
     }
 
-
-    statement(nextStatement);
 }   
 
-void if_statement(ASTNode *node){
-
+void if_statement(ASTNode *node){ // chyba opt value, segfault else
+    int if_count = if_counter++;
+    node = node->right; // P_EXPRESSION
+    expression(node->right);
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS &if_%d_else\n", if_count);
+    node = node->left->right; // P_BLOCK
+    statement(node->right);
+    printf("JUMP &if_%d_end\n", if_count);
+    printf("LABEL &if_%d_else\n", if_count);
+    if(node->left != NULL){
+        node = node->left; // P_ELSE_STATEMENT
+        if(node->right->type == P_BLOCK)
+            node = node->right->right;
+        statement(node);
+    }
+    printf("LABEL &if_%d_end\n", if_count);
 }
 
 void while_loop(ASTNode *node){
-    printf("while ");
+    printf("while\n");
 
 }
 
 void for_loop(ASTNode *node){
-
+    printf("for\n");
 }
 
 void return_statement(ASTNode *node){

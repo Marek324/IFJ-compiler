@@ -70,7 +70,7 @@ void symtable_free_entry(symtable_entry_ptr entry) {
                 free(entry->param_nullable);
                 entry->param_nullable = NULL;
             }
-        if(entry->param_types != NULL) {
+            if(entry->param_types != NULL) {
                 free(entry->param_types);
                 entry->param_types = NULL;
             }
@@ -106,7 +106,7 @@ void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type 
     }
     else {
         // key already exists in symtable
-        symtable_dispose(tree);
+        symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
         error_exit(5, "ERROR: Redefinition of a variable or function!\n");
     }

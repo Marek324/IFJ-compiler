@@ -5,15 +5,150 @@
 
 // TODO: implicit conversion and IDIV/DIV
 void analyse (ASTNode* root) {
-    checkForMain(SymFunctionTree);
+    checkForMain();
     root = root->right->left; // skip prolog
-    funcDef(root);
+    symFuncDef(root);
 }
 
-void funcDef(ASTNode* root){
-    //function Sym node 
-    symtable_node_ptr node = symtable_search(SymFunctionTree, root->right->token->value.string_value);
-    (void) node;
+void symFuncDef(ASTNode* node){
+    if (node == NULL || node->type == END_OF_FILE) return;
+    // function Sym node 
+    node = node->right; // ID
+    symtable_node_ptr tree = symtable_search(SymFunctionTree, node->token->value.string_value);
+    tree = *tree->entry->local_symtable;
+
+    node = node->left->left; // params or RPAREN
+    if (node->type == P_PARAM_LIST){
+
+        symParamList(node, &tree);
+        
+        node = node->left; // RPAREN
+    }
+
+    node = node->left->left; // block
+
+    symStatement(node->right, &tree); 
+
+    symFuncDef(node->left);
+}
+void symStatement(ASTNode* node, symtable_tree_ptr tree) {
+    if (node == NULL)
+        return;
+
+    node = node->right;
+    ASTNode *nextStatement = node->left;
+
+    switch(node->type){
+
+        case P_VAR_DECLARATION:
+            symVarDec(node, tree);
+            break;
+
+        case ID:
+            symIdStatement(node, tree);
+            nextStatement = node->right;
+            break;
+
+        case P_IF_STATEMENT:
+            symIfStatement(node, tree);
+            break;
+
+        case P_WHILE_LOOP:
+            symWhileLoop(node, tree);
+            break;
+        
+        case P_RETURN_STATEMENT:
+            symReturnStatement(node, tree);
+            break;
+
+        case P_BREAK:
+            symBreakStatement(node, tree);
+            break;
+
+        case P_CONTINUE:
+            symContinueStatement(node, tree);
+            break;
+
+        case P_FOR_LOOP:
+            symForLoop(node, tree);
+            break;
+
+        default:
+            printf("unknown\n");
+            break;
+    }
+
+    symStatement(nextStatement, tree);
+}
+
+void symParamList(ASTNode* node, symtable_tree_ptr tree) {
+    if (node == NULL) return;
+    
+    ASTNode *id = node->right; // save ID
+    symtable_insert(tree, id->token->value.string_value, T_VAR_SYM);
+    node = id->left; // move to P_TYPE_COMPLETE
+
+    symtable_node_ptr key = symtable_search(*tree, id->token->value.string_value);
+        key->entry->isChanged = false;
+        key->entry->hasExplicitType = true;
+        key->entry->isUsed = false;
+    if (node->right->type == P_QUESTION_MARK) {
+        key->entry->isConst = true;
+        key->entry->isNullable = true;
+        key->entry->type = getRetType(convertToASTType(T_KW, node->right->left->right->token->value.keyword));
+    }
+    else if (node->right->type == P_TYPE) {
+        key->entry->isConst = true;
+        key->entry->isNullable = false;
+        key->entry->type = getRetType(convertToASTType(T_KW, node->right->right->token->value.keyword));
+    }
+    
+    node = node->left; // comma or null
+    if (node != NULL) {
+        symParamList(node->right, tree);
+    }
+}
+
+void symVarDec(ASTNode* node, symtable_tree_ptr tree){
+    node = node->right; // const or var
+    bool isconst = node->token->value.keyword == KW_CONST ? true : false;
+    node = node->left; // ID
+    symtable_insert(tree, node->token->value.string_value, T_VAR_SYM);
+    symtable_node_ptr key = symtable_search(*tree, node->token->value.string_value);
+    node = node->left; // ASSGN OR P_TYPE_COMPLETE
+    key->entry->isConst = isconst;
+    key->entry->isUsed = false;
+    if (node == P_TYPE_COMPLETE) {
+        key->entry->hasExplicitType = true;
+    }
+}
+
+void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
+    
+}
+
+void symIfStatement(ASTNode* node, symtable_tree_ptr tree){
+
+}
+
+void symWhileLoop(ASTNode* node, symtable_tree_ptr tree){
+    
+}
+
+void symReturnStatement(ASTNode* node, symtable_tree_ptr tree){
+    
+}
+
+void symBreakStatement(ASTNode* node, symtable_tree_ptr tree){
+    
+}
+
+void symContinueStatement(ASTNode* node, symtable_tree_ptr tree){
+    
+}
+
+void symForLoop(ASTNode* node, symtable_tree_ptr tree){
+    
 }
 
 ret_type checkExpr(ASTNode* node) {
@@ -89,8 +224,8 @@ ret_type checkExpr(ASTNode* node) {
     checkExpr(node->right);
 }
 
-void checkForMain(symtable_node_ptr tree) {
-    symtable_node_ptr node = symtable_search(tree, "main");
+void checkForMain() {
+    symtable_node_ptr node = symtable_search(SymFunctionTree, "main");
     if (node == NULL) {
         symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
@@ -103,19 +238,20 @@ void checkForMain(symtable_node_ptr tree) {
     }
 }
 
-void checkForFunction(symtable_node_ptr tree, char *key) {
+void checkIfIdExits(symtable_node_ptr tree, char *key) {
     symtable_node_ptr node = symtable_search(tree, key);
 
     if (node == NULL) {
         symtable_dispose(&SymFunctionTree);
         freeAST(ASTRoot);
-        error_exit(3, "ERROR: Missing func definition!\n");
+        error_exit(3, "ERROR: Missing definition!\n");
     }
 }
 
+
 void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList, int i, int capacity) {
     symtable_node_ptr node = symtable_search(tree, key);
-    
+
     if (node->entry->param_nullable == NULL && node->entry->param_types == NULL) {
         node->entry->param_nullable = malloc(capacity*sizeof(bool));
         node->entry->param_types = malloc(capacity*sizeof(ret_type));
@@ -162,6 +298,7 @@ void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList,
 
 void getFunctionType(symtable_node_ptr tree, char *key, ASTNode *FunctionType) {
     symtable_node_ptr node = symtable_search(tree, key);
+    node->entry->isUsed = false;
 
     if (FunctionType->right->type == T_VOID) {
         node->entry->type = getRetType(T_VOID);

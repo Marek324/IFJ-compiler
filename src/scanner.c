@@ -357,6 +357,7 @@ KeyWordType check_keyword(char *str)
 
 void free_token(Token* token)
 {
+    if (token == NULL) return;
     if(token->type == T_ID || token->type == T_STR)
         free(token->value.string_value);
     free(token);
