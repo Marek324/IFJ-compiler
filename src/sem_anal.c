@@ -34,7 +34,7 @@ void symFuncDef(ASTNode* node){
 void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     if (node == NULL)
         return;
-
+    
     node = node->right;
     ASTNode *nextStatement = node->left;
 
@@ -119,6 +119,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
     key->entry->isConst = isconst;
     key->entry->isUsed = false;
     key->entry->isChanged = false;
+    key->entry->hasExplicitType = false;
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
@@ -140,6 +141,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
         if (key->entry->type == checkExpr(node->right)) {
             return;
         } 
+        
         freeAST(ASTRoot);
         symtable_dispose(&SymFunctionTree);        
         error_exit(7, "ERROR: assigning wrong type\n");
@@ -157,7 +159,11 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
 }
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
-    
+    bool ifjFound = false;
+    if (strcmp(node->token->value.string_value, "ifj") == 0){
+        ifjFound = true;
+    }
+
 }
 
 void symIfStatement(ASTNode* node, symtable_tree_ptr tree){
@@ -565,7 +571,107 @@ bool isRel(ASTNodeType type) {
             return false;
     }
 }
+void insertBuiltInFun() {
+    symtable_node_ptr key = NULL;
 
+    symtable_insert(&SymFunctionTree, "ifj.readstr", T_FUN_SYM);
+    key = symtable_search(SymFunctionTree, "ifj.readstr");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry = {
+        .entry_type = T_FUN_SYM,
+        .type = T_STR_RET,
+        .isUsed = true,
+        .isNullable = true,
+        .param_count = 0,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry;
+
+    symtable_insert(&SymFunctionTree,"ifj.readi32",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.readi32");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = true,
+        .returnsValue = true,
+        .param_count = 0,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry;
+    symtable_insert(&SymFunctionTree,"ifj.readf64",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.readf64");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry = {
+        .entry_type = T_FUN_SYM,
+        .type = T_FLOAT_RET,
+        .isUsed = true,
+        .isNullable = true,
+        .returnsValue = true,
+        .param_count = 0,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry;
+    
+    symtable_insert(&SymFunctionTree,"ifj.write",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.write");
+    free(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry = {
+        .entry_type = T_FUN_SYM,
+        .type = T_NULL_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .returnsValue = false,
+        .param_count = 1,
+        .param_nullable = malloc(sizeof(bool)),
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    *key->entry = entry;
+    
+    symtable_insert(&SymFunctionTree,"ifj.i2f",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.i2f");
+    
+    symtable_insert(&SymFunctionTree,"ifj.f2i",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.f2i");
+    
+    symtable_insert(&SymFunctionTree,"ifj.string",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.string");
+    
+    symtable_insert(&SymFunctionTree,"ifj.length",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.length");
+    
+    symtable_insert(&SymFunctionTree,"ifj.concat",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.concat");
+   
+    symtable_insert(&SymFunctionTree,"ifj.substring",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"ifj.substring");
+    
+}
 ret_type convertToRetType(ASTNodeType node_type) {
     switch(node_type) {
         case TYPE_INT:
