@@ -69,6 +69,8 @@ void symForLoop(ASTNode* node, symtable_tree_ptr tree);
 void funcDef(ASTNode* node);
 // returns T_ERROR_RET as default
 ret_type convertToRetType(ASTNodeType node_type);
+// returns true if float can be converted to int (decimal part is 0)
+bool floatIsInt(float value);
 
 
 

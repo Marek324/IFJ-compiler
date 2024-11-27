@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "sem_anal.h"
 #include "ast.h"
 #include "error.h"
@@ -479,10 +481,11 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         }
         left_type = left_id->entry->type;
         if(left_id->entry->entry_type == T_VAR_SYM) {
-            
+            left_id->entry->isUsed = true;
         }
         else if(left_id->entry->entry_type == T_FUN_SYM) {
-
+            left_id->entry->isUsed = true;
+            /*TODO: go through all parameters and check if the datatypes and count is good*/
         }
         else {
             symtable_dispose(&SymFunctionTree);
@@ -498,7 +501,31 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     }
     // right node is ID
     if(node->right->type == ID) {
-        // get return type
+        // get return_type, check if variable or function was defined
+        right_id = symtable_search(local_table, node->token->value.string_value);
+        if(right_id == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined variable!\n");
+        }
+        if(right_id->entry->isNullable) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n");
+        }
+        right_type = right_id->entry->type;
+        if(right_id->entry->entry_type == T_VAR_SYM) {
+            right_id->entry->isUsed = true;
+        }
+        else if(right_id->entry->entry_type == T_FUN_SYM) {
+            right_id->entry->isUsed = true;
+            /*TODO: go through all parameters and check if the datatypes and count is good*/
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown state!\n");
+        }
     }
     else if(isOperator(node->right->token)) {
         right_type = checkExpr(node->right, local_table);
@@ -506,10 +533,16 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     else {
         right_type = convertToRetType(node->right->type);
     }
+    // type control
     if(left_type == T_INT_RET && right_type == T_INT_RET) {
         node->token->type = T_IDIV;
         node->type = IDIV;
         return T_INT_RET;
+    }
+    else if(left_type == T_FLOAT_RET && right_type == T_FLOAT_RET) {
+        node->token->type = T_DIV;
+        node->type = DIV;
+        return T_FLOAT_RET;
     }
     else if((left_type == T_INT_RET || left_type == T_FLOAT_RET) && (right_type == T_INT_RET || right_type == T_FLOAT_RET)) {
         // f64 to i32 if the decimal part is 0 (only literals and constants)
@@ -1149,4 +1182,10 @@ ret_type convertToRetType(ASTNodeType node_type) {
         default:
             return T_ERROR_RET;
     }
+}
+
+bool floatIsInt(float value) {
+    // Tolerance for floating-point precision
+    const float epsilon = 1e-6;
+    return (fabs((value - (int)value)) < epsilon) ? true : false;
 }
