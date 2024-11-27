@@ -105,12 +105,12 @@ FUNEXP\\
  \Large \textbf{Syntakticka analyza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
+\paragraph{Riesenie syntaktickej analyzy sme zapocali vytvorenim LL gramatiky, LL tabulky a precendecnej tabulky. Nasledne na ich zaklade sme vypracovali subor \textit{parser.c a exp\_parser.c}.Tieto subory pracuju s uzlamy deklarovanymi v subore \textit{ast.h}. Spustenie syntaktickej analyzy zapocne zavolanim funkcie \textit{Parse()}. Tato funkcia postupne prechadza cez tokeny a priradzuje ich do uzlov pomocou ktorych postupne tvori abstraktny syntakticky strom na zaklade LL gramatiky. Subor \textit{parser.c} dalej riadi aj precedencnu analyzu volanim funkcii zo suboru \textit{exp\_parser.c}.Tento subor vytvori strom vyrazov, ktory je nasledne pripojeny do syntaktickeho stromu.  \newline \\}
 
  \Large \textbf{Semanticka analyza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
+\paragraph{Semanticka analyza je implementovana v suboroch \textit{sem\_anal.c , symtable.c, sem\_anal.h a symtable.h}. \newline \\}
 
  \Large \textbf{Generovanie kodu} \normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
