@@ -65,7 +65,7 @@ void symContinueStatement(ASTNode* node, symtable_tree_ptr tree);
 
 void symForLoop(ASTNode* node, symtable_tree_ptr tree);
 void funcDef(ASTNode* node);
-// returns T_NULL_RET as default
+// returns T_ERROR_RET as default
 ret_type convertToRetType(ASTNodeType node_type);
 
 

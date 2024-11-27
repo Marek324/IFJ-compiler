@@ -244,16 +244,6 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
                 error_exit(7, "ERROR: Wrong type for unary boolean operation!\n");
             }
         }
-        // ternary operation
-        if(node->type == T_IF) {
-            ret_type node_type = checkTernTypes(node->left, local_table);
-            if(node_type == T_ERROR_RET) {
-                symtable_dispose(&SymFunctionTree);
-                freeAST(ASTRoot);
-                error_exit(7, "ERROR: Wrong types for ternary operation!\n");
-            }
-            return node_type;
-        }
         // binary boolean operations
         if(node->type == T_AND || node->type == T_OR) {
             if(checkBool(node, local_table) == T_BOOL_RET) {
@@ -301,6 +291,41 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
     }
     else if(isOperand(node->token)){
         // functions and IDs and literals
+        if(node->type == T_NULL) {
+            return T_NULL_RET;
+        }
+        symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+        if(sym_node == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined identifier!\n");
+        }
+        if(sym_node->entry->entry_type == T_VAR_SYM) {
+            sym_node->entry->isUsed = true;
+            return sym_node->entry->type;
+        }
+        else if(sym_node->entry->entry_type == T_FUN_SYM) {
+            sym_node->entry->isUsed = true;
+            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            return sym_node->entry->type;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown symtable return type!\n");
+        }
+    }
+    else {
+        // ternary operation
+        if(node->type == T_IF) {
+            ret_type node_type = checkTernTypes(node->left, local_table);
+            if(node_type == T_ERROR_RET) {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong types for ternary operation!\n");
+            }
+            return node_type;
+        }
     }
 }
 
