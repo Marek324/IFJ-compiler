@@ -1,8 +1,8 @@
 #include "codegen_priv.h"
 
-int if_counter = 0;
-int while_counter = 0;
-int for_counter = 0;
+unsigned if_counter = 0;
+unsigned while_counter = 0;
+unsigned for_counter = 0;
 char *curr_func = NULL;
 
 void codegen()
@@ -109,14 +109,13 @@ void statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
             break;
 
         case P_IF_STATEMENT:
-            if_statement(node, dec_var, var_asgn, "");
+            if_statement(node, dec_var, var_asgn, label);
             break;
 
         case P_WHILE_LOOP:{
             char label_prefix[strlen(curr_func) + 10];
 
             if (dec_var){
-                sprintf(label_prefix, "");
                 label_prefix[0] = '\0';
             }
 
@@ -452,7 +451,7 @@ void id_statement(ASTNode *node, bool dec_var, bool var_asgn){
 
 void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){ 
     int if_count;
-    if (!dec_var){
+    if (var_asgn){
         if_count = if_counter++;
     }
     node = node->right; // P_EXPRESSION
@@ -461,14 +460,15 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
     if (node->type == P_OPTIONAL_VALUE){
         if (dec_var)
             printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
-        else {
+
+        if (var_asgn){
             printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value);
             printf("PUSHS nil@nil\n");
             printf("JUMPIFEQS &if_%d_else\n", if_count);
         }
         node = node->left; // P_BLOCK
     } else {
-        if (!dec_var){
+        if (var_asgn){
             printf("PUSHS bool@true\n");
             printf("JUMPIFNEQS &if_%d_else\n", if_count);
         }
@@ -476,7 +476,7 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
 
     statement(node->right, dec_var, var_asgn, label);
     
-    if (!dec_var)
+    if (var_asgn)
     printf("JUMP &if_%d_end\n", if_count);
     printf("LABEL &if_%d_else\n", if_count);
     if(node->left != NULL){
