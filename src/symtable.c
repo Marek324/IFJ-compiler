@@ -18,28 +18,47 @@ char* my_str_dup(char* key) {
 
 symtable_entry_ptr symtable_entry_init(symtable_entry_type type) {
     symtable_entry_ptr entry = malloc(sizeof(symtable_entry_t));
-    if(entry == NULL) {
-        freeAST(ASTRoot);
+    if (entry == NULL) {
+        freeAST(ASTRoot); // Cleanup other global structures on failure
         error_exit(99, "ERROR: Unable to allocate memory for symtable_entry_ptr\n");
     }
-    if(type == T_FUN_SYM) {
-        entry->param_count = 0;
-        entry->param_nullable = NULL;
-        entry->param_types = NULL;
-        entry->local_symtable = (symtable_tree_ptr)malloc(sizeof(symtable_node_t));
-        symtable_init(entry->local_symtable);
-    }
+
+    // Initialize fields
     entry->entry_type = type;
+    entry->param_count = 0;
+    entry->param_nullable = NULL;
+    entry->param_types = NULL;
+    entry->isUsed = false;
+    entry->isNullable = false;
+
+    if (type == T_FUN_SYM) {
+        // Allocate memory for the local symbol table (pointer to a tree)
+        entry->local_symtable = malloc(sizeof(symtable_node_t *));
+        if (entry->local_symtable == NULL) {
+            free(entry);
+            freeAST(ASTRoot); // Cleanup other global structures on failure
+            error_exit(99, "ERROR: Unable to allocate memory for local_symtable\n");
+        }
+        symtable_init(entry->local_symtable); // Initialize as an empty tree
+    } else {
+        entry->local_symtable = NULL; // No local table for variables
+    }
+
     return entry;
 }
 
+
 symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type) {
-    symtable_node_ptr node = (symtable_node_ptr)malloc(sizeof(symtable_node_t));
-    if(node == NULL) {
+    symtable_node_ptr node = malloc(sizeof(symtable_node_t));
+    if (node == NULL) {
         freeAST(ASTRoot);
         error_exit(99, "ERROR: Unable to allocate memory for symtable_node_ptr\n");
     }
+
+    // Duplicate the key
     node->key = my_str_dup(key);
+
+    // Initialize node pointers and entry
     node->left = NULL;
     node->right = NULL;
     node->entry = symtable_entry_init(type);
@@ -48,6 +67,9 @@ symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type) {
     return node;
 }
 
+void symtable_init(symtable_tree_ptr tree) {
+    *tree = NULL;
+}
 int max(int a, int b) {
     return a > b ? a : b;
 }
@@ -62,34 +84,28 @@ int height(symtable_node_ptr node){
 int get_balance (symtable_node_ptr node) {
     return node != NULL ? height(node->right) - height(node->left) : 0;
 }
-
-void symtable_free_entry(symtable_entry_ptr entry) {   
-    if (entry != NULL) {
-        //if(entry->entry_type == T_FUN_SYM) {
-            if(entry->param_nullable != NULL) {
-                free(entry->param_nullable);
-                entry->param_nullable = NULL;
-            }
-            if(entry->param_types != NULL) {
-                free(entry->param_types);
-                entry->param_types = NULL;
-            }
-            if (*entry->local_symtable == NULL) {
-                free(entry->local_symtable);
-            }
-            else {
-                symtable_dispose(entry->local_symtable);
-                entry->local_symtable = NULL;
-            } 
-        //}
-        free(entry);
-        entry = NULL;
+void symtable_free_entry(symtable_entry_ptr entry) {
+    if (entry == NULL) {
+        return; // Nothing to free
     }
+
+    // Free function-specific resources
+    if (entry->entry_type == T_FUN_SYM) {
+        free(entry->param_nullable); // Free nullable flags for parameters
+        free(entry->param_types);    // Free parameter types
+
+        // Dispose of the local symbol table if it exists
+        if (entry->local_symtable != NULL) {
+            symtable_dispose(entry->local_symtable);
+            free(entry->local_symtable); // Free the pointer itself
+            entry->local_symtable = NULL;
+        }
+    }
+
+    // Free the entry itself
+    free(entry);
 }
 
-void symtable_init(symtable_tree_ptr tree) {
-    *tree = NULL;
-}
 
 void symtable_insert(symtable_tree_ptr tree, char* new_key, symtable_entry_type type) {
     if (*tree == NULL) {
@@ -213,16 +229,21 @@ void rebalance(symtable_tree_ptr tree) {
 }
 
 void symtable_dispose(symtable_tree_ptr tree) {
-    if (tree == NULL || (*tree) == NULL) {
-        return;
+    if (tree == NULL || *tree == NULL) {
+        return; // Nothing to dispose
     }
+
+    // Recursively dispose of left and right subtrees
     symtable_dispose(&((*tree)->left));
     symtable_dispose(&((*tree)->right));
+
+    // Free the entry associated with the current node
     symtable_free_entry((*tree)->entry);
-    if((*tree)->key != NULL) {
-        free((*tree)->key);
-        (*tree)->key = NULL;
-    }
-    free(*tree);    
-    *tree = NULL;
+
+    // Free the key
+    free((*tree)->key);
+
+    // Free the current node
+    free(*tree);
+    *tree = NULL; // Prevent dangling pointer
 }

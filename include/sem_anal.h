@@ -51,6 +51,8 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree);
 
 void symIfStatement(ASTNode* node, symtable_tree_ptr tree);
 
+void symEnd(symtable_tree_ptr tree);
+
 void symWhileLoop(ASTNode* node, symtable_tree_ptr tree, ASTNode* id);
 // check types for boolean operation
 ret_type checkBool(ASTNode* node, symtable_node_ptr local_table);
