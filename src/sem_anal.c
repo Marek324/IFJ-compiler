@@ -6,7 +6,7 @@
 void analyse (ASTNode* root) {
     checkForMain();
     root = root->right->left; // skip prolog
-    symFuncDef(root);
+    //symFuncDef(root);
 }
 
 void symFuncDef(ASTNode* node){
@@ -30,22 +30,7 @@ void symFuncDef(ASTNode* node){
 
     symFuncDef(node->left);
 }
-void print_AVL(symtable_node_ptr node) {
-    if (node == NULL) {
-        return;
-    }
-    print_AVL(node->left);
-    print_AVL(node->right);
-    fprintf(stderr,"%s,", node->key);
-    /*printf("%d", node->entry->type);
-    printf("%i", node->entry->isNullable);
-    printf("%d", node->entry->param_nullable[0]);
-    printf("%d", node->entry->param_types[0]);
-    printf("%d", node->entry->param_nullable[1]);
-    printf("%d", node->entry->param_types[1]);
-    printf("%d", node->entry->param_nullable[5]);
-    printf("%d", node->entry->param_types[5]);*/
-}
+
 void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     if (node == NULL)
         return;
@@ -60,7 +45,8 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
             break;
 
         case ID:
-            symIdStatement(node, tree);
+
+            //symIdStatement(node, tree);
             nextStatement = nextStatement->left;
             break;
 
@@ -128,6 +114,7 @@ void symParamList(ASTNode* node, symtable_tree_ptr tree) {
 }
 
 void symVarDec(ASTNode* node, symtable_tree_ptr tree){
+    
     node = node->right; // const or var
     bool isconst = node->token->value.keyword == KW_CONST ? true : false;
     node = node->left; // ID
@@ -138,11 +125,11 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
     key->entry->isUsed = false;
     key->entry->isChanged = false;
     key->entry->hasExplicitType = false;
+    key->entry->isNullable = false;
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
         if(Jozef->type == P_TYPE) {
-            key->entry->isNullable = false;
             Jozef = Jozef->right;
             key->entry->type = getRetType(convertToASTType(T_KW, Jozef->token->value.keyword));
         }
@@ -155,10 +142,17 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
     }
     node = node->right->right; //P_EXPRESSION
     if (key->entry->hasExplicitType == true) {
-        if (key->entry->type == checkExpr(node->right,*tree)) {
+        ret_type type = checkExpr(node->right,*tree);
+        if (type != T_NULL_RET) {
+            if (key->entry->type == type) {
             return;
-        } 
-        
+            } 
+        }
+        else {
+            if (key->entry->isNullable == true){
+                return;
+            } 
+        }
         freeAST(ASTRoot);
         symtable_dispose(&SymFunctionTree);        
         error_exit(7, "ERROR: assigning wrong type\n");
@@ -184,20 +178,40 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
     }
     node = node->left->right; // LPAREN or ID or P_WHILE_LOOP or P_ASGN_FOUND
     if (node->type == LPAREN) {
+        printf("FUNCTION_CALL\n");
         checkIfIdExits(SymFunctionTree, id->token->value.string_value);
-        fprintf(stderr,"%s",id->token->value.string_value);
         key = symtable_search(SymFunctionTree, id->token->value.string_value);
-        node = node->left; //P_EXPRESSION_LIST
+        node = node->left; // P_EXPRESSION_LIST
         if (node->right != NULL) {
-            node = node->right; //P_EXPRESSION
-
-            for (int i = 0; i < key->entry->param_count; i++) {
-                if (!(key->entry->param_types[i] == checkExpr(node->right,*tree))) {
-                    freeAST(ASTRoot);
-                    symtable_dispose(&SymFunctionTree);
-                    error_exit(7, "ERROR: assigning wrong type\n");
+            node = node->right; // P_EXPRESSION
+            ret_type type = T_NULL_RET;
+            int i = 0;
+            while (1) {
+                type = checkExpr(node->right, *tree);
+            
+                printf("%i",i);
+                if (type != T_NULL_RET) {
+                     if (!(key->entry->param_types[i] == type)) {
+                        freeAST(ASTRoot);
+                        symtable_dispose(&SymFunctionTree);
+                        error_exit(4, "ERROR: assigning wrong type\n");
+                    }
                 }
-
+                else {
+                    if ((key->entry->param_nullable[i] != true)) {
+                        freeAST(ASTRoot);
+                        symtable_dispose(&SymFunctionTree);
+                        error_exit(4, "ERROR: assigning wrong type\n");
+                    }
+                } 
+                i++;
+                node = node->left; // null or P_COMMA_EXPR_FOUND
+                if ((node != NULL && node->left != NULL) || i != key->entry->param_count) {
+                    node = node->left->right; // P_EXPRESSION
+                }
+                else {
+                    break;
+                }
             }
         }
     }
@@ -208,13 +222,24 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
         symWhileLoop(node, tree, id);
     }
     else if (node->type == P_ASGN_FOUND) {
+        printf("ASGN\n");
         checkIfIdExits(*tree, id->token->value.string_value);
         key = symtable_search(*tree, id->token->value.string_value);
         node = node->right; // P_EXPRESSION
-        if (!(key->entry->type == checkExpr(node->right, *tree))) {
-            freeAST(ASTRoot);
-            symtable_dispose(&SymFunctionTree);        
-            error_exit(7, "ERROR: assigning wrong type\n");
+        ret_type type = checkExpr(node->right, *tree);
+        if (type != T_NULL_RET) {
+            if (!(key->entry->type == type)) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);        
+                error_exit(7, "ERROR: assigning wrong type\n");
+            }
+        }
+        else {
+            if(!(key->entry->isNullable == true)) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);        
+                error_exit(7, "ERROR: assigning wrong type\n");
+            }
         }
     }   
 }
