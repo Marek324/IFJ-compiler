@@ -142,6 +142,16 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 symtable_dispose(&SymFunctionTree);
                 error_exit(2, "SYNTAX ERROR: Missing RPAREN after expression\n");
             }
+            free_token(*token);
+            // get token after RPAREN (should be semicolon)
+            *token = get_token(buff);
+            if((*token)->type != T_SEMICOL) {
+                free_token(*token);
+                freeAll(paren_depth, operand_stack, operator_stack);
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(2, "SYNTAX ERROR: Missing SEMICOLON after RPAREN\n");
+            }
             continue;
         } 
         // for function calls ----------------------------------------------------------------------
