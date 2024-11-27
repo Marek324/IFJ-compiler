@@ -162,6 +162,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     symtable_dispose(&SymFunctionTree);
                     checkForT_Error(*token);
                 }
+                // ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
+                // insertLeft(id_node, expressionListRule);
                 ExpressionList(token, id_node, buff);
             }
             if((*token)->type == T_DOT) {

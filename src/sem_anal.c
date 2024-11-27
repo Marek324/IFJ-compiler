@@ -417,6 +417,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     ret_type right_type;
     symtable_node_ptr left_id;
     symtable_node_ptr right_id;
+    // left node is ID
     if(node->left->type == ID) {
         // get return_type, check if variable or function was defined
         left_id = symtable_search(local_table, node->token->value.string_value);
@@ -425,6 +426,23 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
             freeAST(ASTRoot);
             error_exit(3, "ERROR: Undefined variable!\n");
         }
+        if(left_id->entry->isNullable) {
+            symtable_dispose(SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n");
+        }
+        left_type = left_id->entry->type;
+        if(left_id->entry->entry_type == T_VAR_SYM) {
+            
+        }
+        else if(left_id->entry->entry_type == T_FUN_SYM) {
+
+        }
+        else {
+            symtable_dispose(SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown state!\n");
+        }
     }
     else if(isOperator(node->left->token)) {
         left_type = checkExpr(node->left, local_table);
@@ -432,7 +450,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     else {
         left_type = convertToRetType(node->left->type);
     }
-    // right node
+    // right node is ID
     if(node->right->type == ID) {
         // get return type
     }
@@ -544,7 +562,8 @@ ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
     ret_type node_type;
     if(node->left->type == ID) {
         // get return_type
-        // node_type = ...
+        symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+        // if(sym_node->entry->)
     }
     else {
         node_type = convertToRetType(node->type);
