@@ -290,30 +290,35 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
         }
     }
     else if(isOperand(node->token)){
-        // functions and IDs and literals
+        // functions, IDs and literals
         if(node->type == T_NULL) {
             return T_NULL_RET;
         }
-        symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
-        if(sym_node == NULL) {
-            symtable_dispose(&SymFunctionTree);
-            freeAST(ASTRoot);
-            error_exit(3, "ERROR: Undefined identifier!\n");
+        if(node->type == ID) {
+            symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+            if(sym_node == NULL) {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(3, "ERROR: Undefined identifier!\n");
+            }
+            // variables
+            if(sym_node->entry->entry_type == T_VAR_SYM) {
+                sym_node->entry->isUsed = true;
+                return sym_node->entry->type;
+            }
+            // functions
+            else if(sym_node->entry->entry_type == T_FUN_SYM) {
+                sym_node->entry->isUsed = true;
+                /*TODO: go through all parameters and check if the datatypes and count is good*/
+                return sym_node->entry->type;
+            }
+            else {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(10, "ERROR: Uknown symtable return type!\n");
+            }
         }
-        if(sym_node->entry->entry_type == T_VAR_SYM) {
-            sym_node->entry->isUsed = true;
-            return sym_node->entry->type;
-        }
-        else if(sym_node->entry->entry_type == T_FUN_SYM) {
-            sym_node->entry->isUsed = true;
-            /*TODO: go through all parameters and check if the datatypes and count is good*/
-            return sym_node->entry->type;
-        }
-        else {
-            symtable_dispose(&SymFunctionTree);
-            freeAST(ASTRoot);
-            error_exit(10, "ERROR: Uknown symtable return type!\n");
-        }
+        return convertToRetType(node->type);
     }
     else {
         // ternary operation
@@ -588,7 +593,25 @@ ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
     if(node->left->type == ID) {
         // get return_type
         symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
-        // if(sym_node->entry->)
+        if(sym_node == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined identifier!\n");
+        }
+        if(sym_node->entry->entry_type == T_VAR_SYM) {
+            sym_node->entry->isUsed = true;
+            return sym_node->entry->type;
+        }
+        else if(sym_node->entry->entry_type == T_FUN_SYM) {
+            sym_node->entry->isUsed = true;
+            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            return sym_node->entry->type;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown symtable return type!\n");
+        }
     }
     else {
         node_type = convertToRetType(node->type);
