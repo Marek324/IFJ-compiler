@@ -15,17 +15,17 @@ void checkArgs();
 // checks the type of a function or variable
 ret_type checkType();
 // check expression, check for P_EXPRESSION and pass in its right child (the expression itself)
-ret_type checkExpr(ASTNode* node, bool* is_nullable);
+ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table);
 // check types in a binary arithmetic operation
-ret_type checkAritTypes(ASTNode* node, bool* is_nullable);
+ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table);
 // check types in a unary operation
-ret_type checkUnType(ASTNode* node, bool* is_nullable);
+ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table);
 // check types in a ternary operation
-ret_type checkTernTypes(ASTNode* node, bool* is_nullable);
+ret_type checkTernTypes(ASTNode* node, symtable_node_ptr local_table);
 // check types in division (convert to whole number division if necessary)
-ret_type checkDiv(ASTNode* node, bool* is_nullable);
+ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table);
 // check types in relation operation
-ret_type checkRel(ASTNode* node);
+ret_type checkRel(ASTNode* node, symtable_node_ptr local_table);
 // gets ret_type
 ret_type getRetType(ASTNodeType type);
 // gets function
@@ -53,7 +53,7 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr tree);
 
 void symWhileLoop(ASTNode* node, symtable_tree_ptr tree, ASTNode* id);
 // check types for boolean operation
-ret_type checkBool(ASTNode* node, bool* is_nullable);
+ret_type checkBool(ASTNode* node, symtable_node_ptr local_table);
 // true if relation operation, false otherwise. (EQ, NEQ, MORE, LESS, MEQ, LEQ)
 bool isRel(ASTNodeType type);
 

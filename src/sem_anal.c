@@ -3,7 +3,6 @@
 #include "error.h"
 #include "exp_parser.h"
 
-// TODO: implicit conversion and IDIV/DIV
 void analyse (ASTNode* root) {
     checkForMain();
     root = root->right->left; // skip prolog
@@ -228,7 +227,7 @@ void symForLoop(ASTNode* node, symtable_tree_ptr tree){
     
 }
 
-ret_type checkExpr(ASTNode* node, bool* is_nullable) {
+ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
     if(node == NULL) {
         return T_ERROR_RET;
     }
@@ -236,7 +235,7 @@ ret_type checkExpr(ASTNode* node, bool* is_nullable) {
         ret_type node_type;
         // unary boolean operation
         if(node->type == BANG) {
-            if(checkUnType(node, is_nullable) == T_BOOL_RET) {
+            if(checkUnType(node, local_table) == T_BOOL_RET) {
                 return T_BOOL_RET;
             }
             else {
@@ -247,7 +246,7 @@ ret_type checkExpr(ASTNode* node, bool* is_nullable) {
         }
         // ternary operation
         if(node->type == T_IF) {
-            ret_type node_type = checkTernTypes(node->left, is_nullable);
+            ret_type node_type = checkTernTypes(node->left, local_table);
             if(node_type == T_ERROR_RET) {
                 symtable_dispose(&SymFunctionTree);
                 freeAST(ASTRoot);
@@ -257,7 +256,7 @@ ret_type checkExpr(ASTNode* node, bool* is_nullable) {
         }
         // binary boolean operations
         if(node->type == T_AND || node->type == T_OR) {
-            if(checkBool(node, is_nullable) == T_BOOL_RET) {
+            if(checkBool(node, local_table) == T_BOOL_RET) {
                 return T_BOOL_RET;
             }
             else {
@@ -268,7 +267,7 @@ ret_type checkExpr(ASTNode* node, bool* is_nullable) {
         }
         // relation operation
         if(isRel(node->type)) {
-            if(checkRel(node) == T_BOOL_RET) {
+            if(checkRel(node, local_table) == T_BOOL_RET) {
                 return T_BOOL_RET;
             }
             else {
@@ -279,7 +278,7 @@ ret_type checkExpr(ASTNode* node, bool* is_nullable) {
         }
         // binary arithmetic division
         if(node->type == DIV) {
-            ret_type node_type = checkDiv(node, is_nullable);
+            ret_type node_type = checkDiv(node, local_table);
             if(node_type == T_INT_RET || node_type == T_FLOAT) {
                 return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
             }
@@ -290,7 +289,7 @@ ret_type checkExpr(ASTNode* node, bool* is_nullable) {
             }
         }
         // all other binary operations (arithmetic)
-        node_type = checkAritTypes(node, is_nullable);
+        node_type = checkAritTypes(node, local_table);
         if(node_type == T_INT_RET || node_type == T_FLOAT_RET) {
             return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
         }
@@ -413,14 +412,22 @@ ret_type getRetType(ASTNodeType type) {
     }
 }
 
-ret_type checkDiv(ASTNode* node, bool* is_nullable) { 
+ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) { 
     ret_type left_type;
     ret_type right_type;
+    symtable_node_ptr left_id;
+    symtable_node_ptr right_id;
     if(node->left->type == ID) {
         // get return_type, check if variable or function was defined
+        left_id = symtable_search(local_table, node->token->value.string_value);
+        if(left_id == NULL) {
+            symtable_dispose(SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined variable!\n");
+        }
     }
     else if(isOperator(node->left->token)) {
-        left_type = checkExpr(node->left, is_nullable);
+        left_type = checkExpr(node->left, local_table);
     }
     else {
         left_type = convertToRetType(node->left->type);
@@ -430,7 +437,7 @@ ret_type checkDiv(ASTNode* node, bool* is_nullable) {
         // get return type
     }
     else if(isOperator(node->right->token)) {
-        right_type = checkExpr(node->right, is_nullable);
+        right_type = checkExpr(node->right, local_table);
     }
     else {
         right_type = convertToRetType(node->right->type);
@@ -442,13 +449,15 @@ ret_type checkDiv(ASTNode* node, bool* is_nullable) {
     }
     else if((left_type == T_INT_RET || left_type == T_FLOAT_RET) && (right_type == T_INT_RET || right_type == T_FLOAT_RET)) {
         // f64 to i32 if the decimal part is 0 (only literals and constants)
+        // if()
+         
     }
     else {
         return T_ERROR_RET;
     }
 }
 
-ret_type checkAritTypes(ASTNode* node, bool* is_nullable) {
+ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     if(node->left == NULL || node->right == NULL) {
         return T_ERROR_RET;
     }
@@ -459,7 +468,7 @@ ret_type checkAritTypes(ASTNode* node, bool* is_nullable) {
         // get return_type, check if variable or function was defined
     }
     else if(isOperator(node->left->token)) {
-        left_type = checkExpr(node->left, is_nullable);
+        left_type = checkExpr(node->left, local_table);
     }
     else {
         left_type = convertToRetType(node->left->type);
@@ -469,7 +478,7 @@ ret_type checkAritTypes(ASTNode* node, bool* is_nullable) {
         // get return type
     }
     else if(isOperator(node->right->token)) {
-        right_type = checkExpr(node->right, is_nullable);
+        right_type = checkExpr(node->right, local_table);
     }
     else {
         right_type = convertToRetType(node->right->type);
@@ -527,9 +536,9 @@ ret_type checkAritTypes(ASTNode* node, bool* is_nullable) {
     }
 }
 
-ret_type checkUnType(ASTNode* node, bool* is_nullable) {
+ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
     if(isOperator(node->right->token)) {
-        return (checkExpr(node->right, is_nullable) == T_BOOL_RET) ? T_BOOL_RET : T_ERROR_RET;
+        return (checkExpr(node->right, local_table) == T_BOOL_RET) ? T_BOOL_RET : T_ERROR_RET;
     }
     // ret_type of node
     ret_type node_type;
@@ -544,18 +553,18 @@ ret_type checkUnType(ASTNode* node, bool* is_nullable) {
             
 }
 
-ret_type checkTernTypes(ASTNode* node, bool* is_nullable) {
+ret_type checkTernTypes(ASTNode* node, symtable_node_ptr local_table) {
     if(node == NULL) {
         return T_ERROR_RET;
     }
     if(node->type != P_EXPRESSION) {
         return T_ERROR_RET;
     }
-    if(checkExpr(node->right, is_nullable) != T_BOOL_RET) {
+    if(checkExpr(node->right, local_table) != T_BOOL_RET) {
         return T_ERROR_RET;
     }
-    ret_type if_type = checkExpr(node->left->right, is_nullable);
-    ret_type else_type = checkExpr(node->left->left->right, is_nullable);
+    ret_type if_type = checkExpr(node->left->right, local_table);
+    ret_type else_type = checkExpr(node->left->left->right, local_table);
     if(if_type != else_type) {
         return T_ERROR_RET;
     }
@@ -564,7 +573,7 @@ ret_type checkTernTypes(ASTNode* node, bool* is_nullable) {
     }
 }
 
-ret_type checkBool(ASTNode* node, bool* is_nullable) {
+ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
     ret_type left_type;
     ret_type right_type;
     if(node->left->type == ID) {
@@ -581,7 +590,7 @@ ret_type checkBool(ASTNode* node, bool* is_nullable) {
     }
     // checks if left node is an operator
     if(isOperator(node->left->token)) {
-        if(checkExpr(node->left, is_nullable) == T_BOOL_RET) {
+        if(checkExpr(node->left, local_table) == T_BOOL_RET) {
             left_type = T_BOOL_RET;
         }
         else {
@@ -592,7 +601,7 @@ ret_type checkBool(ASTNode* node, bool* is_nullable) {
     }
     // checks if right node is an operator
     if(isOperator(node->right->token)) {
-        if(checkExpr(node->right, is_nullable) == T_BOOL_RET) {
+        if(checkExpr(node->right, local_table) == T_BOOL_RET) {
             right_type = T_BOOL_RET;
         }
         else {
@@ -611,7 +620,7 @@ ret_type checkBool(ASTNode* node, bool* is_nullable) {
     }
 }
 
-ret_type checkRel(ASTNode* node) {
+ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
     if(node->type) {
     //    TODO
     }
