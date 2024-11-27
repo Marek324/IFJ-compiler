@@ -3,6 +3,7 @@
 int if_counter = 0;
 int while_counter = 0;
 int for_counter = 0;
+char *curr_func = NULL;
 
 void codegen()
 {
@@ -42,6 +43,8 @@ void function_def(ASTNode *node){
 
     printf("LABEL ");
     node = node->right; // ID
+    curr_func = malloc(strlen(node->token->value.string_value) + 1);
+    strcpy(curr_func, node->token->value.string_value);
     printf("%s\n", node->token->value.string_value);
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
@@ -56,14 +59,13 @@ void function_def(ASTNode *node){
     
     node = node->left->left; // block
 
-    statement(node->right);
+    statement(node->right, true, true, NULL);
 
     printf("POPFRAME\n");
     printf("RETURN\n");
 
+    free(curr_func);
     function_def(node->left);
-
-
 }
 
 void param_list(ASTNode *node){
@@ -88,7 +90,7 @@ void param_list(ASTNode *node){
 
 }
 
-void statement(ASTNode *node){
+void statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
     if (node == NULL)
         return;
 
@@ -98,38 +100,51 @@ void statement(ASTNode *node){
 
     switch(node->type){
         case P_VAR_DECLARATION:
-            var_dec(node);
+            var_dec(node, dec_var, var_asgn);
             break;
 
         case ID:
-            id_statement(node);
+            id_statement(node, dec_var, var_asgn);
             nextStatement = nextStatement->left;
             break;
 
         case P_IF_STATEMENT:
-            if_statement(node);
+            if_statement(node, dec_var, var_asgn, "");
             break;
 
-        case P_WHILE_LOOP:
-            while_loop(node);
-            break;
+        case P_WHILE_LOOP:{
+            char label_prefix[strlen(curr_func) + 10];
+
+            if (dec_var){
+                sprintf(label_prefix, "");
+                label_prefix[0] = '\0';
+            }
+
+            if (var_asgn)
+                sprintf(label_prefix, "&%s_while_%d", curr_func, while_counter++);
+
+            while_loop(node, label_prefix, dec_var, var_asgn);
+            break;}
 
         case P_FOR_LOOP:
-            for_loop(node);
+            for_loop(node, dec_var, var_asgn);
             break;
         
         case P_RETURN_STATEMENT:
-            return_statement(node);
+            if (var_asgn)
+                return_statement(node);
             nextStatement = NULL; // unreachable code
             break;
 
         case P_BREAK: 
-            break_statement(node);
+            if (var_asgn)
+                break_statement(node, label);
             nextStatement = NULL; // unreachable code
             break;
 
         case P_CONTINUE: 
-            continue_statement(node);
+            if (var_asgn)
+                continue_statement(node, label);
             nextStatement = NULL; // unreachable code
             break;
 
@@ -139,14 +154,16 @@ void statement(ASTNode *node){
 
     }
 
-    statement(nextStatement);
+    statement(nextStatement, dec_var, var_asgn, label);
 }
 
-void var_dec(ASTNode *node){
-    printf("DEFVAR ");
+void var_dec(ASTNode *node, bool dec_var, bool var_asgn){
     node = node->right->left; // ID
+    if (dec_var){
+        printf("DEFVAR ");
 
-    printf("TF@%s\n", node->token->value.string_value);
+        printf("TF@%s\n", node->token->value.string_value);
+    }
     ASTNode *idNode = node;
 
     node = node->left; // P_TYPE_COMPLETE | ASSGN
@@ -155,8 +172,8 @@ void var_dec(ASTNode *node){
         node = node->left; // ASSGN
 
     // node = node->right; // P_ASGN_FOUND
-
-    asgn_found(node->right, idNode->token->value.string_value);    
+    if (var_asgn)
+        asgn_found(node->right, idNode->token->value.string_value);    
 }
 
 void asgn_found(ASTNode *node, const char *var){
@@ -308,11 +325,9 @@ void expression(ASTNode *node){ // @as
                         expression_list(node); 
                         printf("CALL &strcmp\n");
                     } else if (!strcmp(builtin_func, "ord")){
-                        printf("# ord\n");
                         expression_list(node); 
                         printf("STRI2INTS\n");
                     } else if (!strcmp(builtin_func, "chr")){
-                        printf("# chr\n");
                         expression(node->right->right);
                         printf("INT2CHARS\n");
                     } else {
@@ -382,11 +397,8 @@ void func_call(ASTNode *node){
     if (node == NULL)
         return;
     
-
     expression_list(node);
     printf("CALL %s\n", node->token->value.string_value);
-
-
 }
 
 void expression_list(ASTNode *node){
@@ -394,9 +406,7 @@ void expression_list(ASTNode *node){
         return;
 
     node = node->right;
-
     expression(node->right);
-
 
     if (node->left != NULL){
         expression_list(node->left->left);
@@ -404,28 +414,34 @@ void expression_list(ASTNode *node){
 
 }
 
-void id_statement(ASTNode *node){
+void id_statement(ASTNode *node, bool dec_var, bool var_asgn){
     // printf("id_statement %s ", node->token->value.string_value);
     ASTNode *idNode = node;
     node = node->left->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
     switch(node->type){
         case P_ASGN_FOUND:
-            asgn_found(node, idNode->token->value.string_value);
+            if (var_asgn)
+                asgn_found(node, idNode->token->value.string_value);
             break;
 
         case ID:
-            expression(node->left->left->right->right);
-            printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\nPUSHS TF@out\n");
-            printf("WRITE TF@out\nPOPFRAME\n");
+            if (var_asgn){
+                expression(node->left->left->right->right);
+                printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@out\nPOPS TF@out\nPUSHS TF@out\n");
+                printf("WRITE TF@out\nPOPFRAME\n");
+            }
             break;
 
         case LPAREN:
-            func_call(idNode);
+            if (var_asgn)
+                func_call(idNode);
             break;
 
-        case P_WHILE_LOOP:
-            printf("while\n");
-            break;
+        case P_WHILE_LOOP:{ 
+            char label_prefix[strlen(curr_func) + strlen(idNode->token->value.string_value) + 4];
+            sprintf(label_prefix, "&%s_%s", curr_func, idNode->token->value.string_value);
+            while_loop(node, label_prefix, dec_var, var_asgn);
+            break;}
         
         default:
             printf("id unknown\n");
@@ -434,39 +450,112 @@ void id_statement(ASTNode *node){
 
 }   
 
-void if_statement(ASTNode *node){ // chyba opt value, segfault else
-    int if_count = if_counter++;
+void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){ 
+    int if_count;
+    if (!dec_var){
+        if_count = if_counter++;
+    }
     node = node->right; // P_EXPRESSION
     expression(node->right);
     node = node->left->right; // P_BLOCK | P_OPTIONAL_VALUE
     if (node->type == P_OPTIONAL_VALUE){
-        printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
-        printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value);
-        printf("PUSHS nil@nil\n");
-        printf("JUMPIFEQS &if_%d_else\n", if_count);
+        if (dec_var)
+            printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+        else {
+            printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value);
+            printf("PUSHS nil@nil\n");
+            printf("JUMPIFEQS &if_%d_else\n", if_count);
+        }
         node = node->left; // P_BLOCK
     } else {
-        printf("PUSHS bool@true\n");
-        printf("JUMPIFNEQS &if_%d_else\n", if_count);
+        if (!dec_var){
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS &if_%d_else\n", if_count);
+        }
     }
-    statement(node->right);
+
+    statement(node->right, dec_var, var_asgn, label);
+    
+    if (!dec_var)
     printf("JUMP &if_%d_end\n", if_count);
     printf("LABEL &if_%d_else\n", if_count);
     if(node->left != NULL){
         node = node->left; // P_ELSE_STATEMENT
         if(node->right->type == P_BLOCK)
             node = node->right->right;
-        statement(node);
+        statement(node, dec_var, var_asgn, label);
     }
     printf("LABEL &if_%d_end\n", if_count);
 }
 
-void while_loop(ASTNode *node){
-    printf("while\n");
+void while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
+    ASTNode *this_loop = node;
+    node = node->right; // P_EXPRESSION
 
+    bool first_loop = false;
+    if (dec_var && var_asgn){
+        first_loop = true;
+        var_asgn = false;
+    }
+
+    if (var_asgn) {
+        printf("LABEL %s_loop\n", label);
+        expression(node->right);
+    }
+
+    node = node->left; // P_BLOCK | P_OPTIONAL_STATEMENTS | P_OPTIONAL_VALUE
+    
+    if (node->type == P_OPTIONAL_VALUE) {
+        if (dec_var)
+            printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+        
+        if (var_asgn) {
+            printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value); // save value and leave it in data stack
+            printf("PUSHS nil@nil\n");
+            printf("JUMPIFEQS %s_break\n", label); // compare if value is null
+        }
+        node = node->left; // P_BLOCK | P_OPTIONAL_STATEMENTS
+    } else {
+        if (var_asgn) {
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS %s_break\n", label); // check if condition is true 
+        }
+    }
+
+    ASTNode *continue_statements = NULL;   
+    if (node->type == P_OPTIONAL_STATEMENTS){
+        continue_statements = node;
+        node = node->left; // P_BLOCK
+    }
+    
+    statement(node->right, dec_var, var_asgn, label); // loop block
+
+    if (continue_statements != NULL)
+        statement(continue_statements->right, dec_var, var_asgn, label);  // continue statement/s
+
+    if (var_asgn) {
+        printf("JUMP %s_loop\n", label);
+        printf("LABEL %s_break\n", label);
+    }
+
+    node = node->left; // P_ELSE_STATEMENT
+    
+    if (node != NULL) {
+        node = node->right->right;
+        statement(node, dec_var, var_asgn, label); 
+    }
+
+    if (var_asgn)
+        printf("LABEL %s_end\n", label);
+    
+    if (first_loop) { // first loop
+        while_loop(this_loop, label, false, true);
+        return;
+        // statement(node->right, true, false); // loop block
+    }
 }
 
-void for_loop(ASTNode *node){
+void for_loop(ASTNode *node, bool dec_var, bool var_asgn){
     printf("for\n");
 }
 
@@ -479,44 +568,14 @@ void return_statement(ASTNode *node){
 
 }
 
-void break_statement(ASTNode *node){
-    
+void break_statement(ASTNode *node, const char *label){
+    printf("JUMP %s\n", label);
 }
 
-void continue_statement(ASTNode *node){
+void continue_statement(ASTNode *node, const char *label){
+    printf("JUMP %s\n", label);
 
 }
-
-
-// void print_out(ASTNode *node){
-//     switch(node->type){
-//         case TYPE_STR:
-//             dyn_str *str = dyn_str_init();
-//             convert_string(str, node->token->value.string_value);
-//             printf("string@%s\n", str->str);
-//             dyn_str_free(str);
-//             break;
-//         case TYPE_INT:
-//             printf("int@%lld\n", node->token->value.int_value);
-//             break;
-//         case TYPE_F64:
-//             printf("float@%a\n", node->token->value.float_value);
-//             break;
-//         case ID:
-//             printf("TF@%s\n", node->token->value.string_value);
-//             break;
-//         case T_TRUE:
-//             printf("bool@true\n");
-//             break;
-//         case T_FALSE:
-//             printf("bool@false\n");
-//             break;
-//         default:
-//             break;
-
-
-//     }
-// }
 
 void convert_string(dyn_str *dyn_s, char *str){
     for (int i = 0; i < (int) strlen(str); i++){

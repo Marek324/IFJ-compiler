@@ -24,10 +24,6 @@ all: $(TARGET)
 tree:
 	d2 tree.d2
 
-#test: tests/TestsCheck.c $(OBJS)
-#	$(CC) $(CFLAGS) $(OBJS) $< -o $@ -lcheck -lsubunit -lm
-#	./test
-#	@rm -f test
 
 test: $(TARGET)
 	./IFJ24-tests/test.sh ./IFJ24-tests ./$(TARGET) ./codegen_test/ic24int

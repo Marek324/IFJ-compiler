@@ -88,16 +88,15 @@ int main() {
     circ_buff_ptr buffer = circ_buff_init();
     symtable_init(&SymFunctionTree);
     Parse(buffer);
-    // 
-    analyse(ASTRoot);
+    // analyse(ASTRoot);
     
-    //print_AVL(SymFunctionTree);
-    // Debug
+    // print_AVL(SymFunctionTree);
+    
     #ifdef DEBUG
     generate_d2_file(ASTRoot, "tree.d2");
     #endif
     
-    // codegen();
+    codegen();
      
     circ_buff_free(buffer);
     freeAST(ASTRoot); 
