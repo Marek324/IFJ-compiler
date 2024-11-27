@@ -88,7 +88,7 @@ int main() {
     circ_buff_ptr buffer = circ_buff_init();
     symtable_init(&SymFunctionTree);
     Parse(buffer);
-    // analyse(ASTRoot);
+    analyse(ASTRoot);
     
     // print_AVL(SymFunctionTree);
     
