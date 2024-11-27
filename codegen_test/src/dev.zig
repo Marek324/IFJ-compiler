@@ -2,12 +2,11 @@ const ifj = @import("ifj24.zig");
 
 pub fn main() void {
     var k = 32;
-    const y = ifj.readi32();
-    const i : i32 = 3 + 3;
-    const f : ?i32 = 3 + 3;
+    const i = 3 + 3.0;
+    const f : ?i32 = 3;
+    fu(i,i);
     const s : i32 = 3 + 3;
     i = 1 + 1;
-    
     
 }
 

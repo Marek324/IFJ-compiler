@@ -7,7 +7,7 @@
 #include "sem_anal.h"
 
 // post-order printing 
-/*void print_AVL(symtable_node_ptr node) {
+void print_AVL(symtable_node_ptr node) {
     if (node == NULL) {
         return;
     }
@@ -22,7 +22,7 @@
     printf("%d", node->entry->param_types[1]);
     printf("%d", node->entry->param_nullable[5]);
     printf("%d", node->entry->param_types[5]);
-}*/
+}
 
 
 void test_symtable() {
