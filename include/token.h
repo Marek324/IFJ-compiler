@@ -43,7 +43,8 @@ typedef enum {
  
     T_EOF,
     T_ERROR,
-    T_I2F
+    T_I2F,
+    T_F2I,
 
 } TokenType;
 
