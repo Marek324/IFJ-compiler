@@ -30,6 +30,22 @@ void symFuncDef(ASTNode* node){
 
     symFuncDef(node->left);
 }
+void print_AVL(symtable_node_ptr node) {
+    if (node == NULL) {
+        return;
+    }
+    print_AVL(node->left);
+    print_AVL(node->right);
+    fprintf(stderr,"%s,", node->key);
+    /*printf("%d", node->entry->type);
+    printf("%i", node->entry->isNullable);
+    printf("%d", node->entry->param_nullable[0]);
+    printf("%d", node->entry->param_types[0]);
+    printf("%d", node->entry->param_nullable[1]);
+    printf("%d", node->entry->param_types[1]);
+    printf("%d", node->entry->param_nullable[5]);
+    printf("%d", node->entry->param_types[5]);*/
+}
 void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     if (node == NULL)
         return;
@@ -40,14 +56,12 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     switch(node->type){
 
         case P_VAR_DECLARATION:
-            printf("1\n");
             symVarDec(node, tree);
             break;
 
         case ID:
-            printf("2\n");
             symIdStatement(node, tree);
-            nextStatement = node->right;
+            nextStatement = nextStatement->left;
             break;
 
         case P_IF_STATEMENT:
@@ -80,8 +94,11 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
     }
 
     symStatement(nextStatement, tree);
+    symEnd(tree);
 }
-
+void symEnd(symtable_tree_ptr tree) {
+    symtable_dispose(tree);
+}
 void symParamList(ASTNode* node, symtable_tree_ptr tree) {
     if (node == NULL) return;
     
@@ -137,9 +154,8 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
         node = node->left; // ASSGN
     }
     node = node->right->right; //P_EXPRESSION
-    bool isNullable = false;
     if (key->entry->hasExplicitType == true) {
-        if (key->entry->type == checkExpr(node->right, &isNullable)) {
+        if (key->entry->type == checkExpr(node->right,*tree)) {
             return;
         } 
         
@@ -148,7 +164,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree){
         error_exit(7, "ERROR: assigning wrong type\n");
     }
     else {
-        key->entry->type = checkExpr(node->right, &isNullable);
+        key->entry->type = checkExpr(node->right, *tree);
         if (key->entry->type == T_NULL_RET) {
             freeAST(ASTRoot);
             symtable_dispose(&SymFunctionTree);        
@@ -169,13 +185,14 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
     node = node->left->right; // LPAREN or ID or P_WHILE_LOOP or P_ASGN_FOUND
     if (node->type == LPAREN) {
         checkIfIdExits(SymFunctionTree, id->token->value.string_value);
+        fprintf(stderr,"%s",id->token->value.string_value);
         key = symtable_search(SymFunctionTree, id->token->value.string_value);
         node = node->left; //P_EXPRESSION_LIST
         if (node->right != NULL) {
             node = node->right; //P_EXPRESSION
-            bool isNullable = false;
+
             for (int i = 0; i < key->entry->param_count; i++) {
-                if (!(key->entry->param_types[i] == checkExpr(node, &isNullable) && key->entry->param_nullable[i] == isNullable)) {
+                if (!(key->entry->param_types[i] == checkExpr(node->right,*tree))) {
                     freeAST(ASTRoot);
                     symtable_dispose(&SymFunctionTree);
                     error_exit(7, "ERROR: assigning wrong type\n");
@@ -194,8 +211,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
         checkIfIdExits(*tree, id->token->value.string_value);
         key = symtable_search(*tree, id->token->value.string_value);
         node = node->right; // P_EXPRESSION
-        bool isNullable = false;
-        if (!(key->entry->type == checkExpr(node->right, &isNullable) && key->entry->isNullable == isNullable)) {
+        if (!(key->entry->type == checkExpr(node->right, *tree))) {
             freeAST(ASTRoot);
             symtable_dispose(&SymFunctionTree);        
             error_exit(7, "ERROR: assigning wrong type\n");
@@ -372,7 +388,7 @@ void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList,
         }
     }
 
-    if (i == capacity - 1) {
+    if (i >= capacity - 1) {
         capacity = 2 * capacity;
         node->entry->param_nullable = realloc(node->entry->param_nullable, capacity * sizeof(bool));
         node->entry->param_types = realloc(node->entry->param_types, capacity * sizeof(ret_type));
@@ -452,12 +468,12 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         // get return_type, check if variable or function was defined
         left_id = symtable_search(local_table, node->token->value.string_value);
         if(left_id == NULL) {
-            symtable_dispose(SymFunctionTree);
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(3, "ERROR: Undefined variable!\n");
         }
         if(left_id->entry->isNullable) {
-            symtable_dispose(SymFunctionTree);
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n");
         }
@@ -469,7 +485,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
 
         }
         else {
-            symtable_dispose(SymFunctionTree);
+            symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(10, "ERROR: Uknown state!\n");
         }
