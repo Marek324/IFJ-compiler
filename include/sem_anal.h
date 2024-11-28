@@ -49,7 +49,11 @@ void symVarDec(ASTNode* node, symtable_tree_ptr tree);
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr tree);
 
+void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key);
+
 void symIfStatement(ASTNode* node, symtable_tree_ptr tree);
+
+void insertBuiltInFun();
 
 void symEnd(symtable_tree_ptr tree);
 

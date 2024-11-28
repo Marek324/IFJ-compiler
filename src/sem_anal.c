@@ -7,8 +7,9 @@
 
 void analyse (ASTNode* root) {
     checkForMain();
+    insertBuiltInFun();
     root = root->right->left; // skip prolog
-    //symFuncDef(root);
+    symFuncDef(root);
 }
 
 void symFuncDef(ASTNode* node){
@@ -38,7 +39,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
         return;
     
     node = node->right;
-    ASTNode *nextStatement = node->left;
+    ASTNode *nextStatement = (node->left != NULL) ? node->left : NULL;
 
     switch(node->type){
 
@@ -48,7 +49,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr tree) {
 
         case ID:
 
-            //symIdStatement(node, tree);
+            symIdStatement(node, tree);
             nextStatement = nextStatement->left;
             break;
 
@@ -180,53 +181,43 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
     }
     node = node->left->right; // LPAREN or ID or P_WHILE_LOOP or P_ASGN_FOUND
     if (node->type == LPAREN) {
-        printf("FUNCTION_CALL\n");
         checkIfIdExits(SymFunctionTree, id->token->value.string_value);
         key = symtable_search(SymFunctionTree, id->token->value.string_value);
         node = node->left; // P_EXPRESSION_LIST
-        if (node->right != NULL) {
-            node = node->right; // P_EXPRESSION
-            ret_type type = T_NULL_RET;
-            int i = 0;
-            while (1) {
-                type = checkExpr(node->right, *tree);
-            
-                printf("%i",i);
-                if (type != T_NULL_RET) {
-                     if (!(key->entry->param_types[i] == type)) {
-                        freeAST(ASTRoot);
-                        symtable_dispose(&SymFunctionTree);
-                        error_exit(4, "ERROR: assigning wrong type\n");
-                    }
-                }
-                else {
-                    if ((key->entry->param_nullable[i] != true)) {
-                        freeAST(ASTRoot);
-                        symtable_dispose(&SymFunctionTree);
-                        error_exit(4, "ERROR: assigning wrong type\n");
-                    }
-                } 
-                i++;
-                node = node->left; // null or P_COMMA_EXPR_FOUND
-                if ((node != NULL && node->left != NULL) || i != key->entry->param_count) {
-                    node = node->left->right; // P_EXPRESSION
-                }
-                else {
-                    break;
-                }
-            }
-        }
+        checkArguments(tree, node, key);
     }
     else if (node->type == ID) {
-        
+        if (ifjFound) {
+            if (strlen(node->token->value.string_value) > 9) {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(3, "ERROR: Missing definition!\n");
+            }
+            char builtinFun[14] = "ifj.";
+            strcpy(builtinFun+4, node->token->value.string_value);
+            checkIfIdExits(SymFunctionTree, builtinFun);
+            key = symtable_search(SymFunctionTree, builtinFun);
+            
+            node = node->left->left; // P_EXPRESSION_LIST 
+            checkArguments(tree, node, key);
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Missing definition!\n");
+        }
     }
     else if (node->type == P_WHILE_LOOP){
         symWhileLoop(node, tree, id);
     }
     else if (node->type == P_ASGN_FOUND) {
-        printf("ASGN\n");
         checkIfIdExits(*tree, id->token->value.string_value);
         key = symtable_search(*tree, id->token->value.string_value);
+        if (key->entry->isConst) {
+            freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);        
+                error_exit(5, "ERROR: assigning to CONST!\n");
+        }
         node = node->right; // P_EXPRESSION
         ret_type type = checkExpr(node->right, *tree);
         if (type != T_NULL_RET) {
@@ -246,6 +237,55 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr tree){
     }   
 }
 
+void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key) {
+    if (node->right != NULL) {
+            node = node->right; // P_EXPRESSION
+            ret_type type = T_NULL_RET;
+            int i = 0;
+            while (1) {
+                if (i < key->entry->param_count && key->entry->param_types[i] == T_ANY) {
+                    goto skip;
+                }
+                type = checkExpr(node->right, *tree);
+                if (type != T_NULL_RET) {
+                        if (i < key->entry->param_count && !(key->entry->param_types[i] == type)) {
+                            freeAST(ASTRoot);
+                            symtable_dispose(&SymFunctionTree);
+                            error_exit(4, "ERROR: assigning wrong type\n");
+                        }
+                }
+                else {
+                        if (i < key->entry->param_count && (key->entry->param_nullable[i] != true)) {
+                            freeAST(ASTRoot);
+                            symtable_dispose(&SymFunctionTree);
+                            error_exit(4, "ERROR: assigning null\n");
+                        }
+                } 
+                skip: i++;
+                node = node->left; // null or P_COMMA_EXPR_FOUND
+                if ((node != NULL && node->left != NULL && node->left->right != NULL) && i <= key->entry->param_count + 1) {
+                    node = node->left->right; // P_EXPRESSION
+                }
+                else {
+                    break;
+                }
+            }
+            
+            if (i != key->entry->param_count) {
+                    freeAST(ASTRoot);
+                    symtable_dispose(&SymFunctionTree);
+                    error_exit(4, "ERROR: wrong argument count!\n");
+                }
+        } 
+        else {
+            if (key->entry->param_count != 0) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(4, "ERROR: wrong argument count!\n");
+            }
+        }
+}
+        
 void symIfStatement(ASTNode* node, symtable_tree_ptr tree){
 
 }
@@ -922,7 +962,7 @@ void insertBuiltInFun() {
     // ifj.readstr
     symtable_insert(&SymFunctionTree, "ifj.readstr", T_FUN_SYM);
     key = symtable_search(SymFunctionTree, "ifj.readstr");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -942,7 +982,7 @@ void insertBuiltInFun() {
     // ifj.readi32
     symtable_insert(&SymFunctionTree,"ifj.readi32",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.readi32");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -962,7 +1002,7 @@ void insertBuiltInFun() {
     // ifj.readi64
     symtable_insert(&SymFunctionTree,"ifj.readf64",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.readf64");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -982,7 +1022,7 @@ void insertBuiltInFun() {
     // ifj.write
     symtable_insert(&SymFunctionTree,"ifj.write",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.write");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -990,7 +1030,7 @@ void insertBuiltInFun() {
     //will need changes - term
     symtable_entry_t entry4 = {
         .entry_type = T_FUN_SYM,
-        .type = T_NULL_RET,
+        .type = T_ANY,
         .isUsed = true,
         .isNullable = false,
         .param_count = 1,
@@ -999,11 +1039,22 @@ void insertBuiltInFun() {
         .param_types = NULL,
         .local_symtable = NULL,
     };
+    entry4.param_nullable = malloc(sizeof(bool));
+    if (entry4.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry4.param_nullable[0] = true;
+
+    entry4.param_types = malloc(sizeof(ret_type));
+    if (entry4.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry4.param_types[0] = T_ANY;
     *key->entry = entry4;
     // ifj.i2f
     symtable_insert(&SymFunctionTree,"ifj.i2f",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.i2f");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1035,7 +1086,7 @@ void insertBuiltInFun() {
     // ifj.f2i
     symtable_insert(&SymFunctionTree,"ifj.f2i",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.f2i");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1067,7 +1118,7 @@ void insertBuiltInFun() {
     // ifj.string
     symtable_insert(&SymFunctionTree,"ifj.string",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.string");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1098,7 +1149,7 @@ void insertBuiltInFun() {
     // ifj.length
     symtable_insert(&SymFunctionTree,"ifj.length",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.length");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1129,7 +1180,7 @@ void insertBuiltInFun() {
     // ifj.concat
     symtable_insert(&SymFunctionTree,"ifj.concat",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.concat");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1162,7 +1213,7 @@ void insertBuiltInFun() {
     // ifj.substring
     symtable_insert(&SymFunctionTree,"ifj.substring",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.substring");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1197,7 +1248,7 @@ void insertBuiltInFun() {
     // ifj.strcmp
     symtable_insert(&SymFunctionTree,"ifj.strcmp",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.strcmp");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1230,7 +1281,7 @@ void insertBuiltInFun() {
     // ifj.ord
     symtable_insert(&SymFunctionTree,"ifj.ord",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.ord");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");
@@ -1263,7 +1314,7 @@ void insertBuiltInFun() {
     // ifj.chr
     symtable_insert(&SymFunctionTree,"ifj.chr",T_FUN_SYM);
     key = symtable_search(SymFunctionTree,"ifj.chr");
-    free(key->entry);
+    symtable_free_entry(key->entry);
     key->entry = malloc(sizeof(symtable_entry_t));
     if (key->entry == NULL) {
         error_exit(99,"malloc failed");

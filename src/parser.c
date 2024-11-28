@@ -18,6 +18,7 @@ ASTNode *checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWo
         ptr = nodeCreate(convertToASTType(wantedType, NO_KW), *token);
         return ptr;
     }
+    checkForT_Error(*token);
     Free(token);
     error_exit(2, "%s\n", error); 
     return NULL;

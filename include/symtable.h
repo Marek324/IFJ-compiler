@@ -21,6 +21,7 @@ typedef enum {
     T_STR_RET,
     T_NULL_RET,
     T_ERROR_RET,
+    T_ANY
 } ret_type;
 
 struct symtable_node_s;
