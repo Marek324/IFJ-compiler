@@ -41,35 +41,36 @@ void checkIfIdExits(symtable_node_ptr tree, char *key);
 
 void symFuncDef(ASTNode* node);
 
-void symParamList(ASTNode* node, symtable_tree_ptr tree);
+void symParamList(ASTNode* node, symtable_tree_ptr local_table);
 
-void symStatement(ASTNode* node, symtable_tree_ptr tree);
+void symStatement(ASTNode* node, symtable_tree_ptr local_table);
 
-void symVarDec(ASTNode* node, symtable_tree_ptr tree);
+void symVarDec(ASTNode* node, symtable_tree_ptr local_table);
 
-void symIdStatement(ASTNode* node, symtable_tree_ptr tree);
+void symIdStatement(ASTNode* node, symtable_tree_ptr local_table);
 
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key);
 
-void symIfStatement(ASTNode* node, symtable_tree_ptr tree);
+void symIfStatement(ASTNode* node, symtable_tree_ptr local_table);
 
 void insertBuiltInFun();
 
-void symEnd(symtable_tree_ptr tree);
+void symEnd(symtable_tree_ptr local_table);
 
-void symWhileLoop(ASTNode* node, symtable_tree_ptr tree, ASTNode* id);
+void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id);
 // check types for boolean operation
 ret_type checkBool(ASTNode* node, symtable_node_ptr local_table);
 // true if relation operation, false otherwise. (EQ, NEQ, MORE, LESS, MEQ, LEQ)
 bool isRel(ASTNodeType type);
 
-void symReturnStatement(ASTNode* node, symtable_tree_ptr tree);
+void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table);
 
-void symBreakStatement(ASTNode* node, symtable_tree_ptr tree);
+void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table);
 
-void symContinueStatement(ASTNode* node, symtable_tree_ptr tree);
+void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table);
 
-void symForLoop(ASTNode* node, symtable_tree_ptr tree);
+void symForLoop(ASTNode* node, symtable_tree_ptr local_table);
+
 void funcDef(ASTNode* node);
 // returns T_ERROR_RET as default
 ret_type convertToRetType(ASTNodeType node_type);
