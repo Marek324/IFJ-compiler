@@ -45,8 +45,6 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table) {
 
     stackPush(SCOPEStack, (long)local_table);
 
-    *local_table = stackUtilCopy(*local_table);
-    
     symStatement(node->right, local_table); 
 
     *local_table = stackUtilPop(SCOPEStack);

@@ -51,7 +51,7 @@ symtable_node_ptr stackUtilCopy(symtable_node_ptr tree){
 }
 
 symtable_node_ptr stackUtilPop(stack_t* stack){
-    symtable_node_ptr tree_copy = stackUtilCopy((symtable_node_ptr)stack->top);
+    symtable_node_ptr tree_copy = stackUtilCopy((symtable_node_ptr)stackGetTop(stack));
     stackPop(stack);
     return tree_copy;
 }
