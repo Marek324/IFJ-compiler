@@ -4,7 +4,6 @@
 
 symtable_node_ptr stackUtilCopy(symtable_node_ptr tree){
     if (tree == NULL) {
-        printf("ERROR: tree is NULL\n");
         return NULL;
     }
     // create new node
@@ -29,13 +28,6 @@ symtable_node_ptr stackUtilCopy(symtable_node_ptr tree){
 
     tree_copy->entry = entryNew;
   
-    if (tree != NULL) {
-        printf("ERROR: tree is NOT NULL\n");
-    }   
-    if (tree->entry == NULL) {
-        printf("ERROR: tree->entry is NULL\n");
-    }   
-
     tree_copy->entry->entry_type = tree->entry->entry_type;
     tree_copy->entry->hasExplicitType= tree->entry->hasExplicitType;
     tree_copy->entry->isChanged = tree->entry->isChanged;
@@ -53,7 +45,9 @@ symtable_node_ptr stackUtilCopy(symtable_node_ptr tree){
 
 
 symtable_node_ptr stackUtilPop(stack_t* stack){
-    symtable_node_ptr tree_copy = stackUtilCopy((symtable_node_ptr)stackGetTop(stack));
+    symtable_node_ptr tree = (symtable_node_ptr)stackGetTop(stack);
+    symtable_node_ptr tree_copy = stackUtilCopy(tree);
+    symtable_dispose(&tree);
     stackPop(stack);
     return tree_copy;
 }

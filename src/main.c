@@ -7,22 +7,7 @@
 #include "sem_anal.h"
 
 // post-order printing 
-void print_AVL(symtable_node_ptr node) {
-    if (node == NULL) {
-        return;
-    }
-    print_AVL(node->left);
-    print_AVL(node->right);
-    fprintf(stderr,"%s,", node->key);
-    /*printf("%d", node->entry->type);
-    printf("%i", node->entry->isNullable);
-    printf("%d", node->entry->param_nullable[0]);
-    printf("%d", node->entry->param_types[0]);
-    printf("%d", node->entry->param_nullable[1]);
-    printf("%d", node->entry->param_types[1]);
-    printf("%d", node->entry->param_nullable[5]);
-    printf("%d", node->entry->param_types[5]);*/
-}
+
 
 
 void test_symtable() {
