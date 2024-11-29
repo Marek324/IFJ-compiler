@@ -11,7 +11,6 @@ stack_t *SCOPEStack = NULL;
 void analyse (ASTNode* root) {
     checkForMain();
     insertBuiltInFun();
-    SCOPEStack = stackInit();
     root = root->right->left; // skip prolog
     symFuncDef(root);
 }
@@ -35,20 +34,20 @@ void symFuncDef(ASTNode* node){
 
     symBlock(node, &local_table);
 
-    symtable_dispose(local_table);
-
     symFuncDef(node->left);
 
     stackClear(SCOPEStack);
 }
 void symBlock(ASTNode* node, symtable_tree_ptr local_table) {
 
+    if (local_table != NULL) {
     stackPush(SCOPEStack, (long)local_table);
-
+    }
     symStatement(node->right, local_table); 
 
+    if (!stackIsEmpty(SCOPEStack)) {
     *local_table = stackUtilPop(SCOPEStack);
-    
+    }
 }
 void symStatement(ASTNode* node, symtable_tree_ptr local_table) {
     if (node == NULL)
@@ -56,7 +55,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table) {
     
     node = (node->right != NULL) ? node->right : node;
     ASTNode *nextStatement = node->left;
-
+    fprintf(stderr, "S");
     switch(node->type){
 
         case P_VAR_DECLARATION:
@@ -99,6 +98,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table) {
     }
 
     symStatement(nextStatement, local_table);
+    symtable_dispose(local_table);
 }
 
 void symParamList(ASTNode* node, symtable_tree_ptr local_table) {
@@ -130,7 +130,7 @@ void symParamList(ASTNode* node, symtable_tree_ptr local_table) {
 }
 
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
-    
+    fprintf(stderr, "V");
     node = node->right; // const or var
     bool isconst = node->token->value.keyword == KW_CONST ? true : false;
     node = node->left; // ID
@@ -337,7 +337,7 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table){
 
             node = node->left; // P_BLOCK
     }
-    
+    symBlock(node, local_table);
 }
 
 void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id){

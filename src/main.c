@@ -87,6 +87,7 @@ void test_symtable() {
 int main() {
     circ_buff_ptr buffer = circ_buff_init();
     symtable_init(&SymFunctionTree);
+    SCOPEStack = stackInit();
     Parse(buffer);
     analyse(ASTRoot);
     
