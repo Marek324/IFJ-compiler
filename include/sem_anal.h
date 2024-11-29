@@ -5,7 +5,9 @@
 
 #include "ast.h"
 #include "symtable.h"
+#include "stack.h"
 
+extern stack_t *SCOPEStack;
 // main semantic analyzer function
 void analyse(ASTNode* node);
 // checks if the variable or function was already declared
@@ -43,6 +45,8 @@ void symFuncDef(ASTNode* node);
 
 void symParamList(ASTNode* node, symtable_tree_ptr local_table);
 
+void symBlock(ASTNode* node, symtable_tree_ptr local_table);
+
 void symStatement(ASTNode* node, symtable_tree_ptr local_table);
 
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table);
@@ -54,8 +58,6 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table);
 
 void insertBuiltInFun();
-
-void symEnd(symtable_tree_ptr local_table);
 
 void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id);
 // check types for boolean operation

@@ -4,10 +4,14 @@
 #include "ast.h"
 #include "error.h"
 #include "exp_parser.h"
+#include "stack_utils.h"
+
+stack_t *SCOPEStack = NULL;
 
 void analyse (ASTNode* root) {
     checkForMain();
     insertBuiltInFun();
+    SCOPEStack = stackInit();
     root = root->right->left; // skip prolog
     symFuncDef(root);
 }
@@ -29,11 +33,25 @@ void symFuncDef(ASTNode* node){
 
     node = node->left->left; // block
 
-    symStatement(node->right, &local_table); 
+    symBlock(node, &local_table);
+
+    symtable_dispose(local_table);
 
     symFuncDef(node->left);
-}
 
+    stackClear(SCOPEStack);
+}
+void symBlock(ASTNode* node, symtable_tree_ptr local_table) {
+
+    stackPush(SCOPEStack, (long)local_table);
+
+    *local_table = stackUtilCopy(*local_table);
+    
+    symStatement(node->right, local_table); 
+
+    *local_table = stackUtilPop(SCOPEStack);
+    
+}
 void symStatement(ASTNode* node, symtable_tree_ptr local_table) {
     if (node == NULL)
         return;
@@ -83,11 +101,8 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table) {
     }
 
     symStatement(nextStatement, local_table);
-    symEnd(local_table);
 }
-void symEnd(symtable_tree_ptr local_table) {
-    symtable_dispose(local_table);
-}
+
 void symParamList(ASTNode* node, symtable_tree_ptr local_table) {
     if (node == NULL) return;
     
@@ -228,8 +243,8 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table){
             key = symtable_search(*local_table, id->token->value.string_value);
             if (key->entry->isConst) {
                 freeAST(ASTRoot);
-                    symtable_dispose(&SymFunctionTree);        
-                    error_exit(5, "ERROR: assigning to CONST!\n");
+                symtable_dispose(&SymFunctionTree);        
+                error_exit(5, "ERROR: assigning to CONST!\n");
             }
             key->entry->isChanged = true;
             key->entry->isUsed = true;
@@ -311,6 +326,11 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table){
     node = node->right; // P_EXPRESSION
     ret_type type = checkExpr(node->right, *local_table);
     node = node->right; // P_BLOCK or P_OPTIONAL_VALUE
+    if (node->type == P_BLOCK && type != T_BOOL_RET) {
+         freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);
+        error_exit(7, "ERROR: wrong argument count!\n");
+    }
     node = (type == T_NULL_RET) ? node->left : node;
     if (node->type == P_OPTIONAL_VALUE) {
             symtable_insert(local_table, node->right->token->value.string_value, T_VAR_SYM);
