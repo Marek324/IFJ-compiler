@@ -565,7 +565,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
             }
         }
         if(node->type == T_ORELSE) {
-            node_type = checkOrElse(node, local_table);
+            // node_type = checkOrElse(node, local_table);
             // if()
         }
         // all other binary operations (arithmetic)
