@@ -39,7 +39,7 @@ void checkForReturn(ASTNode *root) {
             if (lookForReturn->right != NULL) {
                 lookForReturn = lookForReturn->right;
             }
-            else if (lookForReturn->type == P_RETURN_STATEMENT) {
+            if (lookForReturn->type == P_RETURN_STATEMENT) {
                 function->entry->returnsValue = true;
             }
             else if (lookForReturn->type == ID) {
