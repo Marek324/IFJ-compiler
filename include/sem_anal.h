@@ -55,27 +55,27 @@ void symFuncDef(ASTNode* node);
 
 void symParamList(ASTNode* node, symtable_tree_ptr local_table);
 
-void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId);
+void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId, symtable_node_ptr function);
 
-void symStatement(ASTNode* node, symtable_tree_ptr local_table);
+void symStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
 
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table);
 
-void symIdStatement(ASTNode* node, symtable_tree_ptr local_table);
+void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
 // pass in ID node of function
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key);
 
-void symIfStatement(ASTNode* node, symtable_tree_ptr local_table);
+void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
 
 void insertBuiltInFun();
 
-void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id);
+void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id, symtable_node_ptr function);
 // check types for boolean operation
 ret_type checkBool(ASTNode* node, symtable_node_ptr local_table);
 // true if relation operation, false otherwise. (EQ, NEQ, MORE, LESS, MEQ, LEQ)
 bool isRel(ASTNodeType type);
 
-void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table);
+void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
 
 void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table);
 
