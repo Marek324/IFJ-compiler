@@ -165,8 +165,10 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
     if (node == NULL)
         return 0;
 
-
     node = node->right;
+
+    if(node == NULL)
+        return 0;
 
     ASTNode *nextStatement = node->left;
 
