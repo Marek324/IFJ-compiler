@@ -96,7 +96,7 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
     if (whileId != NULL) {
         symtable_insert(local_table, whileId->token->value.string_value, T_VAR_SYM);
         symtable_node_ptr key = symtable_search(*local_table, whileId->token->value.string_value);
-        key->entry->type = T_WHILE_wRET;
+        key->entry->type = T_WHILE_RET;
     }
     fprintf(stderr, "SUB_BLOCK\n");
     symStatement(node->right, local_table, function); 
