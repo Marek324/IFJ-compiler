@@ -83,7 +83,7 @@ int main() {
     #endif
     
     //codegen();
-     
+    stackClear(SCOPEStack);
     circ_buff_free(buffer);
     freeAST(ASTRoot); 
     symtable_dispose(&SymFunctionTree);

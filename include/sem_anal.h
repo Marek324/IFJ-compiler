@@ -45,7 +45,7 @@ void symFuncDef(ASTNode* node);
 
 void symParamList(ASTNode* node, symtable_tree_ptr local_table);
 
-void symBlock(ASTNode* node, symtable_tree_ptr local_table);
+void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type);
 
 void symStatement(ASTNode* node, symtable_tree_ptr local_table);
 
