@@ -449,7 +449,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
         // binary arithmetic division
         if(node->type == DIV) {
             ret_type node_type = checkDiv(node, local_table);
-            if(node_type == T_INT_RET || node_type == T_FLOAT) {
+            if(node_type == T_INT_RET || node_type == T_FLOAT_RET) {
                 return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
             }
             else {
@@ -512,6 +512,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
             return node_type;
         }
     }
+    return T_ERROR_RET;
 }
 
 void checkForMain() {
@@ -630,7 +631,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     // left node is ID
     if(node->left->type == ID) {
         // get return_type, check if variable or function was defined
-        left_id = symtable_search(local_table, node->token->value.string_value);
+        left_id = symtable_search(local_table, node->left->token->value.string_value);
         if(left_id == NULL) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
@@ -647,7 +648,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(left_id->entry->entry_type == T_FUN_SYM) {
             left_id->entry->isUsed = true;
-            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            checkArguments(&local_table, node->left, left_id);
         }
         else {
             symtable_dispose(&SymFunctionTree);
@@ -664,7 +665,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     // right node is ID
     if(node->right->type == ID) {
         // get return_type, check if variable or function was defined
-        right_id = symtable_search(local_table, node->token->value.string_value);
+        right_id = symtable_search(local_table, node->right->token->value.string_value);
         if(right_id == NULL) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
@@ -681,7 +682,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(right_id->entry->entry_type == T_FUN_SYM) {
             right_id->entry->isUsed = true;
-            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            checkArguments(&local_table, node->right, right_id);
         }
         else {
             symtable_dispose(&SymFunctionTree);
@@ -696,6 +697,9 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         right_type = convertToRetType(node->right->type);
     }
     // type control
+    if((left_type != T_INT_RET && left_type != T_FLOAT_RET) || (right_type != T_INT_RET && right_type != T_FLOAT_RET)) {
+        return T_ERROR_RET;
+    }
     if(left_type == T_INT_RET && right_type == T_INT_RET) {
         node->token->type = T_IDIV;
         node->type = IDIV;
@@ -706,7 +710,7 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         node->type = DIV;
         return T_FLOAT_RET;
     }
-    else if((left_type == T_INT_RET || left_type == T_FLOAT_RET) && (right_type == T_INT_RET || right_type == T_FLOAT_RET)) {
+    else {
         // f64 to i32 if the decimal part is 0 (only literals and constants)
         if(left_type == T_FLOAT_RET) {
             if(node->left->type == ID) {
@@ -807,12 +811,9 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
                     }
                 }
             }
-        }
-         
+        } 
     }
-    else {
-        return T_ERROR_RET;
-    }
+    return T_ERROR_RET;
 }
 
 ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
@@ -914,7 +915,7 @@ ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node->entry->entry_type == T_FUN_SYM) {
             sym_node->entry->isUsed = true;
-            checkArguments(local_table, node->right, sym_node->key);
+            checkArguments(&local_table, node->right, sym_node);
             return sym_node->entry->type;
         }
         else {
@@ -966,7 +967,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node->entry->entry_type == T_FUN_SYM) {
             sym_node->entry->isUsed = true;
-            checkArguments(local_table, node->left, sym_node->key);
+            checkArguments(&local_table, node->left, sym_node);
             left_type = sym_node->entry->type;
         }
         else {
@@ -1001,7 +1002,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node->entry->entry_type == T_FUN_SYM) {
             sym_node->entry->isUsed = true;
-            checkArguments(local_table, node->right, sym_node->key);
+            checkArguments(&local_table, node->right, sym_node);
             right_type = sym_node->entry->type;
         }
         else {
@@ -1028,9 +1029,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         freeAST(ASTRoot);
         error_exit(7, "ERROR: Wrong type in boolean operation!\n");
     }
-    else {
-        return T_BOOL_RET;
-    }
+    return T_BOOL_RET;
 }
 
 ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
@@ -1049,7 +1048,7 @@ ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node_left->entry->entry_type == T_FUN_SYM) {
             sym_node_left->entry->isUsed = true;
-            checkArguments(local_table, node->left, sym_node_left->key);
+            checkArguments(&local_table, node->left, sym_node_left);
             left_type = sym_node_left->entry->type;
         }
         else {
@@ -1078,7 +1077,7 @@ ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node_right->entry->entry_type == T_FUN_SYM) {
             sym_node_right->entry->isUsed = true;
-            checkArguments(local_table, node->right, sym_node_right->key);
+            checkArguments(&local_table, node->right, sym_node_right);
             right_type = sym_node_right->entry->type;
         }
         else {
@@ -1573,6 +1572,8 @@ void insertBuiltInFun() {
 }
 ret_type convertToRetType(ASTNodeType node_type) {
     switch(node_type) {
+        case T_NULL:
+            return T_NULL_RET;
         case TYPE_INT:
             return T_INT_RET;
         case TYPE_F64:
