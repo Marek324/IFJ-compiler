@@ -486,11 +486,13 @@ void expression_list(ASTNode *node){
         return;
 
     node = node->right;
-    expression(node->right);
-
-    if (node->left != NULL){
-        expression_list(node->left->left);
+    if(node != NULL){
+        expression(node->right);
+        if (node->left != NULL){
+            expression_list(node->left->left);
+        }
     }
+
 
 }
 
