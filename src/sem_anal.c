@@ -594,6 +594,9 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
                 if(node->left->type == ID || node->left->type == P_EXPRESSION_LIST) {
                     sym_node = symtable_search(SymFunctionTree, node->token->value.string_value);
                 }
+                else {
+                    sym_node = symtable_search(local_table, node->token->value.string_value);
+                }
             }
             else {
                 sym_node = symtable_search(local_table, node->token->value.string_value);
@@ -971,7 +974,7 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     }
     // create i2f conversion node for left operand
     if(left_type == T_INT_RET && right_type == T_FLOAT_RET) {
-        if(node->left == ID && !sym_node_left->entry->isConst) {
+        if(node->left->type == ID && !sym_node_left->entry->isConst) {
             return T_ERROR_RET;
         }
         ASTNode* temp = node->left;
@@ -990,7 +993,7 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     }
     // create i2f conversion node for right operand
     else if(right_type == T_INT_RET && left_type == T_FLOAT_RET) {
-        if(node->right == ID && !sym_node_right->entry->isConst) {
+        if(node->right->type == ID && !sym_node_right->entry->isConst) {
             return T_ERROR_RET;
         }
         ASTNode* temp = node->right;
@@ -1302,17 +1305,27 @@ ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
     ret_type right_type;
     symtable_node_ptr sym_node_left;
     symtable_node_ptr sym_node_right;
-    if(node->left == ID) {
-        sym_node_left = symtable_search(local_table, node->left->token->value.string_value);
+    if(node->left->type == ID) {
+        if(node->left->left != NULL) {
+            if(node->left->left->type == ID || node->left->left->type == P_EXPRESSION_LIST) {
+                sym_node_left = symtable_search(SymFunctionTree, node->left->token->value.string_value);
+            }
+            else {
+                sym_node_left = symtable_search(local_table, node->left->token->value.string_value);
+            }
+        }
+        else {
+            sym_node_left = symtable_search(local_table, node->left->token->value.string_value);
+        }
         if(sym_node_left == NULL) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
             error_exit(3, "ERROR: Undefined variable!\n");
         }
-        if(sym_node_left->entry->isNullable) {
+        if(!sym_node_left->entry->isNullable) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
-            error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n");
+            error_exit(7, "ERROR: Nullable variable/function is not in orelse operation!\n");
         }
         left_type = sym_node_left->entry->type;
         if(sym_node_left->entry->entry_type == T_VAR_SYM) {
@@ -1338,6 +1351,51 @@ ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
     }
     else {
         left_type = convertToRetType(node->left->type);
+    }
+    if(node->right->type == ID) {
+        if(node->right->right != NULL) {
+            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+                sym_node_right = symtable_search(SymFunctionTree, node->right->token->value.string_value);
+            }
+            else {
+                sym_node_right = symtable_search(local_table, node->right->token->value.string_value);
+            }
+        }
+        else {
+            sym_node_right = symtable_search(local_table, node->right->token->value.string_value);
+        }
+        if(sym_node_right == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined variable!\n");
+        }
+        right_type = sym_node_right->entry->type;
+        if(sym_node_right->entry->entry_type == T_VAR_SYM) {
+            sym_node_right->entry->isUsed = true;
+        }
+        else if(sym_node_right->entry->entry_type == T_FUN_SYM) {
+            sym_node_right->entry->isUsed = true;
+            checkArguments(&local_table, node->right, sym_node_right);
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown state!\n");
+        }
+    }
+    else if(isOperator(node->left->token)) {
+        right_type = checkExpr(node->left, local_table);
+    }
+    else {
+        right_type = convertToRetType(node->right->type);
+    }
+
+    if(left_type != right_type) {
+        return T_ERROR_RET;
+    }
+    else {
+        // TODO: figure out how to pass back to semantic analyzer (isNullable)
+        return left_type;
     }
 }
 
