@@ -26,6 +26,8 @@ ret_type checkTernTypes(ASTNode* node, symtable_node_ptr local_table);
 ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table);
 // check types in relation operation
 ret_type checkRel(ASTNode* node, symtable_node_ptr local_table);
+// check types in an orelse operation
+ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table);
 // gets ret_type
 ret_type getRetType(ASTNodeType type);
 // gets function
@@ -72,7 +74,7 @@ void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table);
 void symForLoop(ASTNode* node, symtable_tree_ptr local_table);
 
 void funcDef(ASTNode* node);
-// returns T_ERROR_RET as default
+// returns T_ERROR_RET as default, converts node types to return types
 ret_type convertToRetType(ASTNodeType node_type);
 // returns true if float can be converted to int (decimal part is 0)
 bool floatIsInt(float value);

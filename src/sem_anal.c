@@ -448,7 +448,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
         }
         // binary arithmetic division
         if(node->type == DIV) {
-            ret_type node_type = checkDiv(node, local_table);
+            node_type = checkDiv(node, local_table);
             if(node_type == T_INT_RET || node_type == T_FLOAT_RET) {
                 return node_type == T_INT_RET ? T_INT_RET : T_FLOAT_RET;
             }
@@ -457,6 +457,10 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
                 freeAST(ASTRoot);
                 error_exit(7, "ERROR: Wrong type for binary aritmetic operation!\n");
             }
+        }
+        if(node->type == T_ORELSE) {
+            node_type = checkOrElse(node, local_table);
+            // if()
         }
         // all other binary operations (arithmetic)
         node_type = checkAritTypes(node, local_table);
@@ -983,9 +987,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         right_type = convertToRetType(node->right->type);
     }
     if(left_type != T_BOOL_RET || right_type != T_BOOL_RET) {
-        symtable_dispose(&SymFunctionTree);
-        freeAST(ASTRoot);
-        error_exit(7, "ERROR: Wrong type in boolean operation!\n");
+        return T_ERROR_RET;
     }
     return T_BOOL_RET;
 }
@@ -1537,6 +1539,8 @@ ret_type convertToRetType(ASTNodeType node_type) {
         case TYPE_F64:
             return T_FLOAT_RET;
         case T_KW_BOOL:
+        case T_TRUE:
+        case T_FALSE:
             return T_BOOL_RET;
         case TYPE_STR:
             return T_STR_RET;
