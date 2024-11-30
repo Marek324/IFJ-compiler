@@ -589,7 +589,15 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
             return T_NULL_RET;
         }
         if(node->type == ID) {
-            symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+            symtable_node_ptr sym_node;
+            if(node->left != NULL) {
+                if(node->left->type == ID || node->left->type == P_EXPRESSION_LIST) {
+                    sym_node = symtable_search(SymFunctionTree, node->token->value.string_value);
+                }
+            }
+            else {
+                sym_node = symtable_search(local_table, node->token->value.string_value);
+            }
             if(sym_node == NULL) {
                 symtable_dispose(&SymFunctionTree);
                 freeAST(ASTRoot);
@@ -1290,7 +1298,47 @@ ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
 }
 
 ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
-    // TODO
+    ret_type left_type;
+    ret_type right_type;
+    symtable_node_ptr sym_node_left;
+    symtable_node_ptr sym_node_right;
+    if(node->left == ID) {
+        sym_node_left = symtable_search(local_table, node->left->token->value.string_value);
+        if(sym_node_left == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined variable!\n");
+        }
+        if(sym_node_left->entry->isNullable) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n");
+        }
+        left_type = sym_node_left->entry->type;
+        if(sym_node_left->entry->entry_type == T_VAR_SYM) {
+            sym_node_left->entry->isUsed = true;
+        }
+        else if(sym_node_left->entry->entry_type == T_FUN_SYM) {
+            sym_node_left->entry->isUsed = true;
+            checkArguments(&local_table, node->left, sym_node_left);
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown state!\n");
+        }
+    }
+    else if(isOperator(node->left->token)) {
+        if(node->left->type != T_ORELSE) {
+            return T_ERROR_RET;
+        }
+        else {
+            left_type = checkExpr(node->left, local_table);
+        }
+    }
+    else {
+        left_type = convertToRetType(node->left->type);
+    }
 }
 
 bool isRel(ASTNodeType type) {
