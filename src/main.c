@@ -83,10 +83,10 @@ int main() {
     setbuf(stdout, NULL);
     #endif
     
-    //codegen();
+    int err = codegen(); // can be 0 or 99 on allocation error
     stackClear(SCOPEStack);
     circ_buff_free(buffer);
     freeAST(ASTRoot); 
     symtable_dispose(&SymFunctionTree);
-    return 0;
+    return err;
 }

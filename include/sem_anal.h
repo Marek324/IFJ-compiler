@@ -7,6 +7,14 @@
 #include "symtable.h"
 #include "stack.h"
 
+typedef enum {
+    FUNCTION_SCOPE,
+    WHILE_SCOPE,
+    FOR_SCOPE,
+    NULL_SCOPE
+} scopeLevel;
+    
+
 extern stack_t *SCOPEStack;
 // main semantic analyzer function
 void analyse(ASTNode* node);
@@ -41,11 +49,13 @@ void checkForMain();
 // check for function
 void checkIfIdExits(symtable_node_ptr tree, char *key);
 
+void checkForReturn(ASTNode *root);
+
 void symFuncDef(ASTNode* node);
 
 void symParamList(ASTNode* node, symtable_tree_ptr local_table);
 
-void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type);
+void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId);
 
 void symStatement(ASTNode* node, symtable_tree_ptr local_table);
 

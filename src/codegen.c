@@ -1,43 +1,104 @@
 #include "codegen_priv.h"
+#include "linked_list.h"
 
 unsigned if_counter = 0;
 unsigned while_counter = 0;
 unsigned for_counter = 0;
 char *curr_func = NULL;
+LinkedList_ptr var_list = NULL;
 
-void codegen()
+int codegen()
 {
-    PROLOG;
+    // IFJcode24 prolog
+    printf("\
+.IFJcode24\n\
+DEFVAR GF@&discard\n\
+CREATEFRAME\n\
+CALL main\n\
+EXIT int@0\n\
+LABEL &strcmp\n\
+PUSHFRAME\n\
+CREATEFRAME\n\
+DEFVAR TF@s1\n\
+DEFVAR TF@s2\n\
+POPS TF@s2\n\
+POPS TF@s1\n\
+DEFVAR TF@cnt\n\
+DEFVAR TF@res\n\
+LT TF@cnt TF@s1 TF@s2\n\
+JUMPIFEQ &strcmp_smaller TF@cnt bool@true\n\
+GT TF@cnt TF@s1 TF@s2\n\
+JUMPIFEQ &strcmp_bigger TF@cnt bool@true\n\
+MOVE TF@res int@0\n\
+PUSHS TF@res\n\
+POPFRAME\n\
+RETURN\n\
+LABEL &strcmp_smaller\n\
+MOVE TF@res int@-1\n\
+PUSHS TF@res\n\
+POPFRAME\n\
+RETURN\n\
+LABEL &strcmp_bigger\n\
+MOVE TF@res int@1\n\
+PUSHS TF@res\n\
+POPFRAME\n\
+RETURN\n\
+LABEL &substring\n\
+PUSHFRAME\n\
+CREATEFRAME\n\
+DEFVAR TF@s\n\
+DEFVAR TF@i\n\
+DEFVAR TF@j\n\
+POPS TF@j\n\
+POPS TF@i\n\
+POPS TF@s\n\
+DEFVAR TF@res\n\
+MOVE TF@res string@\n\
+DEFVAR TF@cnt_err\n\
+LT TF@cnt_err TF@i int@0\n\
+JUMPIFEQ &substring_err TF@cnt_err bool@true\n\
+LT TF@cnt_err TF@j int@0\n\
+JUMPIFEQ &substring_err TF@cnt_err bool@true\n\
+LT TF@cnt_err TF@j TF@i\n\
+JUMPIFEQ &substring_err TF@cnt_err bool@true\n\
+DEFVAR TF@len\n\
+STRLEN TF@len TF@s\n\
+GT TF@cnt_err TF@j TF@len\n\
+JUMPIFEQ &substring_err TF@cnt_err bool@true\n\
+LT TF@cnt_err TF@i TF@len\n\
+NOT TF@cnt_err TF@cnt_err\n\
+JUMPIFEQ &substring_err TF@cnt_err bool@true\n\
+DEFVAR TF@char\n\
+LABEL &substring_loop\n\
+JUMPIFEQ &substring_loop_end TF@i TF@j\n\
+GETCHAR TF@char TF@s TF@i\n\
+CONCAT TF@res TF@res TF@char\n\
+ADD TF@i TF@i int@1\n\
+JUMP &substring_loop\n\
+LABEL &substring_loop_end\n\
+PUSHS TF@res\n\
+POPFRAME\n\
+RETURN\n\
+LABEL &substring_err\n\
+PUSHS nil@nil\n\
+POPFRAME\n\
+RETURN\n\
+\n");
 
-    /*
-    Volanie funkcii
+    return prog(ASTRoot);
 
-    -- parametre --
-        PUSHS TF@a
-        PUSHS int@2
-        PUSHS int@2
-
-        CALL &substring
-
-    -- return --
-        POPS TF@c
-    */
-
-    prog(ASTRoot);
-
-        
 
 }
 
-void prog(ASTNode *root){
+int prog(ASTNode *root){
     root = root->right->left; // skip prolog
-    function_def(root);
+    return function_def(root);
 }
 
 
-void function_def(ASTNode *node){
+int function_def(ASTNode *node){
     if (node == NULL)
-        return;
+        return 0;
 
     // else is function def
 
@@ -59,13 +120,23 @@ void function_def(ASTNode *node){
     
     node = node->left->left; // block
 
-    statement(node->right, true, true, NULL);
+    // declare all variables in the function
+    var_list = (LinkedList_ptr) malloc(sizeof(LinkedList_t));
+    LLInit(var_list);
+    int err = statement(node->right, true, false, NULL);
+    if (err) return 99;
+    LLDispose(var_list);
+    free(var_list);
+
+    // execute the function statements without declaring
+    // no need to check for error as it can only be allocation error
+    statement(node->right, false, true, NULL);
 
     printf("POPFRAME\n");
     printf("RETURN\n");
 
     free(curr_func);
-    function_def(node->left);
+    return function_def(node->left);
 }
 
 void param_list(ASTNode *node){
@@ -90,23 +161,28 @@ void param_list(ASTNode *node){
 
 }
 
-void statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
+int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
     if (node == NULL)
-        return;
+        return 0;
 
     node = node->right;
+
+    if(node == NULL)
+        return 0;
 
     ASTNode *nextStatement = node->left;
 
     switch(node->type){
-        case P_VAR_DECLARATION:
-            var_dec(node, dec_var, var_asgn);
-            break;
+        case P_VAR_DECLARATION:{
+            int err = var_dec(node, dec_var, var_asgn);
+            if (err) return 99;            
+            break;}
 
-        case ID:
-            id_statement(node, dec_var, var_asgn);
+        case ID:{
+            int err = id_statement(node, dec_var, var_asgn);
+            if (err) return 99;
             nextStatement = nextStatement->left;
-            break;
+            break;}
 
         case P_IF_STATEMENT:
             if_statement(node, dec_var, var_asgn, label);
@@ -115,17 +191,21 @@ void statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
         case P_WHILE_LOOP: {
             char label_prefix[strlen(curr_func) + 10];
 
-            sprintf(label_prefix, "&%s_while_%d", curr_func, while_counter++);
+            int while_num = var_asgn ? while_counter++ : 0;
+            sprintf(label_prefix, "&%s_while_%d", curr_func, while_num);
 
-            while_loop(node, label_prefix, dec_var, var_asgn);
+            int err = while_loop(node, label_prefix, dec_var, var_asgn);
+            if (err) return 99;
             break;}
 
         case P_FOR_LOOP: {
             char label_prefix[strlen(curr_func) + 10];
 
-            sprintf(label_prefix, "&%s_while_%d", curr_func, while_counter++);
+            int for_num = var_asgn ? for_counter++ : 0;
+            sprintf(label_prefix, "&%s_while_%d", curr_func, for_num);
 
-            for_loop(node, label_prefix, dec_var, var_asgn);
+            int err = for_loop(node, label_prefix, dec_var, var_asgn);
+            if (err) return 99;
             break;}
         
         case P_RETURN_STATEMENT:
@@ -152,13 +232,24 @@ void statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
 
     }
 
-    statement(nextStatement, dec_var, var_asgn, label);
+    return statement(nextStatement, dec_var, var_asgn, label);
 }
 
-void var_dec(ASTNode *node, bool dec_var, bool var_asgn){
+int var_dec(ASTNode *node, bool dec_var, bool var_asgn){
     node = node->right->left; // ID
     if (dec_var){
-        printf("DEFVAR TF@%s\n", node->token->value.string_value);
+        if(!LLFind(var_list, node->token->value.string_value)){
+            int err = LLInsert(var_list, node->token->value.string_value);
+            if (err){
+                fprintf(stderr, "Error: Allocation error in code generation\n");  
+                LLDispose(var_list);
+                free(var_list);
+                free(curr_func);
+                return 99;
+            }
+                
+            printf("DEFVAR TF@%s\n", node->token->value.string_value);
+        } 
     }
     ASTNode *idNode = node;
 
@@ -170,6 +261,8 @@ void var_dec(ASTNode *node, bool dec_var, bool var_asgn){
     // node = node->right; // P_ASGN_FOUND
     if (var_asgn)
         asgn_found(node->right, idNode->token->value.string_value);    
+
+    return 0;
 }
 
 void asgn_found(ASTNode *node, const char *var){
@@ -401,7 +494,7 @@ void expression_list(ASTNode *node){
 
 }
 
-void id_statement(ASTNode *node, bool dec_var, bool var_asgn){
+int id_statement(ASTNode *node, bool dec_var, bool var_asgn){
     // printf("id_statement %s ", node->token->value.string_value);
     ASTNode *idNode = node;
     node = node->left->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
@@ -427,13 +520,16 @@ void id_statement(ASTNode *node, bool dec_var, bool var_asgn){
         case P_WHILE_LOOP:{ 
             char label_prefix[strlen(curr_func) + strlen(idNode->token->value.string_value) + 4];
             sprintf(label_prefix, "&%s_%s", curr_func, idNode->token->value.string_value);
-            while_loop(node, label_prefix, dec_var, var_asgn);
+            int err = while_loop(node, label_prefix, dec_var, var_asgn);
+            if (err) return 99;
             break;}
         
         default:
             printf("id unknown\n");
             break;
     }
+
+    return 0;
 
 }   
 
@@ -447,8 +543,19 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
         expression(node->right);
     node = node->left->right; // P_BLOCK | P_OPTIONAL_VALUE
     if (node->type == P_OPTIONAL_VALUE){
-        if (dec_var)
-            printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+        if (dec_var){
+            if(!LLFind(var_list, node->right->token->value.string_value)){
+                int err = LLInsert(var_list, node->right->token->value.string_value);
+                if (err){
+                    fprintf(stderr, "Error: Allocation error in code generation\n");  
+                    LLDispose(var_list);
+                    free(var_list);
+                    free(curr_func);
+                    exit(99);
+                }
+                printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+            }
+        }
 
         if (var_asgn){
             printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value);
@@ -479,15 +586,8 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
         printf("LABEL &if_%d_end\n", if_count);
 }
 
-void while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
-    ASTNode *this_loop = node;
+int while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     node = node->right; // P_EXPRESSION
-
-    bool first_loop = false;
-    if (dec_var && var_asgn){
-        first_loop = true;
-        var_asgn = false;
-    }
 
     if (var_asgn) {
         printf("LABEL %s_loop\n", label);
@@ -497,8 +597,12 @@ void while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     node = node->left; // P_BLOCK | P_OPTIONAL_STATEMENTS | P_OPTIONAL_VALUE
     
     if (node->type == P_OPTIONAL_VALUE) {
-        if (dec_var)
-            printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+        if (dec_var){
+            if(!LLFind(var_list, node->right->token->value.string_value)){
+                LLInsert(var_list, node->right->token->value.string_value);
+                printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+            }
+        }
         
         if (var_asgn) {
             printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value); // save value and leave it in data stack
@@ -519,7 +623,8 @@ void while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
         node = node->left; // P_BLOCK
     }
     
-    statement(node->right, dec_var, var_asgn, label); // loop block
+    int err = statement(node->right, dec_var, var_asgn, label); // loop block
+    if (err) return 99;
 
     if (var_asgn)
         printf("LABEL %s_continue\n", label);
@@ -527,7 +632,9 @@ void while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     if (continue_statements != NULL){
         if (continue_statements->type == P_BLOCK)
             continue_statements = continue_statements->right; // P_STATEMENT
-        statement(continue_statements, dec_var, var_asgn, label);  // continue statement/s
+        
+        int err = statement(continue_statements, dec_var, var_asgn, label);  // continue statement/s
+        if (err) return 99;
     }
 
     if (var_asgn) {
@@ -539,21 +646,20 @@ void while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     
     if (node != NULL) {
         node = node->right->right;
-        statement(node, dec_var, var_asgn, label); 
+        int err = statement(node, dec_var, var_asgn, label); 
+        if (err) return 99;
     }
 
     if (var_asgn)
         printf("LABEL %s_end\n", label);
+
+    return 0;
     
-    if (first_loop) {
-        while_loop(this_loop, label, false, true);
-        return;
-        // statement(node->right, true, false); // loop block
-    }
 }
 
-void for_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
+int for_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     printf("for\n");
+    return 0;
 }
 
 void return_statement(ASTNode *node){
