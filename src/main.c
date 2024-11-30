@@ -80,6 +80,7 @@ int main() {
     
     #ifdef DEBUG
     generate_d2_file(ASTRoot, "tree.d2");
+    setbuf(stdout, NULL);
     #endif
     
     //codegen();

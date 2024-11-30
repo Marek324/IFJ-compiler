@@ -14,14 +14,19 @@ DEFVAR TF@s2\n\
 POPS TF@s2\n\
 POPS TF@s1\n\
 DEFVAR TF@cnt\n\
+DEFVAR TF@res\n\
 LT TF@cnt TF@s1 TF@s2\n\
 JUMPIFEQ &strcmp_smaller TF@cnt bool@true\n\
-GT TF@cnt TF@s1 TF@s\n\
+GT TF@cnt TF@s1 TF@s2\n\
 JUMPIFEQ &strcmp_bigger TF@cnt bool@true\n\
 MOVE TF@res int@0\n\
+PUSHS TF@res\n\
+POPFRAME\n\
 RETURN\n\
 LABEL &strcmp_smaller\n\
 MOVE TF@res int@-1\n\
+PUSHS TF@res\n\
+POPFRAME\n\
 RETURN\n\
 LABEL &strcmp_bigger\n\
 MOVE TF@res int@1\n\
@@ -78,7 +83,7 @@ void var_dec(ASTNode *node, bool dec_var, bool asgn_var);
 void id_statement(ASTNode *node, bool dec_var, bool asgn_var);
 void if_statement(ASTNode *node, bool dec_var, bool asgn_var, const char *label);
 void while_loop(ASTNode *node, const char* label_prefix, bool dec_var, bool asgn_var);
-void for_loop(ASTNode *node, bool dec_var, bool asgn_var);
+void for_loop(ASTNode *node, const char* label, bool dec_var, bool asgn_var);
 void return_statement(ASTNode *node);
 void break_statement(ASTNode *node, const char *label);
 void continue_statement(ASTNode *node, const char *label);
