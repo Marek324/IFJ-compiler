@@ -23,9 +23,40 @@ void print_AVL(symtable_node_ptr node) {
     printf("%d", node->entry->param_nullable[5]);
     printf("%d", node->entry->param_types[5]);*/
 }
+void checkForReturn(ASTNode *root) {
+    root = root->right->left; // skip prolog
+    while (root != NULL) {
+        root = root->right; // ID
+        symtable_node_ptr function = symtable_search(SymFunctionTree, root->token->value.string_value);
+        root = root->left->left; //RPAREN or P_PARAM_LIST
+        if (root->type == P_PARAM_LIST) {
+            root = root->left; // RPAREN
+        }
+        root = root->left->left; // P_BLOCK
+
+        ASTNode *lookForReturn = root->right;
+        while (lookForReturn != NULL) {
+            if (lookForReturn->right != NULL) {
+                lookForReturn = lookForReturn->right;
+            }
+            else if (lookForReturn->type == P_RETURN_STATEMENT) {
+                function->entry->returnsValue = true;
+            }
+            else if (lookForReturn->type == ID) {
+                lookForReturn = lookForReturn->left->left;
+            }
+            else {
+                lookForReturn = lookForReturn->left;
+            }
+        }
+        root = root->left;
+    }
+}
+
 void analyse (ASTNode* root) {
     checkForMain();
     insertBuiltInFun();
+    checkForReturn(root);
     root = root->right->left; // skip prolog
     symFuncDef(root);
 }
@@ -36,7 +67,7 @@ void symFuncDef(ASTNode* node){
     node = node->right; // ID
     symtable_node_ptr local_table = symtable_search(SymFunctionTree, node->token->value.string_value);
     local_table = *local_table->entry->local_symtable;
-
+    
     node = node->left->left; // params or RPAREN
     if (node->type == P_PARAM_LIST){
 
@@ -47,12 +78,12 @@ void symFuncDef(ASTNode* node){
 
     node = node->left->left; // block
 
-    symBlock(node, &local_table, NULL, T_ANY);
+    symBlock(node, &local_table, NULL, T_ANY, NULL);
 
     symFuncDef(node->left);
     symtable_dispose(&local_table);
 }
-void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type) {
+void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId) {
     if (local_table != NULL) {
     stackPush(SCOPEStack, (long)(*local_table));
     *local_table = stackUtilCopy(*local_table);
@@ -61,6 +92,11 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         symtable_insert(local_table, optionalValue->right->token->value.string_value, T_VAR_SYM);
         symtable_node_ptr key = symtable_search(*local_table, optionalValue->right->token->value.string_value);
         key->entry->type = type;
+    }
+    if (whileId != NULL) {
+        symtable_insert(local_table, whileId->token->value.string_value, T_VAR_SYM);
+        symtable_node_ptr key = symtable_search(*local_table, whileId->token->value.string_value);
+        key->entry->type = T_WHILE_RET;
     }
     fprintf(stderr, "SUB_BLOCK\n");
     symStatement(node->right, local_table); 
@@ -90,7 +126,6 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table) {
             break;
 
         case ID:
-
             symIdStatement(node, local_table);
             nextStatement = nextStatement->left;
             break;
@@ -186,9 +221,18 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     }
     node = node->right->right; //P_EXPRESSION
     if (key->entry->hasExplicitType == true) {
+        
         ret_type type = checkExpr(node->right,*local_table);
         if (type != T_NULL_RET) {
             if (key->entry->type == type) {
+                if (node->right->type == ID) {
+                symtable_node_ptr expressionID = symtable_search(*local_table, node->right->token->value.string_value);
+                if (expressionID->entry->isNullable && !key->entry->isNullable) {
+                    freeAST(ASTRoot);
+                    symtable_dispose(&SymFunctionTree);        
+                    error_exit(7, "ERROR: assigning wrong type\n");
+                }
+            }
             return;
             } 
         }
@@ -203,6 +247,10 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     }
     else {
         key->entry->type = checkExpr(node->right, *local_table);
+        if (node->right->type == ID) {
+                symtable_node_ptr expressionID = symtable_search(*local_table, node->right->token->value.string_value);
+                key->entry->isNullable = expressionID->entry->isNullable;
+            }
         if (key->entry->type == T_NULL_RET) {
             freeAST(ASTRoot);
             symtable_dispose(&SymFunctionTree);        
@@ -210,7 +258,6 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
         }
         return;
     }
-    
 }
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr local_table){
@@ -355,7 +402,7 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table) {
     fprintf(stderr,"IF\n");
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
-    ret_type type = checkExpr(node->right, *local_table);
+    ret_type type = checkExpr(expressionValue, *local_table);
     node = node->left->right; // P_BLOCK or P_OPTIONAL_VALUE
     if (node->type == P_BLOCK && type != T_BOOL_RET) {
         freeAST(ASTRoot);
@@ -363,7 +410,6 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table) {
         error_exit(7, "ERROR: wrong condition!\n");
     }
     ASTNode *optionalValue = NULL;
-    node = (type == T_NULL_RET) ? node->left : node;
 
     if (node->type == P_OPTIONAL_VALUE) {
         if (expressionValue->type == ID) {
@@ -380,19 +426,79 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table) {
             error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
         }
             optionalValue = node;
-            
-            
             node = node->left; // P_BLOCK
     }
-    symBlock(node, local_table, optionalValue, type);
+    symBlock(node, local_table, optionalValue, type, NULL);
+
+    if (node->left != NULL) {
+        node = node->left; // P_ELSE_STATEMENT
+        node = node->right; // P_BLOCK
+        symBlock(node, local_table, NULL, T_ANY, NULL);
+    }
 }
 
 void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id){
-    
+    node = node->right; // P_EXPRESSION
+    fprintf(stderr,"WHILE\n");
+    ASTNode *expressionValue = node->right;
+    ret_type type = checkExpr(expressionValue, *local_table);
+    node = node->left; // P_BLOCK or P_OPTIONAL_VALUE or P_OPTIONAL_STATEMENTS
+    if (node->type == P_BLOCK && type != T_BOOL_RET) {
+        freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);
+        error_exit(7, "ERROR: wrong condition!\n");
+    }
+    if (node->type == P_OPTIONAL_STATEMENTS) {
+        if (type != T_BOOL_RET) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);
+            error_exit(7, "ERROR: wrong condition!\n");
+        }
+        ASTNode* optionalStatements = node;
+        if(node->right->type == P_BLOCK) {
+            optionalStatements = node->right;
+        }
+        symBlock(optionalStatements, local_table, NULL, T_ANY, id);
+        node = node->left; // P_BLOCK
+    }
+
+    ASTNode *optionalValue = NULL;
+    if (node->type == P_OPTIONAL_VALUE) {
+        if (expressionValue->type == ID) {
+            symtable_node_ptr conditionID = symtable_search(*local_table,expressionValue->token->value.string_value);
+            if (conditionID->entry->isNullable == false) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
+            }
+        }
+        else {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);
+            error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
+        }
+        optionalValue = node;
+        node = node->left; // P_BLOCK or P_OPTIONAL_STATEMENTS
+        if (node->type == P_OPTIONAL_STATEMENTS) {
+            ASTNode* optionalStatements = node;
+            if(node->right->type == P_BLOCK) {
+                optionalStatements = node->right;
+            }
+            symBlock(optionalStatements, local_table, optionalValue, type, id);
+            node = node->left; // P_BLOCK
+        }
+    }  
+    symBlock(node, local_table, optionalValue, type, id);
+    if (node->left != NULL) {
+        node = node->left; // P_ELSE_STATEMENT
+        node = node->right; // P_BLOCK
+        symBlock(node, local_table, NULL, T_ANY, id);
+    }
 }
 
 void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table){
-    
+    fprintf(stderr,"return\n");
+
 }
 
 void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table){

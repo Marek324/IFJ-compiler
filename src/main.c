@@ -74,7 +74,7 @@ int main() {
     symtable_init(&SymFunctionTree);
     SCOPEStack = stackInit();
     Parse(buffer);
-    // analyse(ASTRoot);
+    analyse(ASTRoot);
     
     //print_AVL(SymFunctionTree);
     
