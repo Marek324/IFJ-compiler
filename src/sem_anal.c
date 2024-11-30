@@ -975,6 +975,16 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
             error_exit(10, "ERROR: Uknown symtable return type!\n");
         }
     }
+    else if(isOperator(node->left->token)) {
+        if(checkExpr(node->left, local_table) == T_BOOL_RET) {
+            left_type = T_BOOL_RET;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Wrong type in boolean operation (left operand)!\n");
+        }
+    }
     else {
         left_type = convertToRetType(node->left->type);
     }
@@ -1000,23 +1010,8 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
             error_exit(10, "ERROR: Uknown symtable return type!\n");
         }
     }
-    else {
-        right_type = convertToRetType(node->right->type);
-    }
-    // checks if left node is an operator
-    if(isOperator(node->left->token)) {
-        if(checkExpr(node->left, local_table) == T_BOOL_RET) {
-            left_type = T_BOOL_RET;
-        }
-        else {
-            symtable_dispose(&SymFunctionTree);
-            freeAST(ASTRoot);
-            error_exit(7, "ERROR: Wrong type in boolean operation (left operand)!\n");
-        }
-    }
-    // checks if right node is an operator
-    if(isOperator(node->right->token)) {
-        if(checkExpr(node->right, local_table) == T_BOOL_RET) {
+    else if(isOperator(node->right->token)) {
+         if(checkExpr(node->right, local_table) == T_BOOL_RET) {
             right_type = T_BOOL_RET;
         }
         else {
@@ -1024,6 +1019,9 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
             freeAST(ASTRoot);
             error_exit(7, "ERROR: Wrong type in boolean operation (right operand)!\n");
         }
+    }
+    else {
+        right_type = convertToRetType(node->right->type);
     }
     if(left_type != T_BOOL_RET || right_type != T_BOOL_RET) {
         symtable_dispose(&SymFunctionTree);
@@ -1036,8 +1034,140 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
 }
 
 ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
-    if(node->type) {
-    // TODO
+    ret_type left_type, right_type;
+    symtable_node_ptr sym_node_right, sym_node_left;
+    if(node->left->type == ID) {
+        sym_node_left = symtable_search(local_table, node->left->token->value.string_value);
+        if(sym_node_left == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined identifier!\n");
+        }
+        if(sym_node_left->entry->entry_type == T_VAR_SYM) {
+            sym_node_left->entry->isUsed = true;
+            left_type = sym_node_left->entry->type;
+        }
+        else if(sym_node_left->entry->entry_type == T_FUN_SYM) {
+            sym_node_left->entry->isUsed = true;
+            checkArguments(local_table, node->left, sym_node_left->key);
+            left_type = sym_node_left->entry->type;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown symtable return type!\n");
+        }
+    }
+    else if(isOperator(node->left->token)) {
+        left_type = checkExpr(node->left, local_table);
+    }
+    // literals
+    else {
+        left_type = convertToRetType(node->left->type);
+    }
+    if(node->right->type == ID) {
+        sym_node_right = symtable_search(local_table, node->right->token->value.string_value);
+        if(sym_node_right == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined identifier!\n");
+        }
+        if(sym_node_right->entry->entry_type == T_VAR_SYM) {
+            sym_node_right->entry->isUsed = true;
+            right_type = sym_node_right->entry->type;
+        }
+        else if(sym_node_right->entry->entry_type == T_FUN_SYM) {
+            sym_node_right->entry->isUsed = true;
+            checkArguments(local_table, node->right, sym_node_right->key);
+            right_type = sym_node_right->entry->type;
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown symtable return type!\n");
+        }
+    }
+    else if(isOperator(node->right->token)) {
+        right_type = checkExpr(node->right, local_table);
+    }
+    // literals
+    else {
+        right_type = convertToRetType(node->right->type);
+    }
+    // check if both operands are nullable in "==" || "!="
+    if(node->type == EQ || node->type == NEQ) {
+        if((node->left->type == T_NULL || sym_node_left->entry->isNullable) && (node->right->type != T_NULL && !sym_node_right->entry->isNullable)) {
+            return T_ERROR_RET;
+        }
+        if((node->left->type != T_NULL && !sym_node_left->entry->isNullable) && (node->right->type == T_NULL || sym_node_right->entry->isNullable)) {
+            return T_ERROR_RET;
+        }
+        if(sym_node_left->entry->isNullable && sym_node_right->entry->isNullable) {
+            if(sym_node_left->entry->type != sym_node_right->entry->type) {
+                return T_ERROR_RET;
+            }
+        }
+        if(node->left->type != T_NULL && node->right->type != T_NULL) {
+            if(node->left->type == TYPE_STR || node->right->type == TYPE_STR) {
+                return T_ERROR_RET;
+            }
+        }
+    }
+    // cannot have nullable operands
+    else {
+        if((node->left->type == T_NULL || sym_node_left->entry->isNullable) || (node->right->type == T_NULL || sym_node_right->entry->isNullable)) {
+            return T_ERROR_RET;
+        }
+        if(node->left->type == TYPE_STR || node->right->type == TYPE_STR) {
+            return T_ERROR_RET;
+        }
+    }
+    if(left_type == T_INT_RET && right_type == T_FLOAT_RET) {
+        if(node->left->type == ID && !sym_node_left->entry->isConst) {
+            return T_ERROR_RET;
+        }
+        else {
+            ASTNode* temp = node->left;
+            Token* new_token = (Token*)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_I2F;
+            // create node for I2F
+            ASTNode* new_node = nodeCreate(I2F, new_token);
+            new_node->right = temp;
+            node->left = new_node;
+            return T_BOOL_RET;
+        }
+    }
+    // create i2f conversion node for right operand
+    else if(right_type == T_INT_RET && left_type == T_FLOAT_RET) {
+        if(node->right->type == ID && !sym_node_right->entry->isConst) {
+            return T_ERROR_RET;
+        }
+        else {
+            ASTNode* temp = node->right;
+            Token* new_token = (Token*)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_I2F;
+            // create node for I2F
+            ASTNode* new_node = nodeCreate(I2F, new_token);
+            new_node->right = temp;
+            node->right = new_node;
+            return T_BOOL_RET;
+        }
+    }
+    if(left_type != right_type) {
+        return T_ERROR_RET;
+    }
+    else {
+        return T_BOOL_RET;
     }
 }
 
