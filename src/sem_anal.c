@@ -565,8 +565,12 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
             }
         }
         if(node->type == T_ORELSE) {
-            // node_type = checkOrElse(node, local_table);
-            // if()
+            node_type = checkOrElse(node, local_table);
+            if(node_type == T_ERROR_RET) {
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(7, "ERROR: Wrong type for binary orelse operation!\n");
+            }
         }
         // all other binary operations (arithmetic)
         node_type = checkAritTypes(node, local_table);
@@ -890,9 +894,33 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     }
     ret_type left_type;
     ret_type right_type;
+    symtable_node_ptr sym_node_left, sym_node_right;
     // left node
     if(node->left->type == ID) {
-        // get return_type, check if variable or function was defined
+        sym_node_left = symtable_search(local_table, node->left->token->value.string_value);
+        if(sym_node_left == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined variable!\n");
+        }
+        if(sym_node_left->entry->isNullable) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n"); 
+        }
+        left_type = sym_node_left->entry->type;
+        if(sym_node_left->entry->entry_type == T_VAR_SYM) {
+            sym_node_left->entry->isUsed = true;
+        }
+        else if(sym_node_left->entry->entry_type == T_FUN_SYM) {
+            sym_node_left->entry->isUsed = true;
+            checkArguments(&local_table, node->left, sym_node_left);
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown state!\n");
+        }
     }
     else if(isOperator(node->left->token)) {
         left_type = checkExpr(node->left, local_table);
@@ -902,7 +930,30 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     }
     // right node
     if(node->right->type == ID) {
-        // get return type
+        sym_node_right = symtable_search(local_table, node->right->token->value.string_value);
+        if(sym_node_right == NULL) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(3, "ERROR: Undefined variable!\n");
+        }
+        if(sym_node_right->entry->isNullable) {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(7, "ERROR: Nullable variable/function in arithmetic operation!\n"); 
+        }
+        right_type = sym_node_right->entry->type;
+        if(sym_node_right->entry->entry_type == T_VAR_SYM) {
+            sym_node_right->entry->isUsed = true;
+        }
+        else if(sym_node_right->entry->entry_type == T_FUN_SYM) {
+            sym_node_right->entry->isUsed = true;
+            checkArguments(&local_table, node->right, sym_node_right);
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(10, "ERROR: Uknown state!\n");
+        }
     }
     else if(isOperator(node->right->token)) {
         right_type = checkExpr(node->right, local_table);
@@ -912,39 +963,41 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     }
     // create i2f conversion node for left operand
     if(left_type == T_INT_RET && right_type == T_FLOAT_RET) {
-        if(1==1/*get bool isConst, variables cannot be converted*/) {
-            ASTNode* temp = node->left;
-            Token* new_token = (Token*)malloc(sizeof(Token));
-            if (new_token == NULL){ 
-                symtable_dispose(&SymFunctionTree);
-                freeAST(ASTRoot);
-                error_exit(99, "Memory allocation failed"); 
-            }
-            new_token->type = T_I2F;
-            // create node for I2F
-            ASTNode* new_node = nodeCreate(I2F, new_token);
-            new_node->right = temp;
-            node->left = new_node;
-            return T_FLOAT_RET;
+        if(node->left == ID && !sym_node_left->entry->isConst) {
+            return T_ERROR_RET;
         }
+        ASTNode* temp = node->left;
+        Token* new_token = (Token*)malloc(sizeof(Token));
+        if (new_token == NULL){ 
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(99, "Memory allocation failed"); 
+        }
+        new_token->type = T_I2F;
+        // create node for I2F
+        ASTNode* new_node = nodeCreate(I2F, new_token);
+        new_node->right = temp;
+        node->left = new_node;
+        return T_FLOAT_RET;
     }
     // create i2f conversion node for right operand
     else if(right_type == T_INT_RET && left_type == T_FLOAT_RET) {
-        if(1==1/*get bool isConst, variables cannot be converted*/) {
-            ASTNode* temp = node->right;
-            Token* new_token = (Token*)malloc(sizeof(Token));
-            if (new_token == NULL){ 
-                symtable_dispose(&SymFunctionTree);
-                freeAST(ASTRoot);
-                error_exit(99, "Memory allocation failed"); 
-            }
-            new_token->type = T_I2F;
-            // create node for I2F
-            ASTNode* new_node = nodeCreate(I2F, new_token);
-            new_node->right = temp;
-            node->right = new_node;
-            return T_FLOAT_RET;
+        if(node->right == ID && !sym_node_right->entry->isConst) {
+            return T_ERROR_RET;
         }
+        ASTNode* temp = node->right;
+        Token* new_token = (Token*)malloc(sizeof(Token));
+        if (new_token == NULL){ 
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(99, "Memory allocation failed"); 
+        }
+        new_token->type = T_I2F;
+        // create node for I2F
+        ASTNode* new_node = nodeCreate(I2F, new_token);
+        new_node->right = temp;
+        node->right = new_node;
+        return T_FLOAT_RET;
     }
     if(left_type != right_type) {
         return T_ERROR_RET;
@@ -1234,6 +1287,10 @@ ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
     else {
         return T_BOOL_RET;
     }
+}
+
+ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
+    // TODO
 }
 
 bool isRel(ASTNodeType type) {
