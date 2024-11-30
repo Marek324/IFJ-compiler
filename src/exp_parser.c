@@ -166,18 +166,20 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     error_exit(2, "ERROR: Unexpected LPAREN in expression!\n");
                     return NULL;
                 }
+                // get token after LPAREN (should be expression)
                 *token = get_token(buff);
                 if((*token)->type == T_ERROR) {
                     freeAll(paren_depth, operand_stack, operator_stack);
                     symtable_dispose(&SymFunctionTree);
                     checkForT_Error(*token);
                 }
-                // ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
-                // insertLeft(id_node, expressionListRule);
+                ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
+                insertLeft(id_node, expressionListRule);
                 ExpressionList(token, id_node, buff);
             }
             if((*token)->type == T_DOT) {
                 freeAST(node);
+                // get token after dot (should be ID or question mark)
                 *token = get_token(buff);
                 if((*token)->type == T_ERROR) {
                     freeAll(paren_depth, operand_stack, operator_stack);
@@ -241,6 +243,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 }
                 ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
                 insertLeft(id_node, node);
+                // get token after ID (should be LPAREN)
                 *token = get_token(buff);
                 continue;
             }

@@ -599,7 +599,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
             // functions
             else if(sym_node->entry->entry_type == T_FUN_SYM) {
                 sym_node->entry->isUsed = true;
-                /*TODO: go through all parameters and check if the datatypes and count is good*/
+                checkArguments(&local_table, node, sym_node);
                 return sym_node->entry->type;
             }
             else {
