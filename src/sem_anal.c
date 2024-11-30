@@ -954,7 +954,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
     ret_type left_type;
     ret_type right_type;
     if(node->left->type == ID) {
-        symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+        symtable_node_ptr sym_node = symtable_search(local_table, node->left->token->value.string_value);
         if(sym_node == NULL) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
@@ -966,7 +966,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node->entry->entry_type == T_FUN_SYM) {
             sym_node->entry->isUsed = true;
-            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            checkArguments(local_table, node->left, sym_node->key);
             left_type = sym_node->entry->type;
         }
         else {
@@ -979,7 +979,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         left_type = convertToRetType(node->left->type);
     }
     if(node->right->type == ID) {
-        symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+        symtable_node_ptr sym_node = symtable_search(local_table, node->right->token->value.string_value);
         if(sym_node == NULL) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
@@ -991,7 +991,7 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node->entry->entry_type == T_FUN_SYM) {
             sym_node->entry->isUsed = true;
-            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            checkArguments(local_table, node->right, sym_node->key);
             right_type = sym_node->entry->type;
         }
         else {
