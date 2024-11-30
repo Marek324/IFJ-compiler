@@ -900,9 +900,9 @@ ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
     }
     // ret_type of node
     ret_type node_type;
-    if(node->left->type == ID) {
+    if(node->right->type == ID) {
         // get return_type
-        symtable_node_ptr sym_node = symtable_search(local_table, node->token->value.string_value);
+        symtable_node_ptr sym_node = symtable_search(local_table, node->right->token->value.string_value);
         if(sym_node == NULL) {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
@@ -914,7 +914,7 @@ ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
         }
         else if(sym_node->entry->entry_type == T_FUN_SYM) {
             sym_node->entry->isUsed = true;
-            /*TODO: go through all parameters and check if the datatypes and count is good*/
+            checkArguments(local_table, node->right, sym_node->key);
             return sym_node->entry->type;
         }
         else {

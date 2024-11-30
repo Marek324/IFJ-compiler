@@ -12,8 +12,6 @@ extern stack_t *SCOPEStack;
 void analyse(ASTNode* node);
 // checks if the variable or function was already declared
 void checkDec();
-// check the arguments of a function
-void checkArgs();
 // checks the type of a function or variable
 ret_type checkType();
 // check expression, check for P_EXPRESSION and pass in its right child (the expression itself)
@@ -52,7 +50,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table);
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table);
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr local_table);
-
+// pass in ID node of function
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key);
 
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table);
