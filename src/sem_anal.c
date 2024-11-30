@@ -713,105 +713,63 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     else {
         // f64 to i32 if the decimal part is 0 (only literals and constants)
         if(left_type == T_FLOAT_RET) {
+            if(left_id->entry->entry_type == T_FUN_SYM) {
+                return T_ERROR_RET;
+            }
             if(node->left->type == ID) {
-                if(left_id->entry->isConst && floatIsInt(node->left->token->value.float_value)) {
-                    if(left_id->entry->entry_type == T_VAR_SYM) {
-                        if(left_id->entry->isConst) {
-                            ASTNode* temp = node->left;
-                            Token* new_token = (Token*)malloc(sizeof(Token));
-                            if (new_token == NULL){ 
-                                symtable_dispose(&SymFunctionTree);
-                                freeAST(ASTRoot);
-                                error_exit(99, "Memory allocation failed"); 
-                            }
-                            new_token->type = T_F2I;
-                            // create node for F2I
-                            ASTNode* new_node = nodeCreate(F2I, new_token);
-                            new_node->right = temp;
-                            node->left = new_node;
-                            // set division to be for whole numbers
-                            node->token->type = T_IDIV;
-                            node->type = IDIV;
-                            return T_INT_RET;
-                        }
-                    }
+                if(!left_id->entry->isConst) {
+                    return T_ERROR_RET;
                 }
             }
-            else {
-                if(floatIsInt(node->left->token->value.float_value)) {
-                    if(left_id->entry->entry_type == T_VAR_SYM) {
-                        if(left_id->entry->isConst) {
-                            ASTNode* temp = node->left;
-                            Token* new_token = (Token*)malloc(sizeof(Token));
-                            if (new_token == NULL){ 
-                                symtable_dispose(&SymFunctionTree);
-                                freeAST(ASTRoot);
-                                error_exit(99, "Memory allocation failed"); 
-                            }
-                            new_token->type = T_F2I;
-                            // create node for F2I
-                            ASTNode* new_node = nodeCreate(F2I, new_token);
-                            new_node->right = temp;
-                            node->left = new_node;
-                            // set division to be for whole numbers
-                            node->token->type = T_IDIV;
-                            node->type = IDIV;
-                            return T_INT_RET;
-                        }
-                    }
-                }
+            if(!floatIsInt(node->left->token->value.float_value)) {
+                return T_ERROR_RET;
             }
+            ASTNode* temp = node->left;
+            Token* new_token = (Token*)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_F2I;
+            // create node for F2I
+            ASTNode* new_node = nodeCreate(F2I, new_token);
+            new_node->right = temp;
+            node->left = new_node;
+            // set division to be for whole numbers
+            node->token->type = T_IDIV;
+            node->type = IDIV;
+            return T_INT_RET;
         }
         if(right_type == T_FLOAT_RET) {
+            if(right_id->entry->entry_type == T_FUN_SYM) {
+                return T_ERROR_RET;
+            }
             if(node->right->type == ID) {
-                if(right_id->entry->isConst && floatIsInt(node->right->token->value.float_value)) {
-                    if(right_id->entry->entry_type == T_VAR_SYM) {
-                        if(right_id->entry->isConst) {
-                            ASTNode* temp = node->right;
-                            Token* new_token = (Token*)malloc(sizeof(Token));
-                            if (new_token == NULL){ 
-                                symtable_dispose(&SymFunctionTree);
-                                freeAST(ASTRoot);
-                                error_exit(99, "Memory allocation failed"); 
-                            }
-                            new_token->type = T_F2I;
-                            // create node for F2I
-                            ASTNode* new_node = nodeCreate(F2I, new_token);
-                            new_node->right = temp;
-                            node->right = new_node;
-                            // set division to be for whole numbers
-                            node->token->type = T_IDIV;
-                            node->type = IDIV;
-                            return T_INT_RET;
-                        }
-                    }
+                if(!right_id->entry->isConst) {
+                    return T_ERROR_RET;
                 }
             }
-            else {
-                if(floatIsInt(node->right->token->value.float_value)) {
-                    if(right_id->entry->entry_type == T_VAR_SYM) {
-                        if(right_id->entry->isConst) {
-                            ASTNode* temp = node->right;
-                            Token* new_token = (Token*)malloc(sizeof(Token));
-                            if (new_token == NULL){ 
-                                symtable_dispose(&SymFunctionTree);
-                                freeAST(ASTRoot);
-                                error_exit(99, "Memory allocation failed"); 
-                            }
-                            new_token->type = T_F2I;
-                            // create node for F2I
-                            ASTNode* new_node = nodeCreate(F2I, new_token);
-                            new_node->right = temp;
-                            node->right = new_node;
-                            // set division to be for whole numbers
-                            node->token->type = T_IDIV;
-                            node->type = IDIV;
-                            return T_INT_RET;
-                        }
-                    }
-                }
+            if(!floatIsInt(node->right->token->value.float_value)) {
+                return T_ERROR_RET;
             }
-        } 
+            ASTNode* temp = node->right;
+            Token* new_token = (Token*)malloc(sizeof(Token));
+            if (new_token == NULL){ 
+                symtable_dispose(&SymFunctionTree);
+                freeAST(ASTRoot);
+                error_exit(99, "Memory allocation failed"); 
+            }
+            new_token->type = T_F2I;
+            // create node for F2I
+            ASTNode* new_node = nodeCreate(F2I, new_token);
+            new_node->right = temp;
+            node->right = new_node;
+            // set division to be for whole numbers
+            node->token->type = T_IDIV;
+            node->type = IDIV;
+            return T_INT_RET;
+        }
     }
     return T_ERROR_RET;
 }
