@@ -269,7 +269,6 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     }
     node = node->right->right; //P_EXPRESSION
     if (key->entry->hasExplicitType == true) {
-        
         ret_type type = checkExpr(node->right,*local_table);
         if (type != T_NULL_RET) {
             if (key->entry->type == type) {
@@ -490,7 +489,6 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
 
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key) {
     if (node->right != NULL) {
-        
             node = node->right; // P_EXPRESSION
             ret_type type = T_NULL_RET;
             int i = 0;
