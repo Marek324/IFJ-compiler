@@ -116,21 +116,45 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
     fprintf(stderr, "SUB_BLOCK\n");
     fprintf(stderr, "%i\n", scope);
     symStatement(node->right, local_table, function);
-    scope--;
+    checkVarsAndConsts(*local_table);
     if (!stackIsEmpty(SCOPEStack)) {
         print_AVL(*local_table);
         fprintf(stderr,"\n");
         symtable_node_ptr old_table = *local_table; // Store old table for cleanup
         updateTableBySameKey(old_table, local_table);
-        *local_table = stackUtilPop(SCOPEStack);
+        *local_table = stackUtilPop(SCOPEStack); //POP FROM STACK
         symtable_dispose(&old_table); // Free the previous scope's memory
+        scope--;
         fprintf(stderr, "SUB_BLOCK_END\n");
-        fprintf(stderr, "%i\n", scope);
         print_AVL(*local_table);
         fprintf(stderr, "\n");
+        fprintf(stderr, "%i\n", scope);
     }
 }
 
+void checkVarsAndConsts(symtable_node_ptr local_table) {
+    if (local_table == NULL) return;
+
+    checkVarsAndConsts(local_table->right);
+    checkVarsAndConsts(local_table->left);
+
+    if (scope == local_table->entry->scopeLevel) {
+        if (local_table->entry->isConst == true){
+            if (local_table->entry->isUsed != true) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);        
+                error_exit(9, "ERROR: constant not used\n");
+            }
+        }
+        else {
+            if (local_table->entry->isUsed != true && local_table->entry->isChanged != true) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);        
+                error_exit(9, "ERROR: variable neither used nor modified\n");
+            }
+        }
+    }
+}
 void symStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function) {
     if (node == NULL)
         return;
