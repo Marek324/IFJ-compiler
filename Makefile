@@ -29,7 +29,7 @@ test: $(TARGET)
 	./test/run.sh 
 
 clean:
-	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test $(TARGET) tree.d2 tree.svg aa.out
+	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test/out/* $(TARGET) tree.d2 tree.svg aa.out
 
 submit: clean
 	mkdir xhricma00
