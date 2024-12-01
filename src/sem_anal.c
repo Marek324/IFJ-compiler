@@ -711,7 +711,7 @@ void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_n
             if (function->entry->type != type) {
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);
-                error_exit(7, "ERROR: returning wrong type!\n");
+                error_exit(4, "ERROR: returning wrong type!\n");
             }
         }
         else {
