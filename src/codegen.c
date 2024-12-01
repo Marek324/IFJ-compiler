@@ -13,7 +13,8 @@ int codegen()
 DEFVAR GF@&discard\n\
 CREATEFRAME\n\
 CALL main\n\
-EXIT int@0\n\n\
+EXIT int@0\n\
+\n\
 LABEL &strcmp\n\
 PUSHFRAME\n\
 CREATEFRAME\n\
@@ -40,7 +41,49 @@ LABEL &strcmp_bigger\n\
 MOVE TF@res int@1\n\
 PUSHS TF@res\n\
 POPFRAME\n\
-RETURN\n\n\
+RETURN\n\
+\n\
+LABEL &ord\n\
+PUSHFRAME\n\
+CREATEFRAME\n\
+DEFVAR TF@res\n\
+DEFVAR TF@s\n\
+DEFVAR TF@i\n\
+POPS TF@i\n\
+POPS TF@s\n\
+\
+DEFVAR TF@len\n\
+STRLEN TF@len TF@s\n\
+\
+PUSHS int@0\n\
+PUSHS TF@len\n\
+JUMPIFEQS &ord_err\n\
+\
+PUSHS TF@i\n\
+PUSHS int@0\n\
+LTS\n\
+PUSHS bool@true\n\
+JUMPIFEQS &ord_err\n\
+\
+PUSHS TF@i\n\
+PUSHS TF@len\n\
+LTS\n\
+NOTS\n\
+PUSHS bool@true\n\
+JUMPIFEQS &ord_err\n\
+\
+PUSHS TF@s\n\
+PUSHS TF@i\n\
+STRI2INTS\n\
+POPFRAME\n\
+RETURN\n\
+\
+LABEL &ord_err\n\
+MOVE TF@res int@0\n\
+PUSHS TF@res\n\
+POPFRAME\n\
+RETURN\n\
+\n\
 LABEL &substring\n\
 PUSHFRAME\n\
 CREATEFRAME\n\
@@ -187,7 +230,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
             break;
 
         case P_WHILE_LOOP: {
-            char label_prefix[strlen(curr_func) + 10];
+            char label_prefix[strlen(curr_func) + 12];
 
             int while_num = var_asgn ? counter++ : 0;
             sprintf(label_prefix, "&%s_while_%d", curr_func, while_num);
@@ -197,7 +240,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
             break;}
 
         case P_FOR_LOOP: {
-            char label_prefix[strlen(curr_func) + 10];
+            char label_prefix[strlen(curr_func) + 12];
 
             int for_num = var_asgn ? counter++ : 0;
             sprintf(label_prefix, "&%s_while_%d", curr_func, for_num);
@@ -405,12 +448,7 @@ void expression(ASTNode *node){ // @as
                         printf("CALL &strcmp\n");
                     } else if (!strcmp(builtin_func, "ord")){
                         expression_list(node->left); 
-                        //swap stack order
-                        printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp1\nDEFVAR TF@tmp2\n");
-                        printf("POPS TF@tmp2\nPOPS TF@tmp1\nPUSHS TF@tmp1\nPUSHS TF@tmp2\n");
-                        printf("POPFRAME\n");
-
-                        printf("STRI2INTS\n");
+                        printf("CALL &ord\n");
                     } else if (!strcmp(builtin_func, "chr")){
                         expression_list(node->left);
                         printf("INT2CHARS\n");

@@ -83,8 +83,8 @@ int main() {
     setbuf(stdout, NULL);
     #endif
     
-    //int err = codegen(); // can be 0 or 99 on allocation error
-    int err = 0;
+    int err = codegen(); // can be 0 or 99 on allocation error
+    // int err = 0;
     stackClear(SCOPEStack);
     circ_buff_free(buffer);
     freeAST(ASTRoot); 
