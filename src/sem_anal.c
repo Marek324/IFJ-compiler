@@ -117,6 +117,7 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
     fprintf(stderr, "%i\n", scope);
     symStatement(node->right, local_table, function);
     checkVarsAndConsts(*local_table);
+
     if (!stackIsEmpty(SCOPEStack)) {
         print_AVL(*local_table);
         fprintf(stderr,"\n");
@@ -398,14 +399,24 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
 
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key) {
     if (node->right != NULL) {
+        
             node = node->right; // P_EXPRESSION
             ret_type type = T_NULL_RET;
             int i = 0;
             while (1) {
                 if (i < key->entry->param_count && key->entry->param_types[i] == T_ANY) {
+                    if (node->right->type == ID) {
+                        symtable_node_ptr id = symtable_search(*tree, node->right->token->value.string_value);
+                        id->entry->isUsed = true;
+                    }
                     goto skip;
                 }
                 type = checkExpr(node->right, *tree);
+                if (node->right->type == ID) {
+                    symtable_node_ptr id = symtable_search(*tree, node->right->token->value.string_value);
+                    id->entry->isUsed = true;
+                }
+
                 if (type != T_NULL_RET) {
                         if (i < key->entry->param_count && !(key->entry->param_types[i] == type)) {
                             freeAST(ASTRoot);
