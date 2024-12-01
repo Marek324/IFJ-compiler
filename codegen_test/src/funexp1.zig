@@ -1,7 +1,8 @@
 const ifj = @import("ifj24.zig");
 
 pub fn main() void {
-    const a = 1+nic(2,3,);
+    const b = 2;
+    const a = 1+nic(b,3,);
     ifj.write(a); ifj.write("\n");
 }
 

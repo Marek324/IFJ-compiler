@@ -17,7 +17,7 @@ void return_statement(ASTNode *node);
 void break_statement(ASTNode *node, const char *label);
 void continue_statement(ASTNode *node, const char *label);
 void expression(ASTNode *node);
-void func_call(ASTNode *node);
+void func_call(ASTNode *node, bool expression);
 void expression_list(ASTNode *node);
 void asgn_found(ASTNode *node, const char *var);
 void convert_string(dyn_str *dyn_s, char *str);

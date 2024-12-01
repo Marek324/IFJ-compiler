@@ -1,9 +1,7 @@
 #include "codegen_priv.h"
 #include "linked_list.h"
 
-unsigned if_counter = 0;
-unsigned while_counter = 0;
-unsigned for_counter = 0;
+unsigned counter = 0;
 char *curr_func = NULL;
 LinkedList_ptr var_list = NULL;
 
@@ -15,7 +13,7 @@ int codegen()
 DEFVAR GF@&discard\n\
 CREATEFRAME\n\
 CALL main\n\
-EXIT int@0\n\
+EXIT int@0\n\n\
 LABEL &strcmp\n\
 PUSHFRAME\n\
 CREATEFRAME\n\
@@ -42,7 +40,7 @@ LABEL &strcmp_bigger\n\
 MOVE TF@res int@1\n\
 PUSHS TF@res\n\
 POPFRAME\n\
-RETURN\n\
+RETURN\n\n\
 LABEL &substring\n\
 PUSHFRAME\n\
 CREATEFRAME\n\
@@ -83,7 +81,7 @@ LABEL &substring_err\n\
 PUSHS nil@nil\n\
 POPFRAME\n\
 RETURN\n\
-\n");
+");
 
     return prog(ASTRoot);
 
@@ -102,7 +100,7 @@ int function_def(ASTNode *node){
 
     // else is function def
 
-    printf("LABEL ");
+    printf("\nLABEL ");
     node = node->right; // ID
     curr_func = malloc(strlen(node->token->value.string_value) + 1);
     strcpy(curr_func, node->token->value.string_value);
@@ -130,7 +128,7 @@ int function_def(ASTNode *node){
 
     // execute the function statements without declaring
     // no need to check for error as it can only be allocation error
-    statement(node->right, false, true, NULL);
+    statement(node->right, false, true, NULL); // nechyba tu return ?
 
     printf("POPFRAME\n");
     printf("RETURN\n");
@@ -167,7 +165,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
 
     node = node->right;
 
-    if(node == NULL)
+    if(node == NULL) // NULL in empty block
         return 0;
 
     ASTNode *nextStatement = node->left;
@@ -191,7 +189,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
         case P_WHILE_LOOP: {
             char label_prefix[strlen(curr_func) + 10];
 
-            int while_num = var_asgn ? while_counter++ : 0;
+            int while_num = var_asgn ? counter++ : 0;
             sprintf(label_prefix, "&%s_while_%d", curr_func, while_num);
 
             int err = while_loop(node, label_prefix, dec_var, var_asgn);
@@ -201,7 +199,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
         case P_FOR_LOOP: {
             char label_prefix[strlen(curr_func) + 10];
 
-            int for_num = var_asgn ? for_counter++ : 0;
+            int for_num = var_asgn ? counter++ : 0;
             sprintf(label_prefix, "&%s_while_%d", curr_func, for_num);
 
             int err = for_loop(node, label_prefix, dec_var, var_asgn);
@@ -353,23 +351,24 @@ void expression(ASTNode *node){ // @as
             expression(node->right);
             printf("ORS\n");
             break;
-        case T_ORELSE:
+        case T_ORELSE:{
+            int id = counter++;
             expression(node->left);
             printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\nPOPS TF@tmp\nPUSHS TF@tmp\n");
-            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_not_null\n");
+            printf("PUSHS nil@nil\nJUMPIFNEQS &orelse_%d_not_null\n", id);
             expression(node->right);
-            printf("JUMP &orelse_end\n");
-            printf("LABEL &orelse_not_null\n");
+            printf("JUMP &orelse_%d_end\n", id);
+            printf("LABEL &orelse_%d_not_null\n", id);
             printf("PUSHS TF@tmp\n");
-            printf("LABEL &orelse_end\nPOPFRAME\n");
-            break;
+            printf("LABEL &orelse_%d_end\nPOPFRAME\n", id);
+            break;}
         case ID:
             if (node->right == NULL && node->left == NULL){
                 printf("PUSHS TF@%s\n", node->token->value.string_value);
             } else {
-                if (node->left != NULL) { // builtin function
+                if (node->right != NULL) { // builtin function
 
-                    const char *builtin_func = node->left->token->value.string_value;
+                    const char *builtin_func = node->right->token->value.string_value;
                     if (!strcmp(builtin_func, "readstr")){
                         printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\n");
                         printf("READ TF@tmp string\nPUSHS TF@tmp\n");
@@ -389,32 +388,37 @@ void expression(ASTNode *node){ // @as
                         expression(node->right->right);
                         printf("FLOAT2INTS\n");
                     } else if (!strcmp(builtin_func, "string")){
-                        expression(node->right->right); // doesn't matter for IFJcode24
+                        expression_list(node->left);
                     } else if (!strcmp(builtin_func, "length")){
-                        expression(node->right->right);
+                        expression_list(node->left);
                         printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp\nPOPS TF@tmp\n");
                         printf("STRLEN TF@tmp TF@tmp\nPUSHS TF@tmp\nPOPFRAME\n");
                     } else if (!strcmp(builtin_func, "concat")){
-                        expression_list(node); 
+                        expression_list(node->left); 
                         printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp1\nDEFVAR TF@tmp2\n");
                         printf("POPS TF@tmp2\nPOPS TF@tmp1\nCONCAT TF@tmp1 TF@tmp1 TF@tmp2\nPUSHS TF@tmp1\nPOPFRAME\n");
                     } else if (!strcmp(builtin_func, "substring")){
-                        expression_list(node); 
+                        expression_list(node->left); 
                         printf("CALL &substring\n");
                     } else if (!strcmp(builtin_func, "strcmp")){
-                        expression_list(node); 
+                        expression_list(node->left); 
                         printf("CALL &strcmp\n");
                     } else if (!strcmp(builtin_func, "ord")){
-                        expression_list(node); 
+                        expression_list(node->left); 
+                        //swap stack order
+                        printf("PUSHFRAME\nCREATEFRAME\nDEFVAR TF@tmp1\nDEFVAR TF@tmp2\n");
+                        printf("POPS TF@tmp2\nPOPS TF@tmp1\nPUSHS TF@tmp1\nPUSHS TF@tmp2\n");
+                        printf("POPFRAME\n");
+
                         printf("STRI2INTS\n");
                     } else if (!strcmp(builtin_func, "chr")){
-                        expression(node->right->right);
+                        expression_list(node->left);
                         printf("INT2CHARS\n");
                     } else {
                         printf ("unknown builtin function %s\n", builtin_func);
                     }
                 } else
-                    func_call(node);
+                    func_call(node, true);
             }
             break;
         case T_UNREACHABLE:
@@ -456,14 +460,14 @@ void expression(ASTNode *node){ // @as
             node = node->left; // P_EXPRESSION
             expression(node->right); 
             printf("PUSHS bool@true\n");
-            printf("JUMPIFNEQS &if_%d_else\n", if_counter);
+            printf("JUMPIFNEQS &if_%d_else\n", counter);
             node = node->left; 
             expression(node->right); // value if true
-            printf("JUMP &if_%d_end\n", if_counter);
-            printf("LABEL &if_%d_else\n", if_counter);
+            printf("JUMP &if_%d_end\n", counter);
+            printf("LABEL &if_%d_else\n", counter);
             node = node->left;
             expression(node->right); // value if false
-            printf("LABEL &if_%d_end\n", if_counter++);
+            printf("LABEL &if_%d_end\n", counter++);
             break;}
         default:
             printf("expression unknown\n");
@@ -473,12 +477,23 @@ void expression(ASTNode *node){ // @as
     
 }
 
-void func_call(ASTNode *node){
+/**
+ * expression - true if this function is called from expression(), 
+ * func_call in expressions = id --left-> P_EXPRESSION_LIST
+ * func_call in statements = id --left-> P_ID_FOUND --right-> L_PAREN --left-> P_EXPRESSION_LIST
+ */
+void func_call(ASTNode *node, bool expression){
     if (node == NULL)
         return;
     
+    ASTNode *idNode = node;
+
+    node = node->left;
+    if (!expression)
+        node = node->right->left; 
+    
     expression_list(node);
-    printf("CALL %s\n", node->token->value.string_value);
+    printf("CALL %s\n", idNode->token->value.string_value);
 }
 
 void expression_list(ASTNode *node){
@@ -516,7 +531,7 @@ int id_statement(ASTNode *node, bool dec_var, bool var_asgn){
 
         case LPAREN:
             if (var_asgn)
-                func_call(idNode);
+                func_call(idNode, false);
             break;
 
         case P_WHILE_LOOP:{ 
@@ -538,7 +553,7 @@ int id_statement(ASTNode *node, bool dec_var, bool var_asgn){
 void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){ 
     int if_count;
     if (var_asgn)
-        if_count = if_counter++;
+        if_count = counter++;
     
     node = node->right; // P_EXPRESSION
     if (var_asgn)
