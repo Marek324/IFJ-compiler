@@ -1,0 +1,30 @@
+const ifj = @import("ifj24.zig");
+
+pub fn comparestring (a : []u8, b : []u8 ) i32{
+    if(ifj.strcmp(a, b) == 0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+
+pub fn main() void{
+    const a: []u8 = ifj.string("David prijde o body");
+    const b: []u8 = ifj.string("David prijde o body");
+    const c: []u8 = ifj.string("Deadly prijde o body");
+     if(comparestring(a, b) == 1){
+         if(comparestring(b, c) == 0){
+            ifj.write(2);
+         }
+         else{
+            ifj.write(5);
+         }
+         
+     }
+     else{
+         ifj.write(1);
+     }
+}  
+

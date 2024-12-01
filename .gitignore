@@ -1,7 +1,6 @@
 .vscode/
 build/
 ifj24compiler
-test
 notes/
 tree.d2
 tree.svg

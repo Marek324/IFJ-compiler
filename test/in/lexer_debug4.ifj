@@ -1,0 +1,6 @@
+const ifj = @import("ifj24.zig");
+pub fn main() void{
+    const a : []ud8= ifj.string("321");
+    ifj.write(a);
+}   
+

@@ -1,0 +1,18 @@
+const ifj = @import("ifj24.zig");
+
+
+pub fn main() void{
+    const a: i32 = 50;
+    const b: i32 = 10;
+    const c: i32 = 25;
+    const d: i32 = 5;
+    const e: i32 = 2;
+    const f: i32 = 3;
+     if((a * b - (c / d) + f) * e == (b * a - (c / d) + f) * e){
+         ifj.write(e);
+     }
+     else{
+         ifj.write(d);
+     }
+}  
+

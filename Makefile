@@ -26,7 +26,7 @@ tree:
 
 
 test: $(TARGET)
-	./IFJ24-tests/test.sh ./IFJ24-tests ./$(TARGET) ./codegen_test/ic24int
+	./test/run.sh 
 
 clean:
 	rm -rf $(BUILD_DIR) xhricma00.zip xhricma00 test $(TARGET) tree.d2 tree.svg aa.out

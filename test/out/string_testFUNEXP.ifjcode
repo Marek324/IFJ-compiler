@@ -1,0 +1,411 @@
+.IFJcode24
+DEFVAR GF@&discard
+CREATEFRAME
+CALL main
+EXIT int@0
+
+LABEL &strcmp
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@s1
+DEFVAR TF@s2
+POPS TF@s2
+POPS TF@s1
+DEFVAR TF@cnt
+DEFVAR TF@res
+LT TF@cnt TF@s1 TF@s2
+JUMPIFEQ &strcmp_smaller TF@cnt bool@true
+GT TF@cnt TF@s1 TF@s2
+JUMPIFEQ &strcmp_bigger TF@cnt bool@true
+MOVE TF@res int@0
+PUSHS TF@res
+POPFRAME
+RETURN
+LABEL &strcmp_smaller
+MOVE TF@res int@-1
+PUSHS TF@res
+POPFRAME
+RETURN
+LABEL &strcmp_bigger
+MOVE TF@res int@1
+PUSHS TF@res
+POPFRAME
+RETURN
+
+LABEL &ord
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@res
+DEFVAR TF@s
+DEFVAR TF@i
+POPS TF@i
+POPS TF@s
+DEFVAR TF@len
+STRLEN TF@len TF@s
+PUSHS int@0
+PUSHS TF@len
+JUMPIFEQS &ord_err
+PUSHS TF@i
+PUSHS int@0
+LTS
+PUSHS bool@true
+JUMPIFEQS &ord_err
+PUSHS TF@i
+PUSHS TF@len
+LTS
+NOTS
+PUSHS bool@true
+JUMPIFEQS &ord_err
+PUSHS TF@s
+PUSHS TF@i
+STRI2INTS
+POPFRAME
+RETURN
+LABEL &ord_err
+MOVE TF@res int@0
+PUSHS TF@res
+POPFRAME
+RETURN
+
+LABEL &substring
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@s
+DEFVAR TF@i
+DEFVAR TF@j
+POPS TF@j
+POPS TF@i
+POPS TF@s
+DEFVAR TF@res
+MOVE TF@res string@
+DEFVAR TF@cnt_err
+LT TF@cnt_err TF@i int@0
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+LT TF@cnt_err TF@j int@0
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+LT TF@cnt_err TF@j TF@i
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+DEFVAR TF@len
+STRLEN TF@len TF@s
+GT TF@cnt_err TF@j TF@len
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+LT TF@cnt_err TF@i TF@len
+NOT TF@cnt_err TF@cnt_err
+JUMPIFEQ &substring_err TF@cnt_err bool@true
+DEFVAR TF@char
+LABEL &substring_loop
+JUMPIFEQ &substring_loop_end TF@i TF@j
+GETCHAR TF@char TF@s TF@i
+CONCAT TF@res TF@res TF@char
+ADD TF@i TF@i int@1
+JUMP &substring_loop
+LABEL &substring_loop_end
+PUSHS TF@res
+POPFRAME
+RETURN
+LABEL &substring_err
+PUSHS nil@nil
+POPFRAME
+RETURN
+
+LABEL main
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@a
+DEFVAR TF@a_without_null
+DEFVAR TF@b
+DEFVAR TF@str_after
+DEFVAR TF@str_before
+DEFVAR TF@len_after
+DEFVAR TF@cc
+DEFVAR TF@test
+DEFVAR TF@sub
+DEFVAR TF@sub_without_null
+DEFVAR TF@i
+DEFVAR TF@j
+DEFVAR TF@a_len
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp
+READ TF@tmp string
+PUSHS TF@tmp
+POPFRAME
+POPS TF@a
+PUSHS string@
+POPS TF@a_without_null
+PUSHS TF@a
+POPS TF@b
+PUSHS TF@b
+PUSHS nil@nil
+JUMPIFEQS &if_0_else
+PUSHS TF@b
+POPS TF@a_without_null
+JUMP &if_0_end
+LABEL &if_0_else
+LABEL &if_0_end
+PUSHS TF@a
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@--after
+POPS TF@str_after
+PUSHS string@before--
+POPS TF@str_before
+PUSHS TF@str_after
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp
+POPS TF@tmp
+STRLEN TF@tmp TF@tmp
+PUSHS TF@tmp
+POPFRAME
+POPS TF@len_after
+PUSHS string@Sring\032and\032length:\032
+PUSHS TF@str_after
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp1
+DEFVAR TF@tmp2
+POPS TF@tmp2
+POPS TF@tmp1
+CONCAT TF@tmp1 TF@tmp1 TF@tmp2
+PUSHS TF@tmp1
+POPFRAME
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS TF@len_after
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS TF@str_before
+PUSHS TF@a_without_null
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp1
+DEFVAR TF@tmp2
+POPS TF@tmp2
+POPS TF@tmp1
+CONCAT TF@tmp1 TF@tmp1 TF@tmp2
+PUSHS TF@tmp1
+POPFRAME
+PUSHS TF@str_after
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp1
+DEFVAR TF@tmp2
+POPS TF@tmp2
+POPS TF@tmp1
+CONCAT TF@tmp1 TF@tmp1 TF@tmp2
+PUSHS TF@tmp1
+POPFRAME
+POPS TF@cc
+PUSHS TF@cc
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@
+PUSHS string@
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp1
+DEFVAR TF@tmp2
+POPS TF@tmp2
+POPS TF@tmp1
+CONCAT TF@tmp1 TF@tmp1 TF@tmp2
+PUSHS TF@tmp1
+POPFRAME
+POPS TF@cc
+PUSHS TF@cc
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS TF@cc
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp
+POPS TF@tmp
+STRLEN TF@tmp TF@tmp
+PUSHS TF@tmp
+POPFRAME
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@abcdef
+POPS TF@test
+PUSHS TF@test
+PUSHS int@1
+PUSHS int@3
+CALL &substring
+POPS TF@sub
+PUSHS TF@sub
+POPS TF@sub_without_null
+PUSHS TF@sub_without_null
+PUSHS nil@nil
+JUMPIFEQS &if_1_else
+PUSHS TF@sub_without_null
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp1
+DEFVAR TF@tmp2
+POPS TF@tmp2
+POPS TF@tmp1
+CONCAT TF@tmp1 TF@tmp1 TF@tmp2
+PUSHS TF@tmp1
+POPFRAME
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+JUMP &if_1_end
+LABEL &if_1_else
+LABEL &if_1_end
+PUSHS string@abeceda:\032
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS int@65
+POPS TF@i
+LABEL &main_while_2_loop
+PUSHS int@90
+PUSHS TF@i
+LTS
+NOTS
+PUSHS bool@true
+JUMPIFNEQS &main_while_2_break
+PUSHS TF@i
+POPS TF@j
+PUSHS TF@j
+INT2CHARS
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS TF@i
+PUSHS int@1
+ADDS
+POPS TF@i
+LABEL &main_while_2_continue
+JUMP &main_while_2_loop
+LABEL &main_while_2_break
+LABEL &main_while_2_end
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS TF@a_without_null
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@tmp
+POPS TF@tmp
+STRLEN TF@tmp TF@tmp
+PUSHS TF@tmp
+POPFRAME
+POPS TF@a_len
+PUSHS int@0
+POPS TF@j
+LABEL &main_while_3_loop
+PUSHS TF@a_len
+PUSHS TF@j
+GTS
+PUSHS bool@true
+JUMPIFNEQS &main_while_3_break
+PUSHS TF@a_without_null
+PUSHS TF@j
+CALL &ord
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS string@\010
+PUSHFRAME
+CREATEFRAME
+DEFVAR TF@out
+POPS TF@out
+PUSHS TF@out
+WRITE TF@out
+POPFRAME
+PUSHS TF@j
+PUSHS int@1
+ADDS
+POPS TF@j
+LABEL &main_while_3_continue
+JUMP &main_while_3_loop
+LABEL &main_while_3_break
+LABEL &main_while_3_end
+POPFRAME
+RETURN
