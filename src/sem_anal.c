@@ -692,20 +692,20 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
                             error_exit(3, "ERROR: Missing definition!\n");
                         }
                         // if the 2nd part of the built-in function is too long
-                        if (strlen(node->left->token->value.string_value) > 9) {
+                        if (strlen(node->right->token->value.string_value) > 9) {
                             symtable_dispose(&SymFunctionTree);
                             freeAST(ASTRoot);
                             error_exit(3, "ERROR: Missing definition!\n");
                         }
                         char builtinFun[14] = "ifj.";
-                        strcpy(builtinFun+4, node->left->token->value.string_value);
+                        strcpy(builtinFun+4, node->right->token->value.string_value);
                         sym_node = symtable_search(SymFunctionTree, builtinFun);
                         if(sym_node == NULL) {
                             symtable_dispose(&SymFunctionTree);
                             freeAST(ASTRoot);
                             error_exit(3, "ERROR: Undefined identifier!\n");
                         }
-                        checkArguments(&local_table, node->left->left, sym_node);
+                        checkArguments(&local_table, node->left, sym_node);
                     }
                     else {
                         sym_node = symtable_search(SymFunctionTree, node->token->value.string_value);
