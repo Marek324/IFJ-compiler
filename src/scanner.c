@@ -214,7 +214,7 @@ Token *get_token(circ_buff_ptr buffer)
                     break;
                 } else {
                     circ_buff_enqueue(buffer, c);
-                    token->value.float_value = atof(str->str);
+                    token->value.float_value = strtod(str->str, NULL);
                     RETURN_TOKEN(T_FLOAT);
                 }
                 break; // S_FLOAT
@@ -238,7 +238,7 @@ Token *get_token(circ_buff_ptr buffer)
             case S_FLOAT_EXP:
                 READ_NUM;
                 circ_buff_enqueue(buffer, c);
-                token->value.float_value = atof(str->str);
+                token->value.float_value = strtod(str->str, NULL);
                 RETURN_TOKEN(T_FLOAT);
                 break; // S_FLOAT_EXP
 

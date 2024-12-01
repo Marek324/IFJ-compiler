@@ -49,6 +49,7 @@ const char* getNodeName(ASTNode *node) {
         case MINUS: return "MINUS";
         case MUL: return "MUL";
         case DIV: return "DIV";
+        case IDIV: return "IDIV";
         case LPAREN: return "LPAREN";
         case RPAREN: return "RPAREN";
         case LBRACE: return "LBRACE";
