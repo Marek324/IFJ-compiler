@@ -593,12 +593,17 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
         if(node->type == ID) {
             symtable_node_ptr sym_node;
             if(node->left != NULL) {
-                if(node->left->type == ID || node->left->type == P_EXPRESSION_LIST) {
+                if(node->left->type == P_EXPRESSION_LIST) {
                     // built-in function
-                    if(node->left->type == ID) {
+                    if(node->right != NULL) {
+                        if(node->right->type != ID) {
+                            return T_ERROR_RET;
+                        }
                         // if the first ID isn't "ifj"
                         if(strcmp(node->token->value.string_value, "ifj")) {
-                            return T_ERROR_RET;
+                            symtable_dispose(&SymFunctionTree);
+                            freeAST(ASTRoot);
+                            error_exit(3, "ERROR: Missing definition!\n");
                         }
                         // if the 2nd part of the built-in function is too long
                         if (strlen(node->left->token->value.string_value) > 9) {
@@ -788,28 +793,33 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     if(node->left->type == ID) {
         // get return_type, check if variable or function was defined
         if(node->left->left != NULL) {
-            if(node->left->left->type == ID || node->left->left->type == P_EXPRESSION_LIST) {
+            if(node->left->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->left->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                if(node->left->right != NULL) {
+                    if(node->left->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->left->left->token->value.string_value) > 9) {
+                    if (strlen(node->left->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->left->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->left->right->token->value.string_value);
                     left_id = symtable_search(SymFunctionTree, builtinFun);
                     if(left_id == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->left->left->left, left_id);
+                    checkArguments(&local_table, node->left->left, left_id);
                 }
                 else {
                     left_id = symtable_search(SymFunctionTree, node->left->token->value.string_value);
@@ -861,28 +871,33 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     if(node->right->type == ID) {
         // get return_type, check if variable or function was defined
         if(node->right->left != NULL) {
-            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+            if(node->right->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->right->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                if(node->right->right != NULL) {
+                    if(node->right->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->right->left->token->value.string_value) > 9) {
+                    if (strlen(node->right->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->right->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
                     right_id = symtable_search(SymFunctionTree, builtinFun);
                     if(right_id == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->right->left->left, right_id);
+                    checkArguments(&local_table, node->right->left, right_id);
                 }
                 else {
                     right_id = symtable_search(SymFunctionTree, node->right->token->value.string_value);
@@ -1018,28 +1033,33 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     // left node
     if(node->left->type == ID) {
         if(node->left->left != NULL) {
-            if(node->left->left->type == ID || node->left->left->type == P_EXPRESSION_LIST) {
+            if(node->left->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->left->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                if(node->left->right != NULL) {
+                    if(node->left->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->left->left->token->value.string_value) > 9) {
+                    if (strlen(node->left->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->left->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->left->right->token->value.string_value);
                     sym_node_left = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node_left == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->left->left->left, sym_node_left);
+                    checkArguments(&local_table, node->left->left, sym_node_left);
                 }
                 else {
                     sym_node_left = symtable_search(SymFunctionTree, node->left->token->value.string_value);
@@ -1090,28 +1110,33 @@ ret_type checkAritTypes(ASTNode* node, symtable_node_ptr local_table) {
     // right node
     if(node->right->type == ID) {
         if(node->right->left != NULL) {
-            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+            if(node->right->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->right->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                if(node->right->right != NULL) {
+                    if(node->right->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->right->left->token->value.string_value) > 9) {
+                    if (strlen(node->right->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->right->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
                     sym_node_right = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node_right == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->right->left->left, sym_node_right);
+                    checkArguments(&local_table, node->right->left, sym_node_right);
                 }
                 else {
                     sym_node_right = symtable_search(SymFunctionTree, node->right->token->value.string_value);
@@ -1224,29 +1249,35 @@ ret_type checkUnType(ASTNode* node, symtable_node_ptr local_table) {
         symtable_node_ptr sym_node;
         // functions
         if(node->right->left != NULL) {
-            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+            if(node->right->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->right->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                if(node->right->right != NULL) {
+                    if(node->right->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->right->left->token->value.string_value) > 9) {
+                    if (strlen(node->right->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->right->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
                     sym_node = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->right->left->left, sym_node);
+                    checkArguments(&local_table, node->right->left, sym_node);
                 }
+                // user defined functions
                 else {
                     sym_node = symtable_search(SymFunctionTree, node->right->token->value.string_value);
                     if(sym_node == NULL) {
@@ -1313,28 +1344,33 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
     if(node->left->type == ID) {
         symtable_node_ptr sym_node;
         if(node->left->left != NULL) {
-            if(node->left->left->type == ID || node->left->left->type == P_EXPRESSION_LIST) {
+            if(node->left->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->left->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                if(node->left->right != NULL) {
+                    if(node->left->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->left->left->token->value.string_value) > 9) {
+                    if (strlen(node->left->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->left->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->left->right->token->value.string_value);
                     sym_node = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->left->left->left, sym_node);
+                    checkArguments(&local_table, node->left->left, sym_node);
                 }
                 else {
                     sym_node = symtable_search(SymFunctionTree, node->left->token->value.string_value);
@@ -1388,28 +1424,33 @@ ret_type checkBool(ASTNode* node, symtable_node_ptr local_table) {
     if(node->right->type == ID) {
         symtable_node_ptr sym_node;
         if(node->right->left != NULL) {
-            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+            if(node->right->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->right->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                if(node->right->right != NULL) {
+                    if(node->right->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->right->left->token->value.string_value) > 9) {
+                    if (strlen(node->right->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->right->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
                     sym_node = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->right->left->left, sym_node);
+                    checkArguments(&local_table, node->right->left, sym_node);
                 }
                 else {
                     sym_node = symtable_search(SymFunctionTree, node->right->token->value.string_value);
@@ -1471,28 +1512,33 @@ ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
     symtable_node_ptr sym_node_right, sym_node_left;
     if(node->left->type == ID) {
         if(node->left->left != NULL) {
-            if(node->left->left->type == ID || node->left->left->type == P_EXPRESSION_LIST) {
+            if(node->left->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->left->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                if(node->left->right != NULL) {
+                    if(node->left->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->left->left->token->value.string_value) > 9) {
+                    if (strlen(node->left->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->left->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->left->right->token->value.string_value);
                     sym_node_left = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node_left == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->left->left->left, sym_node_left);
+                    checkArguments(&local_table, node->left->left, sym_node_left);
                 }
                 else {
                     sym_node_left = symtable_search(SymFunctionTree, node->left->token->value.string_value);
@@ -1539,28 +1585,33 @@ ret_type checkRel(ASTNode* node, symtable_node_ptr local_table) {
     }
     if(node->right->type == ID) {
         if(node->right->left != NULL) {
-            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+            if(node->right->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->right->left->type == ID) {
+                if(node->right->right != NULL) {
+                    if(node->right->right->type != ID) {
+                        return T_ERROR_RET;
+                    } 
                     // if the first ID isn't "ifj"
                     if(strcmp(node->right->token->value.string_value, "ifj")) {
-                        return T_ERROR_RET;
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
                     }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->right->left->token->value.string_value) > 9) {
+                    if (strlen(node->right->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->right->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
                     sym_node_right = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node_right == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->right->left->left, sym_node_right);
+                    checkArguments(&local_table, node->right->left, sym_node_right);
                 }
                 else {
                     sym_node_right = symtable_search(SymFunctionTree, node->right->token->value.string_value);
@@ -1718,28 +1769,33 @@ ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
     symtable_node_ptr sym_node_right;
     if(node->left->type == ID) {
         if(node->left->left != NULL) {
-            if(node->left->left->type == ID || node->left->left->type == P_EXPRESSION_LIST) {
+            if(node->left->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->left->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                if(node->left->right != NULL) {
+                    if(node->left->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->left->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->left->left->token->value.string_value) > 9) {
+                    if (strlen(node->left->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->left->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->left->right->token->value.string_value);
                     sym_node_left = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node_left == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->left->left->left, sym_node_left);
+                    checkArguments(&local_table, node->left->left, sym_node_left);
                 }
                 else {
                     sym_node_left = symtable_search(SymFunctionTree, node->left->token->value.string_value);
@@ -1793,29 +1849,34 @@ ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
         left_type = convertToRetType(node->left->type);
     }
     if(node->right->type == ID) {
-        if(node->right->right != NULL) {
-            if(node->right->left->type == ID || node->right->left->type == P_EXPRESSION_LIST) {
+        if(node->right->left != NULL) {
+            if(node->right->left->type == P_EXPRESSION_LIST) {
                 // built-in function
-                if(node->right->left->type == ID) {
-                    // if the first ID isn't "ifj"
-                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                if(node->right->right != NULL) {
+                    if(node->right->right->type != ID) {
                         return T_ERROR_RET;
                     }
+                    // if the first ID isn't "ifj"
+                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                        symtable_dispose(&SymFunctionTree);
+                        freeAST(ASTRoot);
+                        error_exit(3, "ERROR: Missing definition!\n");
+                    }
                     // if the 2nd part of the built-in function is too long
-                    if (strlen(node->right->left->token->value.string_value) > 9) {
+                    if (strlen(node->right->right->token->value.string_value) > 9) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Missing definition!\n");
                     }
                     char builtinFun[14] = "ifj.";
-                    strcpy(builtinFun+4, node->right->left->token->value.string_value);
+                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
                     sym_node_right = symtable_search(SymFunctionTree, builtinFun);
                     if(sym_node_right == NULL) {
                         symtable_dispose(&SymFunctionTree);
                         freeAST(ASTRoot);
                         error_exit(3, "ERROR: Undefined identifier!\n");
                     }
-                    checkArguments(&local_table, node->right->left->left, sym_node_right);
+                    checkArguments(&local_table, node->right->left, sym_node_right);
                 }
                 else {
                     sym_node_right = symtable_search(SymFunctionTree, node->right->token->value.string_value);
