@@ -51,3 +51,19 @@ symtable_node_ptr stackUtilPop(stack_t* stack){
     stackPop(stack);
     return tree_copy;
 }
+
+void updateTableBySameKey(symtable_node_ptr oldTable, symtable_tree_ptr localTable){
+    if (oldTable == NULL || *localTable == NULL) return NULL;
+
+    if (strcmp(oldTable->key, (*localTable)->key) == 0) {
+        ((*localTable)->entry->isChanged) = oldTable->entry->isChanged;
+        ((*localTable)->entry->isUsed) = oldTable->entry->isUsed;
+    }
+    // traverse old table
+    updateTableBySameKey(oldTable->left,*localTable);
+    updateTableBySameKey(oldTable->right,*localTable);
+    // traverse local table
+    updateTableBySameKey(oldTable,&((*localTable)->left));
+    updateTableBySameKey(oldTable,&((*localTable)->right));
+
+}
