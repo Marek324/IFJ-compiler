@@ -274,7 +274,52 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
         if (type != T_NULL_RET) {
             if (key->entry->type == type) {
                 if (node->right->type == ID) {
-                symtable_node_ptr expressionID = symtable_search(*local_table, node->right->token->value.string_value);
+                symtable_node_ptr expressionID;
+                // functions
+                if(node->right->left != NULL) {
+                    if(node->right->left->type == P_EXPRESSION_LIST) {
+                        // built-in functions
+                        if(node->right->right != NULL) {
+                            if(node->right->right->type == ID) {
+                                // if the first ID isn't "ifj"
+                                if(strcmp(node->right->token->value.string_value, "ifj")) {
+                                    symtable_dispose(&SymFunctionTree);
+                                    freeAST(ASTRoot);
+                                    error_exit(3, "ERROR: Missing definition!\n");
+                                }
+                                // if the 2nd part of the built-in function is too long
+                                if (strlen(node->right->right->token->value.string_value) > 9) {
+                                    symtable_dispose(&SymFunctionTree);
+                                    freeAST(ASTRoot);
+                                    error_exit(3, "ERROR: Missing definition!\n");
+                                }
+                                char builtinFun[14] = "ifj.";
+                                strcpy(builtinFun+4, node->right->right->token->value.string_value);
+                                expressionID = symtable_search(SymFunctionTree, builtinFun);
+                                if(expressionID == NULL) {
+                                    symtable_dispose(&SymFunctionTree);
+                                    freeAST(ASTRoot);
+                                    error_exit(3, "ERROR: Undefined identifier!\n");
+                                }
+                                checkArguments(local_table, node->right->left, expressionID);
+                            }
+                        }
+                        // normal functions
+                        else {
+                            expressionID = symtable_search(SymFunctionTree, node->right->token->value.string_value);
+                            if(expressionID == NULL) {
+                                symtable_dispose(&SymFunctionTree);
+                                freeAST(ASTRoot);
+                                error_exit(3, "ERROR: Undefined identifier!\n");
+                            }
+                            checkArguments(local_table, node->right->left, expressionID);
+                        }
+                    }
+                }
+                // variables
+                else {
+                    expressionID = symtable_search(*local_table, node->right->token->value.string_value);
+                }
                 if (expressionID->entry->isNullable && !key->entry->isNullable) {
                     freeAST(ASTRoot);
                     symtable_dispose(&SymFunctionTree);        
