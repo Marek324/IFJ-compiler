@@ -140,7 +140,7 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
     checkVarsAndConsts(local_table->left);
 
     if (scope == local_table->entry->scopeLevel) {
-        if (local_table->entry->isConst == true){
+        if (local_table->entry->isConst == true) {
             if (local_table->entry->isUsed != true) {
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);        
@@ -148,7 +148,7 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
             }
         }
         else {
-            if (local_table->entry->isUsed != true && local_table->entry->isChanged != true) {
+            if (local_table->entry->isUsed != true || local_table->entry->isChanged != true) {
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);        
                 error_exit(9, "ERROR: variable neither used nor modified\n");
