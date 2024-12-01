@@ -252,6 +252,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     key->entry->hasExplicitType = false;
     key->entry->isNullable = false;
     key->entry->scopeLevel = scope;
+
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
@@ -298,7 +299,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
             symtable_node_ptr expressionID;
             // functions
             if(node->right->left != NULL) {
-                if(node->right->left == P_EXPRESSION_LIST) {
+                if(node->right->left->type == P_EXPRESSION_LIST) {
                     // built-in functions
                     if(node->right->right != NULL) {
                         if(node->right->right->type == ID) {
@@ -322,7 +323,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
                                 freeAST(ASTRoot);
                                 error_exit(3, "ERROR: Undefined identifier!\n");
                             }
-                            checkArguments(&local_table, node->right->left, expressionID);
+                            checkArguments(local_table, node->right->left, expressionID);
                         }
                     }
                     // normal functions
@@ -333,7 +334,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
                             freeAST(ASTRoot);
                             error_exit(3, "ERROR: Undefined identifier!\n");
                         }
-                        checkArguments(&local_table, node->right->left, expressionID);
+                        checkArguments(local_table, node->right->left, expressionID);
                     }
                 }
             }
@@ -454,7 +455,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
                         symtable_node_ptr expressionID;
                         // functions
                         if(node->right->left != NULL) {
-                            if(node->right->left == P_EXPRESSION_LIST) {
+                            if(node->right->left->type == P_EXPRESSION_LIST) {
                                 // built-in functions
                                 if(node->right->right != NULL) {
                                     if(node->right->right->type == ID) {
@@ -506,7 +507,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
                     symtable_node_ptr expressionID;
                     // functions
                     if(node->right->left != NULL) {
-                        if(node->right->left == P_EXPRESSION_LIST) {
+                        if(node->right->left->type == P_EXPRESSION_LIST) {
                             // built-in functions
                             if(node->right->right != NULL) {
                                 if(node->right->right->type == ID) {
@@ -724,7 +725,7 @@ void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_n
 }
 
 void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table){
-    
+     
 }
 
 void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table){
