@@ -174,7 +174,12 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     checkForT_Error(*token);
                 }
                 ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
-                insertLeft(id_node, expressionListRule);
+                if(id_node->left != NULL) {
+                    insertLeft(id_node->left, expressionListRule);
+                }
+                else {
+                    insertLeft(id_node, expressionListRule);
+                }
                 ExpressionList(token, id_node, buff);
             }
             if((*token)->type == T_DOT) {
@@ -241,11 +246,20 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     }
                     continue;
                 }
-                ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
-                insertLeft(id_node, node);
-                // get token after ID (should be LPAREN)
-                *token = get_token(buff);
-                continue;
+                else if(node->type == ID) {
+                    ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
+                    insertLeft(id_node, node);
+                    // get token after ID (should be LPAREN)
+                    *token = get_token(buff);
+                    continue;
+                }
+                else {
+                    freeAll(paren_depth, operand_stack, operator_stack);
+                    freeAST(ASTRoot);
+                    symtable_dispose(&SymFunctionTree);
+                    error_exit(2, "ERROR: Wrong token after DOT!\n");
+                }
+                
             }
             if((*token)->type != T_RPAREN) {
                 freeAll(paren_depth, operand_stack, operator_stack);

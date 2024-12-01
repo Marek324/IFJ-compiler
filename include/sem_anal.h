@@ -62,7 +62,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_pt
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table);
 
 void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
-// pass in ID node of function
+// pass in ID node of function (2nd ID of built-in) and P_EXPRESSION_LIST node
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key);
 
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
