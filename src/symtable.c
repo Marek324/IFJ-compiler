@@ -30,6 +30,7 @@ symtable_entry_ptr symtable_entry_init(symtable_entry_type type) {
     entry->param_types = NULL;
     entry->isUsed = false;
     entry->isNullable = false;
+    entry->hasReturn = false;
 
     if (type == T_FUN_SYM) {
         // Allocate memory for the local symbol table (pointer to a tree)

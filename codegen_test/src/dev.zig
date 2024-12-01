@@ -2,11 +2,12 @@ const ifj = @import("ifj24.zig");
 
 pub fn main() void {
     const A: ?i32 = null;
-    const C: ?i32 = 3;
+    var C: ?i32 = 3;
+    C = fu(C);
     if (A) |B| {
         const P = B;
     }
-    else {
+    else if (A) {
         const P = C;
     }
     brk: while (A) |B| : (const K: ?i32 = 3) {
@@ -21,6 +22,6 @@ pub fn main() void {
     }
 }
 pub fn fu( ast: ?i32,) ?i32 {
-    const A: ?i32 = 3;
+    const A: ?i32 = null;
     return A;
 }

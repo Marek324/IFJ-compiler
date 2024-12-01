@@ -7,6 +7,9 @@
 #include "stack_utils.h"
 
 stack_t *SCOPEStack = NULL;
+
+int scope = 0;
+
 void print_AVL(symtable_node_ptr node) {
     if (node == NULL) {
         return;
@@ -23,7 +26,7 @@ void print_AVL(symtable_node_ptr node) {
     printf("%d", node->entry->param_nullable[5]);
     printf("%d", node->entry->param_types[5]);*/
 }
-void checkForReturn(ASTNode *root) {
+void findReturn(ASTNode *root) {
     root = root->right->left; // skip prolog
     while (root != NULL) {
         root = root->right; // ID
@@ -40,7 +43,7 @@ void checkForReturn(ASTNode *root) {
                 lookForReturn = lookForReturn->right;
             }
             if (lookForReturn->type == P_RETURN_STATEMENT) {
-                function->entry->returnsValue = true;
+                function->entry->hasReturn = true;
             }
             else if (lookForReturn->type == ID) {
                 lookForReturn = lookForReturn->left->left;
@@ -56,11 +59,18 @@ void checkForReturn(ASTNode *root) {
 void analyse (ASTNode* root) {
     checkForMain();
     insertBuiltInFun();
-    checkForReturn(root);
+    findReturn(root);
     root = root->right->left; // skip prolog
+    //print_AVL(SymFunctionTree);
     symFuncDef(root);
 }
-
+void checkForReturn(symtable_node_ptr function) {
+    if (function->entry->returnsValue == true && function->entry->hasReturn != true) {
+        freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);
+        error_exit(6, "ERROR: function doesnt return anything!\n");
+    }
+}
 void symFuncDef(ASTNode* node){
     if (node == NULL || node->type == END_OF_FILE) return;
     // function Sym node 
@@ -81,10 +91,12 @@ void symFuncDef(ASTNode* node){
     symBlock(node, &local_table, NULL, T_ANY, NULL, function);
 
     symFuncDef(node->left);
+    checkForReturn(function);
     symtable_dispose(&local_table);
 }
 void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId, symtable_node_ptr function) {
     if (local_table != NULL) {
+    scope++;
     stackPush(SCOPEStack, (long)(*local_table));
     *local_table = stackUtilCopy(*local_table);
     }
@@ -92,25 +104,33 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         symtable_insert(local_table, optionalValue->right->token->value.string_value, T_VAR_SYM);
         symtable_node_ptr key = symtable_search(*local_table, optionalValue->right->token->value.string_value);
         key->entry->type = type;
+        key->entry->isConst = true;
+        key->entry->scopeLevel = scope;
     }
     if (whileId != NULL) {
         symtable_insert(local_table, whileId->token->value.string_value, T_VAR_SYM);
         symtable_node_ptr key = symtable_search(*local_table, whileId->token->value.string_value);
         key->entry->type = T_WHILE_RET;
+        key->entry->scopeLevel = scope;
     }
     fprintf(stderr, "SUB_BLOCK\n");
-    symStatement(node->right, local_table, function); 
+    fprintf(stderr, "%i\n", scope);
+    symStatement(node->right, local_table, function);
+    scope--;
     if (!stackIsEmpty(SCOPEStack)) {
         print_AVL(*local_table);
         fprintf(stderr,"\n");
         symtable_node_ptr old_table = *local_table; // Store old table for cleanup
+        updateTableBySameKey(old_table, local_table);
         *local_table = stackUtilPop(SCOPEStack);
         symtable_dispose(&old_table); // Free the previous scope's memory
         fprintf(stderr, "SUB_BLOCK_END\n");
+        fprintf(stderr, "%i\n", scope);
         print_AVL(*local_table);
         fprintf(stderr, "\n");
     }
 }
+
 void symStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function) {
     if (node == NULL)
         return;
@@ -174,6 +194,7 @@ void symParamList(ASTNode* node, symtable_tree_ptr local_table) {
         key->entry->isChanged = false;
         key->entry->hasExplicitType = true;
         key->entry->isUsed = false;
+        key->entry->scopeLevel = 1;
     if (node->right->type == P_QUESTION_MARK) {
         key->entry->isConst = true;
         key->entry->isNullable = true;
@@ -205,6 +226,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     key->entry->isChanged = false;
     key->entry->hasExplicitType = false;
     key->entry->isNullable = false;
+    key->entry->scopeLevel = scope;
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
@@ -433,7 +455,9 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
 
     if (node->left != NULL) {
         node = node->left; // P_ELSE_STATEMENT
-        node = node->right; // P_BLOCK
+        if(node->right->type == P_BLOCK) {
+                node = node->right; //P_BLOCK
+            }
         symBlock(node, local_table, NULL, T_ANY, NULL, function);
     }
 }
@@ -499,7 +523,34 @@ void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id, sym
 
 void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function){
     fprintf(stderr,"return\n");
-
+    node = node->right; // P_EXPRESSION
+    if (function->entry->type == T_NULL_RET && node->right != NULL) {
+        freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);
+        error_exit(6, "ERROR: has to be nullable ID or Function returning null!\n");
+    }
+    if (function->entry->type != T_NULL_RET) {
+        if (node->right == NULL) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);
+            error_exit(6, "ERROR: has to be nullable ID or Function returning null!\n");
+        }
+        ret_type type = checkExpr(node->right, *local_table);
+        if (type != T_NULL_RET) {
+            if (function->entry->type != type) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(7, "ERROR: returning wrong type!\n");
+            }
+        }
+        else {
+            if (function->entry->isNullable != true) {
+                freeAST(ASTRoot);
+                symtable_dispose(&SymFunctionTree);
+                error_exit(7, "ERROR: function cannot return NULL!\n");
+            } 
+        }
+    } 
 }
 
 void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table){

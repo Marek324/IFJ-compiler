@@ -44,12 +44,14 @@ typedef struct symtable_entry_s {
     bool isConst; 
     bool hasExplicitType;
     bool isChanged;
+    int scopeLevel;
 
     // functions
     int param_count;
     bool *param_nullable;
     ret_type *param_types;
     bool returnsValue;
+    bool hasReturn;
     symtable_tree_ptr local_symtable;
 } symtable_entry_t, *symtable_entry_ptr;
 

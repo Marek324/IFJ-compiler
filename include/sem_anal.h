@@ -49,7 +49,9 @@ void checkForMain();
 // check for function
 void checkIfIdExits(symtable_node_ptr tree, char *key);
 
-void checkForReturn(ASTNode *root);
+void findReturn(ASTNode *root);
+
+void checkForReturn(symtable_node_ptr function);
 
 void symFuncDef(ASTNode* node);
 
