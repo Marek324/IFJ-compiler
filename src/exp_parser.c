@@ -174,13 +174,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     checkForT_Error(*token);
                 }
                 ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
-                if(id_node->left != NULL) {
-                    insertLeft(id_node->left, expressionListRule);
-                }
-                else {
-                    insertLeft(id_node, expressionListRule);
-                }
-                ExpressionList(token, id_node, buff);
+                insertLeft(id_node, expressionListRule);
+                ExpressionList(token, expressionListRule, buff);
             }
             if((*token)->type == T_DOT) {
                 freeAST(node);
@@ -248,7 +243,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 }
                 else if(node->type == ID) {
                     ASTNode* id_node = (ASTNode*)stackGetTop(operand_stack);
-                    insertLeft(id_node, node);
+                    insertRight(id_node, node);
                     // get token after ID (should be LPAREN)
                     *token = get_token(buff);
                     continue;
