@@ -422,6 +422,9 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 case U:
                 default:
                     freeAll(paren_depth, operand_stack, operator_stack);
+                    if(node != NULL) {
+                        freeAST(node);
+                    }
                     return NULL;
             }
         }

@@ -1227,11 +1227,13 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
     else {
         // f64 to i32 if the decimal part is 0 (only literals and constants)
         if(left_type == T_FLOAT_RET) {
-            if(left_id->entry->entry_type == T_FUN_SYM) {
-                return T_ERROR_RET;
-            }
             if(node->left->type == ID) {
-                if(!left_id->entry->isConst) {
+                if(node->left->left == NULL) {
+                    if(!left_id->entry->isConst) {
+                        return T_ERROR_RET;
+                    }
+                }
+                else {
                     return T_ERROR_RET;
                 }
             }
@@ -1256,11 +1258,13 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
             return T_INT_RET;
         }
         if(right_type == T_FLOAT_RET) {
-            if(right_id->entry->entry_type == T_FUN_SYM) {
-                return T_ERROR_RET;
-            }
             if(node->right->type == ID) {
-                if(!right_id->entry->isConst) {
+                if(node->right->left == NULL) {
+                    if(!right_id->entry->isConst) {
+                        return T_ERROR_RET;
+                    }
+                }
+                else {
                     return T_ERROR_RET;
                 }
             }
