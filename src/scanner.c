@@ -85,21 +85,22 @@ Token *get_token(circ_buff_ptr buffer)
                 
                 switch (c) {
                     // Single character tokens can be returned immediately
-                    case '(': RETURN_TOKEN(T_LPAREN);
-                    case ')': RETURN_TOKEN(T_RPAREN);
-                    case '{': RETURN_TOKEN(T_LBRACE);
-                    case '}': RETURN_TOKEN(T_RBRACE);
-                    case '[': RETURN_TOKEN(T_LBRACKET);
-                    case ']': RETURN_TOKEN(T_RBRACKET);
-                    case '|': RETURN_TOKEN(T_PIPE);
-                    case '?': RETURN_TOKEN(T_QMARK);
-                    case ':': RETURN_TOKEN(T_COLON);
-                    case ',': RETURN_TOKEN(T_COMMA);
-                    case '.': RETURN_TOKEN(T_DOT);
-                    case ';': RETURN_TOKEN(T_SEMICOL);
                     case '+': RETURN_TOKEN(T_PLUS);
                     case '-': RETURN_TOKEN(T_MINUS);
                     case '*': RETURN_TOKEN(T_MUL);
+                    // case '@': RETURN_TOKEN(T_AT);
+                    case '?': RETURN_TOKEN(T_QMARK);
+                    case '.': RETURN_TOKEN(T_DOT);
+                    case ',': RETURN_TOKEN(T_COMMA);
+                    case ':': RETURN_TOKEN(T_COLON);
+                    case ';': RETURN_TOKEN(T_SEMICOL);
+                    case '(': RETURN_TOKEN(T_LPAREN);
+                    case ')': RETURN_TOKEN(T_RPAREN);
+                    case '|': RETURN_TOKEN(T_PIPE);
+                    case '[': RETURN_TOKEN(T_LBRACKET);
+                    case ']': RETURN_TOKEN(T_RBRACKET);
+                    case '{': RETURN_TOKEN(T_LBRACE);
+                    case '}': RETURN_TOKEN(T_RBRACE);
 
                     case '=': RETURN_TOKEN_FLW_EQ(T_EQ, T_ASGN);
                     case '!': RETURN_TOKEN_FLW_EQ(T_NEQ, T_BANG);
