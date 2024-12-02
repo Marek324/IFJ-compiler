@@ -1,5 +1,13 @@
 const ifj = @import("ifj24.zig");
 pub fn main() void{
-    const a : [  a ]u8= ifj.string("321");
+     ifj.write(ifj.string(
+        \\a
+    ,
+        \\b
+     ));
      ifj.write(a);
-}   
+}  
+
+pub fn a (b:u8) void{
+    
+}
