@@ -56,8 +56,7 @@ Implementation of scanner.
 
 #define ERROR(E, MSG) \
     fprintf(stderr, "Error: %s\n",  MSG);                                  \
-    token->value.int_value = (E);\
-    RETURN_TOKEN(T_ERROR)
+    exit(E) // add freeing of resources
 
 // Function prototypes
 KeyWordType check_keyword(char *str);
@@ -130,7 +129,7 @@ Token *get_token(circ_buff_ptr buffer)
                         break;
                     
                     case '"': PUT_C_BACK_CHANGE_STATE(S_STR)
-                    case '@': 
+                    case '@': // delete
                         dyn_str_append(str, c); // add @ to dyn_string
                         state = S_AT;
                         break;
@@ -138,13 +137,13 @@ Token *get_token(circ_buff_ptr buffer)
                         if (isalpha(c) || c == '_')  PUT_C_BACK_CHANGE_STATE(S_ID)
                         else if (isdigit(c)) PUT_C_BACK_CHANGE_STATE(S_INT) 
                         else {
-                            ERROR(1, "Invalid character"); // Invalid character
+                            ERROR(1, "Invalid character"); 
                         }
                         break;
                 }
                 break; // S_START
 
-            case S_AT:
+            case S_AT: // delete
                 {   
                     READ_ID;
                     int import = !strcmp(str->str, "@import");
@@ -229,6 +228,9 @@ Token *get_token(circ_buff_ptr buffer)
                 } else if (c == '+' || c == '-') {
                     dyn_str_append(str, 'e');
                     dyn_str_append(str, c);
+                    if(!isdigit(c = read_char(buffer))) {
+                        ERROR(1, "Invalid float, no exponent part after \'e\'"); // Invalid float - no exponent
+                    }
                     state = S_FLOAT_EXP;
                     break;
                 } else {
@@ -307,7 +309,7 @@ Token *get_token(circ_buff_ptr buffer)
 
             case S_STR_MLINE_NEWLINE:
                 circ_buff_enqueue(buffer, c);
-                while(isspace(c = read_char(buffer))) {} // skip whitespaces
+                while(isblank(c = read_char(buffer))) {} // skip whitespaces
                 if (c == '\\') {
                     c = read_char(buffer);
                     if (c == '\\') {

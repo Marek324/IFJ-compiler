@@ -1,14 +1,11 @@
-// Ukazka prace s retezci a vestavenymi funkcemi 
 const ifj = @import("ifj24.zig");
-
+// Hlavná funkcia programu
 pub fn main() void {
-  const s1 : []u8 = ifj.string( 
-    \\Toto 
-    \\ je 
-    \\
-    \\ nejaky 
-                        \\ text  // ve viceradkovem retezcovem literalu nelze mit komentar
-    ); // ukoncujici uvozovky ovlivnuji implicitni odsazeni vnitrnich radku retezce
-  ifj.write(s1);
-}
 
+    const a = ifj.string(\\ line1
+                        \\ line2
+                        \\ line3
+                        \\ line4
+                        );
+    ifj.write(a);
+}

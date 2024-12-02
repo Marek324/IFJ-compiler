@@ -107,8 +107,6 @@ typedef struct ASTNode {
 //ASTRoot globally initialized in case of internal or scanner errors 
 extern ASTNode *ASTRoot;
 
-void checkForT_Error(Token *token);
-
 ASTNode *nodeCreate(ASTNodeType type, Token *token);
 
 void insertLeft(ASTNode *parent, ASTNode *leftChild);

@@ -18,7 +18,6 @@ ASTNode *checkToken(Token **token, TokenType wantedType, KeyWordType wantedKeyWo
         ptr = nodeCreate(convertToASTType(wantedType, NO_KW), *token);
         return ptr;
     }
-    checkForT_Error(*token);
     Free(token);
     error_exit(2, "%s\n", error); 
     return NULL;
@@ -77,7 +76,6 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         freeAST(idFound);
     }
     else {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2,"SYNTAX ERROR: WRONG PROLOG ID");
     }
@@ -99,7 +97,6 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     *token = get_token(buffer);
     Expression(token, expression, buffer);
     if (expression->right == NULL) {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR: Prolog (Expression)\n"); 
     }
@@ -108,7 +105,6 @@ void Prolog(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         expression = NULL;
     }
     else {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2,"SYNTAX ERROR: HAS TO BE ifj24.zig");
     }
@@ -267,7 +263,6 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
             }
         }
         else {
-            checkForT_Error(*token);
             Free(token);
             error_exit(2, "SYNTAX ERROR: Type unknown type\n"); 
         }
@@ -288,7 +283,6 @@ void FunctionType(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
                 *token = get_token(buffer);
             }
     else {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR: Unknown func type\n"); 
     }
@@ -466,7 +460,6 @@ void VarDeclaration(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool semi
         }
     }
     else {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR: NOT CONST OR VAR\n");
     }
@@ -553,7 +546,6 @@ void AsgnFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, expressionFound);
     Expression(token, expressionFound, buffer);
     if (expressionFound->right == NULL) {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR assigning wrong expression!\n"); 
     }
@@ -588,7 +580,6 @@ void IfStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR wrong if condition!\n");
     }
@@ -631,7 +622,6 @@ void IfFound(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         }
     }
     else {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR: after if condition\n");
     }
@@ -691,7 +681,6 @@ void SingleStatement(Token **token, ASTNode *ptr, circ_buff_ptr buffer, bool sem
         For(token, statementRule, buffer);
     }
     else {
-        checkForT_Error(*token);
         Free(token);
         error_exit(2, "SYNTAX ERROR not a statement!\n");
     }
@@ -752,7 +741,6 @@ void While(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
-            checkForT_Error(*token);
             Free(token);
             error_exit(2, "SYNTAX ERROR wrong while condition!\n"); 
     }
@@ -888,7 +876,6 @@ void For(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
     insertRight(ptr, expressionRule);
     Expression(token, expressionRule, buffer);
     if (expressionRule->right == NULL) {
-            checkForT_Error(*token);
             Free(token);
             error_exit(2, "SYNTAX ERROR wrong for condition!\n"); 
     }

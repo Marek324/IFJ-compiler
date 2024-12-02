@@ -38,10 +38,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     if (*token == NULL) {
         return NULL; // Error: unexpected end of input
     }
-    if((*token)->type == T_ERROR) {
-        symtable_dispose(&SymFunctionTree);
-        checkForT_Error(*token);
-    }
 
     int* paren_depth = malloc(sizeof(int));
     if (paren_depth == NULL) {
@@ -56,11 +52,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     TokenType temp_type = (*token)->type;
 
     while (*token != NULL && !expressionEnd(isEnd(*token), paren_depth)) {
-        if((*token)->type == T_ERROR) {
-            freeAll(paren_depth, operand_stack, operator_stack);
-            symtable_dispose(&SymFunctionTree);
-            checkForT_Error(*token);
-        }
         ASTNode* node = NULL;
         // for keywords
         if((*token)->type == T_KW) {
@@ -73,47 +64,35 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         if((*token)->type == T_AT_AS) {
             // get token after AT_AS (@as) [should be LPAREN]
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             if((*token)->type != T_LPAREN) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);
-                error_exit(2, "SYNTAX ERROR: Missing LPAREN after \"@as\"\n");
+                fprintf(stderr, "SYNTAX ERROR: Missing LPAREN after \"@as\"\n");
+                exit(2);
             }
             free_token(*token);
             // get token after LPAREN (should be i32)
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             if((*token)->value.keyword != KW_I32) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);
-                error_exit(2, "SYNTAX ERROR: Missing i32 after \"(\"\n");
+                fprintf(stderr, "SYNTAX ERROR: Missing i32 after \"(\"\n");
+                exit(2);
             }
             free_token(*token);
             // get token after i32 (should be comma)
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             if((*token)->type != T_COMMA) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);
-                error_exit(2, "SYNTAX ERROR: Missing COMMA after \"i32\"\n");
+                fprintf(stderr, "SYNTAX ERROR: Missing COMMA after \"i32\"\n");
+                exit(2);
             }
             free_token(*token);
             ASTNode* expression = ruleNode(P_EXPRESSION);
@@ -121,11 +100,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             stackPush(operand_stack, (long)node);
             // get token after COMMA (should be expression)
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             ASTNode* expressionFound = parseExpression(token, buff);
             if(expressionFound == NULL) {
                 free_token(*token);
@@ -168,11 +142,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 }
                 // get token after LPAREN (should be expression)
                 *token = get_token(buff);
-                if((*token)->type == T_ERROR) {
-                    freeAll(paren_depth, operand_stack, operator_stack);
-                    symtable_dispose(&SymFunctionTree);
-                    checkForT_Error(*token);
-                }
                 ASTNode *expressionListRule = ruleNode(P_EXPRESSION_LIST);
                 insertLeft(id_node, expressionListRule);
                 ExpressionList(token, expressionListRule, buff);
@@ -181,11 +150,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 freeAST(node);
                 // get token after dot (should be ID or question mark)
                 *token = get_token(buff);
-                if((*token)->type == T_ERROR) {
-                    freeAll(paren_depth, operand_stack, operator_stack);
-                    symtable_dispose(&SymFunctionTree);
-                    checkForT_Error(*token);
-                }
                 node = nodeCreate(convertToASTType((*token)->type, NO_KW), *token);
                 if(node->type != ID && node->type != QMARK) {
                     freeAll(paren_depth, operand_stack, operator_stack);
@@ -234,11 +198,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     stackPush(operand_stack, (long)node);
                     // gets token after QMARK
                     *token = get_token(buff);
-                    if((*token)->type == T_ERROR) {
-                        freeAll(paren_depth, operand_stack, operator_stack);
-                        symtable_dispose(&SymFunctionTree);
-                        checkForT_Error(*token);
-                    }
                     continue;
                 }
                 else if(node->type == ID) {
@@ -266,11 +225,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             // RPAREN
             free(*token);
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             continue;
         }
         temp_type = (*token)->type;
@@ -283,11 +237,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             stackPush(operand_stack, (long)node);
             // gets token after "if" -> should be LPAREN
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             if((*token)->type != T_LPAREN) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
@@ -298,11 +247,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             free_token(*token);
             // gets token after LPAREN -> should be expression
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             ASTNode* expressionFound = parseExpression(token, buff);
             if(expressionFound == NULL) {
                 free_token(*token);
@@ -327,11 +271,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
 
             // gets token after RPAREN -> should be expression
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             expressionFound = parseExpression(token, buff);
             if(expressionFound == NULL) {
                 free_token(*token);
@@ -356,11 +295,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
 
             // gets token after ELSE -> should be expression
             *token = get_token(buff);
-            if((*token)->type == T_ERROR) {
-                freeAll(paren_depth, operand_stack, operator_stack);
-                symtable_dispose(&SymFunctionTree);
-                checkForT_Error(*token);
-            }
             expressionFound = parseExpression(token, buff);
             if(expressionFound == NULL) {
                 free_token(*token);
@@ -392,21 +326,11 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                     break;
                 }
                 *token = get_token(buff); // Update token
-                if((*token)->type == T_ERROR) {
-                    freeAll(paren_depth, operand_stack, operator_stack);
-                    symtable_dispose(&SymFunctionTree);
-                    checkForT_Error(*token);
-                }
                 continue;
             }
             if (stackIsEmpty(operator_stack)) {
                 stackPush(operator_stack, (long)node);
                 *token = get_token(buff); // Update token
-                if((*token)->type == T_ERROR) {
-                    freeAll(paren_depth, operand_stack, operator_stack);
-                    symtable_dispose(&SymFunctionTree);
-                    checkForT_Error(*token);
-                }
                 continue;
             }
             ASTNode* top = (ASTNode*)stackGetTop(operator_stack);
@@ -433,16 +357,6 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             return NULL;
         }
         *token = get_token(buff); // Update token
-        if((*token)->type == T_ERROR) {
-            freeAll(paren_depth, operand_stack, operator_stack);
-            symtable_dispose(&SymFunctionTree);
-            checkForT_Error(*token);
-        }
-    }
-    if((*token)->type == T_ERROR) {
-        freeAll(paren_depth, operand_stack, operator_stack);
-        symtable_dispose(&SymFunctionTree);
-        checkForT_Error(*token);
     }
     ASTNode* root = reduceAll(paren_depth, operand_stack, operator_stack);
     if(!stackIsEmpty(operand_stack) || !stackIsEmpty(operator_stack)) {

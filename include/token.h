@@ -14,6 +14,8 @@ typedef enum {
     T_ID,
     T_AT_IMPORT,
     T_AT_AS,
+
+    T_AT,
     
     T_INT,
     T_FLOAT,
@@ -42,7 +44,6 @@ typedef enum {
     T_QMARK,
  
     T_EOF,
-    T_ERROR,
     T_I2F,
     T_F2I,
 
