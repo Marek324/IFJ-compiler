@@ -829,7 +829,13 @@ void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr 
     ASTNode *optionalValue = node;
     
     node = node->left; // P_BLOCK
-    symBlock(node, local_table, optionalValue, T_INT_RET, NULL, function);
+    if (strcmp(optionalValue->right->token->value.string_value,"_") != 0) {
+        symBlock(node, local_table, optionalValue, T_INT_RET, NULL, function);
+    }
+    else {
+        symBlock(node, local_table, NULL, T_ANY, NULL, function);
+    }
+    
 
 }
 
