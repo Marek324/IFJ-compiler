@@ -54,8 +54,10 @@ Implementation of scanner.
     dyn_str_append(str, C);                                                     \
     break; }
 
-#define ERROR(E, MSG) \
-    fprintf(stderr, "Error: %s\n",  MSG);                                  \
+#define ERROR(E, MSG)                                                           \
+    free(token);                                                                \
+    dyn_str_free(str);                                                          \
+    fprintf(stderr, "Error: %s\n",  MSG);                                       \
     exit(E) // add freeing of resources
 
 // Function prototypes
