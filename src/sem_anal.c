@@ -2656,6 +2656,38 @@ void insertBuiltInFun() {
     entry13.param_types[0] = T_INT_RET;
 
     *key->entry = entry13;
+    // @as
+    symtable_insert(&SymFunctionTree,"@as",T_FUN_SYM);
+    key = symtable_search(SymFunctionTree,"@as");
+    symtable_free_entry(key->entry);
+    key->entry = malloc(sizeof(symtable_entry_t));
+    if (key->entry == NULL) {
+        error_exit(99,"malloc failed");
+    }
+    symtable_entry_t entry14 = {
+        .entry_type = T_FUN_SYM,
+        .type = T_INT_RET,
+        .isUsed = true,
+        .isNullable = false,
+        .param_count = 1,
+        .returnsValue = true,
+        .param_nullable = NULL,
+        .param_types = NULL,
+        .local_symtable = NULL,
+    };
+    entry14.param_nullable = malloc(1 * sizeof(bool));
+    if (entry14.param_nullable==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry14.param_nullable[0] = false;
+
+    entry14.param_types = malloc(1 * sizeof(ret_type));
+    if (entry14.param_types==NULL) {
+        error_exit(99,"malloc failed");
+    }
+    entry14.param_types[0] = T_ANY;
+
+    *key->entry = entry14;
 }
 ret_type convertToRetType(ASTNodeType node_type) {
     switch(node_type) {
