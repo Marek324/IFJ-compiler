@@ -95,20 +95,11 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
                 exit(2);
             }
             free_token(*token);
-            ASTNode* expression = ruleNode(P_EXPRESSION);
-            insertLeft(node, expression);
+            ASTNode* expressionList = ruleNode(P_EXPRESSION_LIST);
+            insertLeft(node, expressionList);
+            ExpressionList(token, expressionList, buff);
             stackPush(operand_stack, (long)node);
-            // get token after COMMA (should be expression)
-            *token = get_token(buff);
-            ASTNode* expressionFound = parseExpression(token, buff);
-            if(expressionFound == NULL) {
-                free_token(*token);
-                freeAll(paren_depth, operand_stack, operator_stack);
-                freeAST(ASTRoot);
-                symtable_dispose(&SymFunctionTree);
-                error_exit(2, "SYNTAX ERROR: Missing expression after COMMA\n");
-            }
-            insertRight(expression, expressionFound);
+            // get token after expression (should be RPAREN)
             if((*token)->type != T_RPAREN) {
                 free_token(*token);
                 freeAll(paren_depth, operand_stack, operator_stack);
