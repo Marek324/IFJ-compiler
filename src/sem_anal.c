@@ -2685,7 +2685,7 @@ void insertBuiltInFun() {
     if (entry14.param_types==NULL) {
         error_exit(99,"malloc failed");
     }
-    entry14.param_types[0] = T_ANY;
+    entry14.param_types[0] = T_INT_RET;
 
     *key->entry = entry14;
 }
