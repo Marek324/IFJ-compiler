@@ -816,13 +816,13 @@ void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr 
         if (conditionID->entry->isNullable == true || type != T_STR_RET) {
             freeAST(ASTRoot);
             symtable_dispose(&SymFunctionTree);
-            error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
+            error_exit(7, "ERROR: has to be u8 ID or Function returning u8 !\n");
         }
     }
     else {
         freeAST(ASTRoot);
         symtable_dispose(&SymFunctionTree);
-        error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
+        error_exit(7, "ERROR: has to be u8 ID or Function returning u8!\n");
     }
     node = node->left; // P_OPTIONAL_VALUE
     ASTNode *optionalValue = node;
