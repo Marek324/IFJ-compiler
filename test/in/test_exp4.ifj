@@ -4,7 +4,7 @@ pub fn comparestring (a : []u8, b : []u8 ) i32{
     if(ifj.strcmp(a, b) == 0){
         return 1;
     }
-    return 0;
+         return 0;
 }
 
 

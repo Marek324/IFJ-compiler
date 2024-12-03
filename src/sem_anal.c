@@ -17,6 +17,8 @@ void print_AVL(symtable_node_ptr node) {
     print_AVL(node->left);
     print_AVL(node->right);
     fprintf(stderr,"%s,", node->key);
+    //fprintf(stderr,"%d,", node->entry->isChanged);
+    //fprintf(stderr,"%d,", node->entry->isUsed);
     /*printf("%d", node->entry->type);
     printf("%i", node->entry->isNullable);
     printf("%d", node->entry->param_nullable[0]);
@@ -111,26 +113,27 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         symtable_insert(local_table, whileId->token->value.string_value, T_VAR_SYM);
         symtable_node_ptr key = symtable_search(*local_table, whileId->token->value.string_value);
         key->entry->type = T_WHILE_RET;
+        key->entry->isConst = true;
         key->entry->scopeLevel = scope;
     }
     fprintf(stderr, "SUB_BLOCK\n");
     fprintf(stderr, "%i\n", scope);
     symStatement(node->right, local_table, function);
-    checkVarsAndConsts(*local_table);
 
     if (!stackIsEmpty(SCOPEStack)) {
         print_AVL(*local_table);
         fprintf(stderr,"\n");
         symtable_node_ptr old_table = *local_table; // Store old table for cleanup
-        updateTableBySameKey(old_table, local_table);
         *local_table = stackUtilPop(SCOPEStack); //POP FROM STACK
+        updateTableBySameKey(old_table, local_table);
         symtable_dispose(&old_table); // Free the previous scope's memory
-        scope--;
         fprintf(stderr, "SUB_BLOCK_END\n");
         print_AVL(*local_table);
         fprintf(stderr, "\n");
         fprintf(stderr, "%i\n", scope);
     }
+    checkVarsAndConsts(*local_table);
+    scope--;
 }
 
 void checkVarsAndConsts(symtable_node_ptr local_table) {
@@ -242,6 +245,11 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     node = node->right; // const or var
     bool isconst = node->token->value.keyword == KW_CONST ? true : false;
     node = node->left; // ID
+    if (strcmp("_", node->token->value.string_value) == 0) {
+        symtable_dispose(&SymFunctionTree);
+        freeAST(ASTRoot);
+        error_exit(10, "ERROR: _ is not a valid ID name!\n");
+    }
     symtable_insert(local_table, node->token->value.string_value, T_VAR_SYM);
     
     symtable_node_ptr key = symtable_search(*local_table, node->token->value.string_value);
@@ -598,6 +606,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
 
                 if (type != T_NULL_RET) {
                         if (i < key->entry->param_count && !(key->entry->param_types[i] == type)) {
+                            fprintf(stderr,"%i", i);
                             freeAST(ASTRoot);
                             symtable_dispose(&SymFunctionTree);
                             error_exit(4, "ERROR: assigning wrong type!\n");
@@ -768,11 +777,31 @@ void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_n
 }
 
 void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table){
-     
+    if (node->right != NULL) {
+        node = node->right; //ID
+        checkIfIdExits(*local_table, node->token->value.string_value);
+        symtable_node_ptr id = symtable_search(*local_table, node->token->value.string_value);
+        id->entry->isUsed = true;
+        if (id->entry->type != T_WHILE_RET) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);
+            error_exit(4, "ERROR: wrong type of ID after break!\n");
+        }
+    }
 }
 
 void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table){
-    
+    if (node->right != NULL) {
+        node = node->right; //ID
+        checkIfIdExits(*local_table, node->token->value.string_value);
+        symtable_node_ptr id = symtable_search(*local_table, node->token->value.string_value);
+        id->entry->isUsed = true;
+        if (id->entry->type != T_WHILE_RET) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);
+            error_exit(4, "ERROR: wrong type of ID after continue!\n");
+        }
+    }
 }
 
 void symForLoop(ASTNode* node, symtable_tree_ptr local_table){
