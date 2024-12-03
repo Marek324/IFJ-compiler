@@ -199,7 +199,7 @@ void symStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_pt
             break;
 
         case P_FOR_LOOP:
-            symForLoop(node, local_table);
+            symForLoop(node, local_table, function);
             break;
 
         default:
@@ -806,8 +806,30 @@ void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table){
     }
 }
 
-void symForLoop(ASTNode* node, symtable_tree_ptr local_table){
+void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function){
+    fprintf(stderr,"FOR\n");
+    node = node->right; // P_EXPRESSION
+    ASTNode *expressionValue = node->right;
+    ret_type type = checkExpr(expressionValue, *local_table);
+    if (expressionValue->type == ID) {
+        symtable_node_ptr conditionID = symtable_search(*local_table,expressionValue->token->value.string_value);
+        if (conditionID->entry->isNullable == true || type != T_STR_RET) {
+            freeAST(ASTRoot);
+            symtable_dispose(&SymFunctionTree);
+            error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
+        }
+    }
+    else {
+        freeAST(ASTRoot);
+        symtable_dispose(&SymFunctionTree);
+        error_exit(7, "ERROR: has to be nullable ID or Function returning null!\n");
+    }
+    node = node->left; // P_OPTIONAL_VALUE
+    ASTNode *optionalValue = node;
     
+    node = node->left; // P_BLOCK
+    symBlock(node, local_table, optionalValue, type, NULL, function);
+
 }
 
 ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {

@@ -86,7 +86,7 @@ void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table);
 
 void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table);
 
-void symForLoop(ASTNode* node, symtable_tree_ptr local_table);
+void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
 
 void funcDef(ASTNode* node);
 // returns T_ERROR_RET as default, converts node types to return types
