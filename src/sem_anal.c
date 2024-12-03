@@ -107,6 +107,7 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         symtable_node_ptr key = symtable_search(*local_table, optionalValue->right->token->value.string_value);
         key->entry->type = type;
         key->entry->isConst = true;
+        key->entry->isNullable = false;
         key->entry->scopeLevel = scope;
     }
     if (whileId != NULL) {
@@ -828,7 +829,7 @@ void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr 
     ASTNode *optionalValue = node;
     
     node = node->left; // P_BLOCK
-    symBlock(node, local_table, optionalValue, type, NULL, function);
+    symBlock(node, local_table, optionalValue, T_INT_RET, NULL, function);
 
 }
 
