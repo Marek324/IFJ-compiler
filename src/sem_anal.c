@@ -119,6 +119,7 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
     fprintf(stderr, "SUB_BLOCK\n");
     fprintf(stderr, "%i\n", scope);
     symStatement(node->right, local_table, function);
+    checkVarsAndConsts(*local_table);
 
     if (!stackIsEmpty(SCOPEStack)) {
         print_AVL(*local_table);
@@ -127,13 +128,12 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         *local_table = stackUtilPop(SCOPEStack); //POP FROM STACK
         updateTableBySameKey(old_table, local_table);
         symtable_dispose(&old_table); // Free the previous scope's memory
+        scope--;
         fprintf(stderr, "SUB_BLOCK_END\n");
         print_AVL(*local_table);
         fprintf(stderr, "\n");
         fprintf(stderr, "%i\n", scope);
     }
-    checkVarsAndConsts(*local_table);
-    scope--;
 }
 
 void checkVarsAndConsts(symtable_node_ptr local_table) {
@@ -147,14 +147,14 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
             if (local_table->entry->isUsed != true) {
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);        
-                error_exit(9, "ERROR: constant not used\n");
+                error_exit(9, "ERROR: %s constant not used\n",local_table->key);
             }
         }
         else {
             if (local_table->entry->isUsed != true || local_table->entry->isChanged != true) {
                 freeAST(ASTRoot);
                 symtable_dispose(&SymFunctionTree);        
-                error_exit(9, "ERROR: variable neither used nor modified\n");
+                error_exit(9, "ERROR: %s variable either not used or not modified\n", local_table->key);
             }
         }
     }
@@ -739,8 +739,10 @@ void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id, sym
     symBlock(node, local_table, optionalValue, type, id, function);
     if (node->left != NULL) {
         node = node->left; // P_ELSE_STATEMENT
-        node = node->right; // P_BLOCK
-        symBlock(node, local_table, NULL, T_ANY, id, function);
+        if(node->right->type == P_BLOCK) {
+            node = node->right; //P_BLOCK
+        }
+        symBlock(node, local_table, NULL, T_ANY, NULL, function);
     }
 }
 

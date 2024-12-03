@@ -56,8 +56,12 @@ void updateTableBySameKey(symtable_node_ptr oldTable, symtable_tree_ptr localTab
     if (oldTable == NULL || *localTable == NULL) return;
 
     if (strcmp(oldTable->key, (*localTable)->key) == 0) {
-        ((*localTable)->entry->isChanged) = oldTable->entry->isChanged;
-        ((*localTable)->entry->isUsed) = oldTable->entry->isUsed;
+        if (oldTable->entry->isChanged) {
+            ((*localTable)->entry->isChanged) = oldTable->entry->isChanged;
+        }
+        if (oldTable->entry->isUsed) {
+            ((*localTable)->entry->isUsed) = oldTable->entry->isUsed;
+        }
     }
     // traverse old table
     updateTableBySameKey(oldTable->left, localTable);

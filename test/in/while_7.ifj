@@ -10,7 +10,7 @@ pub fn main() void {
         }) {
             ifj.write(i); ifj.write("\n");
             i = i + 2;
-            continue :b;
+            continue : b;
         }else{
             ifj.write("i na konci whilu a: "); ifj.write(i); ifj.write("\n");
         }
