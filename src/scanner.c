@@ -11,8 +11,7 @@ Implementation of scanner.
 
 #define RETURN_TOKEN(T)                                                         \
     token->type = T;                                                            \
-    dyn_str_free(str); \
-                    fprintf(stderr, "%d\n", token->type);                                        \
+    dyn_str_free(str);                                                          \
     return token
 
 // Returns token with string value, type can be T_ID or T_STR

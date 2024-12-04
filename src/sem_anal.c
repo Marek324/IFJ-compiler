@@ -106,6 +106,7 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         *local_table = stackUtilPop(SCOPEStack); //POP FROM STACK
         updateTableBySameKey(old_table, local_table);
         scope--;
+        symtable_dispose(&old_table); // Free the previous scope's memory
     }
 }
 
@@ -115,7 +116,6 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
     checkVarsAndConsts(local_table->right);
     checkVarsAndConsts(local_table->left);
     if (scope == local_table->entry->scopeLevel) {
-        fprintf(stderr,"VarAndConst check failed in scope : %i\n", local_table->entry->scopeLevel);
         if (local_table->entry->isConst == true) {
             if (local_table->entry->isUsed != true) {
                 freeAST(ASTRoot);
@@ -126,9 +126,9 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
         else {
             if (local_table->entry->isUsed != true || local_table->entry->isChanged != true) {
                 freeAST(ASTRoot);
-                symtable_dispose(&SymFunctionTree); 
-                fprintf(stderr, "isUsed:%i, isChanged%i\n",local_table->entry->isUsed,local_table->entry->isChanged );     
+                symtable_dispose(&SymFunctionTree);
                 error_exit(9, "ERROR: %s variable either not used or not modified\n", local_table->key);
+                symtable_dispose(&SymFunctionTree);
             }
         }
     }
@@ -232,9 +232,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     key->entry->hasExplicitType = false;
     key->entry->isNullable = false;
     key->entry->scopeLevel = scope;
-    fprintf(stderr,"%s,",key->key);
-    fprintf(stderr," scope = %i\n",key->entry->scopeLevel);
-    // 
+    
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
@@ -634,6 +632,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
 }
         
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function) {
+
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
     ret_type type = checkExpr(expressionValue, *local_table);
