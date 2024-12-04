@@ -24,5 +24,5 @@ int main() {
     circ_buff_free(buffer);
     freeAST(ASTRoot); 
     symtable_dispose(&SymFunctionTree);
-    return err;
+    return err; 
 }

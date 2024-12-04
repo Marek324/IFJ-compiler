@@ -248,7 +248,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     key->entry->hasExplicitType = false;
     key->entry->isNullable = false;
     key->entry->scopeLevel = scope;
-    //fprintf(stderr,"V:%s = %i:%i\n",key->key, key->entry->scopeLevel,scope);
+    fprintf(stderr,"V:%s = %i:%i\n",key->key, key->entry->scopeLevel,scope);
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
@@ -422,6 +422,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
     }
     node = node->left->right; // LPAREN or ID or P_WHILE_LOOP or P_ASGN_FOUND
     if (node->type == LPAREN) {
+        fprintf(stderr,"FUN\n");
         checkIfIdExits(SymFunctionTree, id->token->value.string_value);
         key = symtable_search(SymFunctionTree, id->token->value.string_value);
         key->entry->isUsed = true;
@@ -436,7 +437,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
     }
     else if (node->type == ID) {
         if (ifjFound) {
-           // fprintf(stderr,"BUILTIN FUN\n");
+           fprintf(stderr,"BUILTIN FUN\n");
             if (strlen(node->token->value.string_value) > 9) {
                 symtable_dispose(&SymFunctionTree);
                 freeAST(ASTRoot);
@@ -465,6 +466,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
         symWhileLoop(node, local_table, id, function);
     }
     else if (node->type == P_ASGN_FOUND) {
+        fprintf(stderr,"ASGN\n");
         if (!(strcmp(id->token->value.string_value, "_") == 0)) {
             checkIfIdExits(*local_table, id->token->value.string_value);
             key = symtable_search(*local_table, id->token->value.string_value);
@@ -654,7 +656,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
 }
         
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function) {
-    //fprintf(stderr,"IF\n");
+    fprintf(stderr,"IF\n");
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
     ret_type type = checkExpr(expressionValue, *local_table);
@@ -690,12 +692,13 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
         if(node->right->type == P_BLOCK) {
                 node = node->right; //P_BLOCK
             }
-        //fprintf(stderr,"ELSE\n");
+        fprintf(stderr,"ELSE\n");
         symBlock(node, local_table, NULL, T_ANY, NULL, function);
     }
 }
 
 void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id, symtable_node_ptr function){
+    fprintf(stderr,"While\n");
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
     ret_type type = checkExpr(expressionValue, *local_table);
@@ -815,7 +818,7 @@ void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table){
 }
 
 void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function){
-    //fprintf(stderr,"FOR\n");
+    fprintf(stderr,"FOR\n");
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
     ret_type type = checkExpr(expressionValue, *local_table);
@@ -842,7 +845,6 @@ void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr 
     else {
         symBlock(node, local_table, NULL, T_ANY, NULL, function);
     }
-    
 
 }
 
@@ -2522,7 +2524,7 @@ void insertBuiltInFun() {
     if (entry5.param_types==NULL) {
         error_exit(99,"malloc failed");
     }
-    entry5.param_types[0] = T_FLOAT_RET;
+    entry5.param_types[0] = T_INT_RET;
     *key->entry = entry5;
     // ifj.f2i
     symtable_insert(&SymFunctionTree,"ifj.f2i",T_FUN_SYM);
@@ -2554,7 +2556,7 @@ void insertBuiltInFun() {
     if (entry6.param_types==NULL) {
         error_exit(99,"malloc failed");
     }
-    entry6.param_types[0] = T_INT_RET;
+    entry6.param_types[0] = T_FLOAT_RET;
     *key->entry = entry6;
     // ifj.string
     symtable_insert(&SymFunctionTree,"ifj.string",T_FUN_SYM);
