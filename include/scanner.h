@@ -1,6 +1,6 @@
 /*
 file: scanner.h
-author: Marek Hric
+author: Marek Hric xhricma00
 Header file for the scanner.
 */
 
@@ -44,8 +44,31 @@ enum State {
     S_STR_ESC, S_STR_HEX,
 };
 
-// Function prototypes
+/**
+ * get_token
+ * buffer - used for saving characters for later use
+ * reads stdin and returns a token
+ */
 Token *get_token(circ_buff_ptr buffer);
+
+/**
+ * frees a token
+ * used other modules
+ */
 void free_token(Token* token);
+
+/**
+ * read_char
+ * buffer - used for saving characters for later use
+ * reads character from buffer if not empty, stdin otherwise
+ * returns a character
+ */
+int read_char(circ_buff_ptr buffer);
+
+/**
+ * unget_char
+ * used for checking if read id is not a reserved keyword
+ */
+KeyWordType check_keyword(char *str);
 
 #endif // SCANNER_H
