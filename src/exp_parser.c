@@ -3,7 +3,6 @@ file: exp_parser.h
 author: Adam Vesely
 Implementation of the expression parser.
 */
-// TODO ERROR HANDLING AND EXTENSIONS, IMPLICIT CONVERSIONS
 #include <stdbool.h>
 
 #include "exp_parser.h"
@@ -39,7 +38,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
         return NULL; // Error: unexpected end of input
     }
 
-    if(*token == T_AT_IMPORT) {
+    if((*token)->type == T_AT_IMPORT) {
         freeAST(ASTRoot);
         symtable_dispose(&SymFunctionTree);
         error_exit(4, "ERROR: @import!\n");
