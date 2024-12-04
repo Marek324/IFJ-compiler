@@ -243,7 +243,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
             char label_prefix[strlen(curr_func) + 12];
 
             int for_num = var_asgn ? counter++ : 0;
-            sprintf(label_prefix, "&%s_while_%d", curr_func, for_num);
+            sprintf(label_prefix, "&%s_for_%d", curr_func, for_num);
 
             int err = for_loop(node, label_prefix, dec_var, var_asgn);
             if (err) return 99;
@@ -507,6 +507,10 @@ void expression(ASTNode *node){ // @as
             expression(node->right); // value if false
             printf("LABEL &if_%d_end\n", counter++);
             break;}
+        case AT_AS:{
+            node = node->left->right->right; // ID
+            expression(node);
+            break;}
         default:
             printf("expression unknown\n");
             break;
@@ -550,7 +554,6 @@ void expression_list(ASTNode *node){
 }
 
 int id_statement(ASTNode *node, bool dec_var, bool var_asgn){
-    // printf("id_statement %s ", node->token->value.string_value);
     ASTNode *idNode = node;
     node = node->left->right; // P_ASGN_FOUND | ID | L_PAREN | P_WHILE_LOOP
     switch(node->type){
@@ -712,8 +715,60 @@ int while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     
 }
 
+
 int for_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
-    printf("for\n");
+    node = node->right; // P_EXPRESSION
+    
+    if (var_asgn) {
+        expression(node->right); // value of nullable var on stack
+        printf("POPS TF@%s_var\n", label); // stores value of nullable var on stack
+        printf("MOVE TF@%s_itr int@0\n", label);
+        printf("LABEL %s_loop\n", label);
+    }
+
+    node = node->left; // P_OPTIONAL_VALUE
+   
+
+    if (dec_var){
+        if(!LLFind(var_list, node->right->token->value.string_value)){
+            LLInsert(var_list, node->right->token->value.string_value);
+            printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
+        }
+        char *var = malloc(sizeof(char) * strlen(node->right->token->value.string_value) + 5);
+        sprintf(var, "%s_var", label); // string storage
+        if(!LLFind(var_list, var)){
+            LLInsert(var_list, var);
+            printf("DEFVAR TF@%s\n", var);
+        }
+        sprintf(var, "%s_itr", label); // iterator for for loop
+        if(!LLFind(var_list, var)){
+            LLInsert(var_list, var);
+            printf("DEFVAR TF@%s\n", var);
+        }
+        free(var);
+    }
+    
+    if (var_asgn) {
+        printf("PUSHS TF@%s_var\nPUSHS TF@%s_itr\nADD TF@%s_itr TF@%s_itr int@1\nCALL &ord\n", label, label, label, label); 
+        printf("POPS TF@%s\nPUSHS TF@%s\n", node->right->token->value.string_value, node->right->token->value.string_value); // save value and leave it in data stack
+        printf("PUSHS int@0\n");
+        printf("JUMPIFEQS %s_break\n", label); // compare if value is null
+    }
+    node = node->left; // P_BLOCK
+
+    int err = statement(node->right, dec_var, var_asgn, label); // loop block
+    if (err) return 99;
+
+    if (var_asgn) {
+        printf("LABEL %s_continue\n", label);
+        printf("JUMP %s_loop\n", label);
+        printf("LABEL %s_break\n", label);
+    }
+
+    if (var_asgn)
+        printf("LABEL %s_end\n", label);
+
+
     return 0;
 }
 
