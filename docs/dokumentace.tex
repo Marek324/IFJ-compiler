@@ -153,9 +153,11 @@ FUNEXP\\
 \item $<function\_type> \text{ }\to \text{ } <type>$
 \item $<function\_type> \text{ }\to \text{ } void$
 \item $<asgn\_found> \text{ }\to \text{ } <expression> $
-\item $<asgn\_found> \text{ }\to \text{ } if (<expression>) <expression> else <expression>$
 \item $<continue> \text{ }\to \text{ } continue ;$
-\item $<break> \text{ }\to \text{ } break ;$
+\item $<break> \text{ }\to \text{ } break <cycle\_current\_control>$
+\item $<break> \text{ }\to \text{ } continue <cycle\_current\_control>$
+\item $<cycle\_current\_control> \text{ }\to \text{ } ID$
+\item $<cycle\_current\_control> \text{ }\to \text{ } \varepsilon$
 
 \end{enumerate}
 
@@ -211,5 +213,20 @@ Implementácia dynamického reťazca je využitá hlavne v Scanner časti progra
 \paragraph{\large \underline{Stack}\normalsize \\ Implementovane v súboroch \textit{stack.c, stack.h}. \\ \newline
 Implementáciu nášho zásobníku využívame v Expression Parser časti programu. Štruktúra zásobníku je implementovana s klasickými funkciami \textit{stackInit, stackPush, stackPop, stackIsEmpty, stackClear a stackGetTop}. Zásobník sme zvolili pre jeho optimálny prístup k dátam a zachovanie jednoduchosti kódu.
 \newline \\}
+
+\newpage
+
+ \Large \textbf{Poznámky}\normalsize \\
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\newline \\
+
+\large
+\noindent \textbf{BOOLTHEN} \newline \\
+Nepodporuje : 
+\normalsize
+\begin{itemize}
+\item Viac relačných operátorov za sebou
+\end{itemize}
+\medskip
 
 \end{document}
