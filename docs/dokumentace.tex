@@ -53,17 +53,34 @@ FUNEXP\\
 \noindent \Large \textbf{Rozdelenie prace :} \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 \newline \\
-\indent \large Marek Hric : \normalsize
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\} 
+\large Marek Hric : 
+\normalsize
+\begin{itemize}
+\item a
+\item b
+\item c
+\end{itemize}
 \large Mikuláš Lešiga :
 \normalsize
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
+\begin{itemize}
+\item a
+\item b
+\item c
+\end{itemize}
 \large Roman Andraščík :
 \normalsize
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
+\begin{itemize}
+\item a
+\item b
+\item c
+\end{itemize}
 \large Adam Veselý :
 \normalsize
-\paragraph{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \newline \\}
+\begin{itemize}
+\item a
+\item b
+\item c
+\end{itemize}
  
 \newpage
 
@@ -76,11 +93,69 @@ FUNEXP\\
 
  \Large \textbf{LL-gramatika :} \\ \normalsize
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+
 \begin{enumerate}
-\item aaaa
-\item bbbb
-\item ccccc
-\item ddddddddd
+\item $<prog>\text{ }\to \text{ }<prolog> <function\_def> <end>$
+\item $<prolog\> \text{ }\to \text{ } const ID = @import ( <expression> ) ;$
+\item $<end> \text{ }\to \text{ } EOF$
+\item $<function\_def> \text{ }\to \text{ } pub fn ID (<param\_list>) <function\_type> <block> <function\_def>$
+\item $<function\_def> \text{ }\to \text{ } \varepsilon$
+\item $<param\_list> \text{ }\to \text{ } ID : <type\_complete> <comma\_par\_found>$
+\item $<param\_list> \text{ }\to \text{ } \varepsilon$
+\item $<comma\_par\_found> \text{ }\to \text{ } , <param\_list>$
+\item $<comma\_par\_found> \text{ }\to \text{ } \varepsilon$
+\item $<block> \text{ }\to \text{ } \{ <statement> \}$
+\item $<block> \text{ }\to \text{ } <single\_statement>$
+\item $<statement> \text{ }\to \text{ } <var\_declaration> <statement>$
+\item $<statement> \text{ }\to \text{ } ID <ID\_found> <statement>$
+\item $<statement> \text{ }\to \text{ } <if\_statement> <statement>$
+\item $<statement> \text{ }\to \text{ } <for\_loop> <statement>$
+\item $<statement> \text{ }\to \text{ } <while\_loop> <statement> $
+\item $<statement> \text{ }\to \text{ } <return\_statement> <statement>$
+\item $<statement> \text{ }\to \text{ } <break> <statemet>$
+\item $<statement> \text{ }\to \text{ } <continue> <statemet>$
+\item $<statement> \text{ }\to \text{ } \varepsilon$
+\item $<ID\_found> \text{ }\to \text{ } = <asgn\_found> ;$
+\item $<ID\_found> \text{ }\to \text{ } ( <expression\_list> );$
+\item $<ID\_found> \text{ }\to \text{ } : <while\_loop>$
+\item $<var\_declaration> \text{ }\to \text{ } const ID : <type\_complete> = <asgn\_found> ;$
+\item $<var\_declaration> \text{ }\to \text{ } var ID : <type\_complete> = <asgn\_found> ;$
+\item $<if\_statement> \text{ }\to \text{ } if ( <expression> ) <if\_found>$
+\item $<if\_found> \text{ }\to \text{ } <optional\_value> <block> <else\_statement>$
+\item $<if\_found> \text{ }\to \text{ } <single\_statement> else <single\_statement>$
+\item $<else\_statement> \text{ }\to \text{ } else <block>$
+\item $<else\_statement> \text{ }\to \text{ } \varepsilon$
+\item $<optional\_value> \text{ }\to \text{ } | ID |$
+\item $<optional\_value> \text{ }\to \text{ } \varepsilon$
+\item $<while\_loop> \text{ }\to \text{ } while ( <expression> ) <optional\_value> <optional\_statements> <block> <else\_statement>$
+\item $<return\_statement> \text{ }\to \text{ } return <expression> ;$
+\item $<expression\_list> \text{ }\to \text{ } <expression> <comma\_expr\_found>$
+\item $<expression\_list> \text{ }\to \text{ } \varepsilon$
+\item $<comma\_expr\_found> \text{ }\to \text{ } , <expression\_list>$ 
+\item $<comma\_expr\_found> \text{ }\to \text{ } \varepsilon$
+\item $<type> \text{ }\to \text{ } i32$
+\item $<type> \text{ }\to \text{ } f64$
+\item $<type> \text{ }\to \text{ } [] u8$
+\item $<type> \text{ }\to \text{ } bool$
+\item $<for\_loop> \text{ }\to \text{ } for ( <expression> ) <optional\_value> <block>$
+\item $<optional\_statements> \text{ }\to \text{ } : <block>$ 
+\item $<optional\_statements> \text{ }\to \text{ } \varepsilon$
+\item $<type\_complete> \text{ }\to \text{ } <question\_mark> <type>$
+\item $<question\_mark> \text{ }\to \text{ } ?$
+\item $<question\_mark> \text{ }\to \text{ } \varepsilon$
+\item $ <single\_statement> \text{ }\to \text{ } <var\_declaration>$
+\item $ <single\_statement> \text{ }\to \text{ } ID <ID\_found>$
+\item $ <single\_statement> \text{ }\to \text{ } <if\_statement>$
+\item $ <single\_statement> \text{ }\to \text{ } <for\_loop>$
+\item $<single\_statement> \text{ }\to \text{ } <while\_loop>$
+\item $<single\_statement> \text{ }\to \text{ } <return\_statement>$
+\item $<function\_type> \text{ }\to \text{ } <type>$
+\item $<function\_type> \text{ }\to \text{ } void$
+\item $<asgn\_found> \text{ }\to \text{ } <expression> $
+\item $<asgn\_found> \text{ }\to \text{ } if (<expression>) <expression> else <expression>$
+\item $<continue> \text{ }\to \text{ } continue ;$
+\item $<break> \text{ }\to \text{ } break ;$
+
 \end{enumerate}
 
 
