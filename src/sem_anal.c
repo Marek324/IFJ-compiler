@@ -9,7 +9,24 @@
 stack_t *SCOPEStack = NULL;
 
 int scope = 0;
-
+void print_AVL(symtable_node_ptr node) {
+    if (node == NULL) {
+        return;
+    }
+    print_AVL(node->left);
+    print_AVL(node->right);
+    fprintf(stderr,"%s : %i,", node->key, node->entry->scopeLevel);
+    //fprintf(stderr,"%d,", node->entry->isChanged);
+    //fprintf(stderr,"%d,", node->entry->isUsed);
+    /*printf("%d", node->entry->type);
+    printf("%i", node->entry->isNullable);
+    printf("%d", node->entry->param_nullable[0]);
+    printf("%d", node->entry->param_types[0]);
+    printf("%d", node->entry->param_nullable[1]);
+    printf("%d", node->entry->param_types[1]);
+    printf("%d", node->entry->param_nullable[5]);
+    printf("%d", node->entry->param_types[5]);*/
+}
 void findReturn(ASTNode *root) {
     root = root->right->left; // skip prolog
     while (root != NULL) {
@@ -78,10 +95,10 @@ void symFuncDef(ASTNode* node){
     symtable_dispose(&local_table);
 }
 void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId, symtable_node_ptr function) {
-    scope++;
     if (local_table != NULL) {
-    stackPush(SCOPEStack, (long)(*local_table));
-    *local_table = stackUtilCopy(*local_table);
+        scope++;
+        stackPush(SCOPEStack, (long)(*local_table));
+        *local_table = stackUtilCopy(*local_table);
     }
     if (optionalValue != NULL) {
         symtable_insert(local_table, optionalValue->right->token->value.string_value, T_VAR_SYM);
@@ -223,7 +240,6 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
         error_exit(10, "ERROR: _ is not a valid ID name!\n");
     }
     symtable_insert(local_table, node->token->value.string_value, T_VAR_SYM);
-    
     symtable_node_ptr key = symtable_search(*local_table, node->token->value.string_value);
     node = node->left; // ASSGN OR P_TYPE_COMPLETE
     key->entry->isConst = isconst;
@@ -232,7 +248,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     key->entry->hasExplicitType = false;
     key->entry->isNullable = false;
     key->entry->scopeLevel = scope;
-    
+    //fprintf(stderr,"V:%s = %i:%i\n",key->key, key->entry->scopeLevel,scope);
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;
@@ -420,6 +436,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
     }
     else if (node->type == ID) {
         if (ifjFound) {
+           // fprintf(stderr,"BUILTIN FUN\n");
             if (strlen(node->token->value.string_value) > 9) {
                 symtable_dispose(&SymFunctionTree);
                 freeAST(ASTRoot);
@@ -632,7 +649,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
 }
         
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function) {
-
+    //fprintf(stderr,"IF\n");
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
     ret_type type = checkExpr(expressionValue, *local_table);
@@ -668,6 +685,7 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
         if(node->right->type == P_BLOCK) {
                 node = node->right; //P_BLOCK
             }
+        fprintf(stderr,"ELSE\n");
         symBlock(node, local_table, NULL, T_ANY, NULL, function);
     }
 }
@@ -792,6 +810,7 @@ void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table){
 }
 
 void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function){
+    //fprintf(stderr,"FOR\n");
     node = node->right; // P_EXPRESSION
     ASTNode *expressionValue = node->right;
     ret_type type = checkExpr(expressionValue, *local_table);
