@@ -907,7 +907,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
             else {
                 symtable_dispose(&SymFunctionTree);
                 freeAST(ASTRoot);
-                error_exit(7, "ERROR: Wrong type for binary aritmetic operation!\n");
+                error_exit(7, "ERROR: Wrong type for division operation!\n");
             }
         }
         if(node->type == T_ORELSE) {
@@ -927,7 +927,7 @@ ret_type checkExpr(ASTNode* node, symtable_node_ptr local_table) {
         else {
             symtable_dispose(&SymFunctionTree);
             freeAST(ASTRoot);
-            error_exit(7, "ERROR: Wrong type for binary aritmetic operation!\n");
+            error_exit(7, "ERROR: Wrong type for binary arithmetic operation!\n");
         }
     }
     else if(isOperand(node->token)){
