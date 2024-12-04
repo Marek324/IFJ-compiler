@@ -13,8 +13,6 @@ int main() {
     Parse(buffer);
     analyse(ASTRoot);
     
-    //print_AVL(SymFunctionTree);
-    
     #ifdef DEBUG
     generate_d2_file(ASTRoot, "tree.d2");
     setbuf(stdout, NULL);
