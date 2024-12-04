@@ -100,36 +100,36 @@ FUNEXP\\
  \Large \textbf{Lexikalna analyza} \normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{\indent Riesenie lexikalnej analyzy sme zacali vytvorenim diagramu deterministickeho konecneho automatu. Nasledne sme na jeho zaklade zacali vypracovavat implementaciu. Implementacia sa nachadza v subore \textit{scanner.c,} ktory pracuje s tokenmi deklarovanymi v subore \textit{token.h}. Hlavnou funkciou \textit{scanner.c} je funkcia \textit{get\_token}. Pre ulahcenie prace a prehladnosti kodu sme si deklarovali niekolko makier, ktore su extensivne pouzivane v hlavnej funkcii. Funkcia \textit{get\_token} berie postupne znaky z standardneho vstupu a vytvara token. Tokenu je priradeny jeho typ a hodnota ktora mu odpoveda. Funkcia zacina urcovanim jednoznakovych tokenov, ktore vie urcite hned na zaciatku. Pokracuje identifikaciou komentarov, ktore nasledne ignoruje. Po identifikacii komentarov zistuje ci sa jedna o ID alebo Keyword, pri klucovych slovach sa nasledne urcuje aj ich typ. Ak sa nejedna ani o jedno pokracuje kontrolov datovych typov pri ktorych uklada aj ich hodnoty.  \newline \\}
+\paragraph{\indent Riešenie lexikálnej analýzy sme začali vytvorením diagramu deterministického konečného automatu. Následne sme na jeho základe začali vypracovávať implementáciu. Implementácia sa nachádza v súbore \textit{scanner.c,} ktorý pracuje s tokenmi deklarovanymi v súbore \textit{token.h}. Hlavnou funkciou \textit{scanner.c} je funkcia \textit{get\_token}. Pre uľahčenie práce a prehľadnosti kódu sme si deklarovali niekoľko makier, ktoré sú extensivne používané v hlavnej funkcii. Funkcia \textit{get\_token} berie postupne znaky zo štandardného vstupu a vytvára token. Tokenu je priradeny jeho typ a hodnota, ktorá mu odpovedá. Funkcia začína určovaním jednoznakovych tokenov, ktoré vie určite hneď na začiatku. Pokračuje identifikáciou komentárov, ktoré následne ignoruje. Po identifikácii komentárov zisťuje či sa jedna o ID alebo Keyword, pri kľúčových slovách sa následne určuje aj ich typ. Ak sa nejedna ani o jedno pokračuje kontrolou dátových typov, pri ktorých ukladá aj ich hodnoty.  \newline \\}
 
  \Large \textbf{Syntakticka analyza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{Riesenie syntaktickej analyzy sme zapocali vytvorenim LL gramatiky, LL tabulky a precendecnej tabulky. Nasledne na ich zaklade sme vypracovali subor \textit{parser.c a exp\_parser.c}.Tieto subory pracuju s uzlamy deklarovanymi v subore \textit{ast.h}. Spustenie syntaktickej analyzy zapocne zavolanim funkcie \textit{Parse()}. Tato funkcia postupne prechadza cez tokeny a priradzuje ich do uzlov pomocou ktorych postupne tvori abstraktny syntakticky strom na zaklade LL gramatiky. Subor \textit{parser.c} dalej riadi aj precedencnu analyzu volanim funkcii zo suboru \textit{exp\_parser.c}.Tento subor vytvori strom vyrazov, ktory je nasledne pripojeny do syntaktickeho stromu.  \newline \\}
+\paragraph{Riešenie syntaktickej analýzy sme započali vytvorením LL gramatiky, LL tabuľky a precendecnej tabuľky. Následne na ich základe sme vypracovali súbor \textit{parser.c a exp\_parser.c}.Tieto súbory pracujú s uzlami deklarovanymi v súbore \textit{ast.h}. Spustenie syntaktickej analýzy započne zavolanim funkcie \textit{Parse()}. Tato funkcia postupne prechádza cez tokeny a priradzuje ich do uzlov, pomocou ktorých postupne tvorí abstraktný syntakticky strom na základe LL gramatiky. Súbor \textit{parser.c} ďalej riadi aj precedencnu analýzu volaním funkcii zo súboru \textit{exp\_parser.c}.Tento súbor vytvorí strom výrazov, ktorý je následne pripojení do syntaktického stromu.  \newline \\}
 
  \Large \textbf{Semanticka analyza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{Semanticka analyza je implementovana v suboroch \textit{sem\_anal.c , symtable.c, sem\_anal.h a symtable.h}. Spustenie semantickej analyzy zapocne zavolanim funkcie \textit{analyse()}.Tato funkcia prechadza vytvoreny AST a postupne urcuje ci vyhovuje pravidlam jazyka IFJ24.Vyhovujuce funkcie su nasledne vlozene do tabulky symbolov, ktora je deklarovana v subore \textit{symtable.h}. \newline \\}
+\paragraph{Sémantická analýza je implementovana v súboroch \textit{sem\_anal.c , symtable.c, sem\_anal.h a symtable.h}. Spustenie sémantickej analýzy započne zavolanim funkcie \textit{analyse()}.Tato funkcia prechádza vytvorený AST a postupne určuje či vyhovuje pravidlám jazyka IFJ24.Vyhovujúce funkcie sú následne vložené do tabuľky symbolov, ktorá je deklarovana v súbore \textit{symtable.h}. \newline \\}
 
  \Large \textbf{Generovanie kodu} \normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{Generator je implementovany v suboroch \textit{codegen\_priv.h. codegen.h a codegen.c }.Spustenie generacie kodu zapocne zavolanim funkcie \textit{codegen()}. \newline \\}
+\paragraph{Generátor je implementovany v súboroch \textit{codegen\_priv.h. codegen.h a codegen.c }.Spustenie generácie kódu započne zavolanim funkcie \textit{codegen()}. \newline \\}
 
  \Large \textbf{Datove struktury}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
-\paragraph{\large \underline{Circular Buffer} \\ Implementovane v suboroch \textit{circ\_buff.c circ\_buff.h}. \\ \newline
-Implementacia Circular Buffer je vyuzita hlavne v casti Scanner kde sluzi na bezpreblemove ziskavanie dat a ich naslednu validaciu. Na pracu so scannerom ho neskor vyuzivaju aj casti Parser a Expression Parser. Struktura obsahuje klasicke funkcie \textit{circ\_buff\_init, circ\_buff\_free, circ\_buff\_enqueue, circ\_buff\_dequeue, circ\_buff\_is\_empty}. 
+\paragraph{\large \underline{Circular Buffer} \\ Implementovane v súboroch \textit{circ\_buff.c circ\_buff.h}. \\ \newline
+Implementácia Circular Buffer je využitá hlavne v časti Scanner, kde slúži na bezpreblemove získavanie dať a ich následnú validaciu. Na prácu so scannerom ho neskôr využívajú aj časti Parser a Expression Parser. Štruktúra obsahuje klasické funkcie \textit{circ\_buff\_init, circ\_buff\_free, circ\_buff\_enqueue, circ\_buff\_dequeue, circ\_buff\_is\_empty}. 
 \newline \\}
 
-\paragraph{\large \underline{Dynamic String} \\ Implementovane v suboroch \textit{dyn\_str.c, dyn\_str.h}. \\ \newline
-Implementacia dynamickeho retazca je vyuzita hlavne v Scanner casti programu kde sprostredkuvava validaciu a uschovavanie dat, neskor je pouzita aj v casti Codegen kde sluzi na ulahcenie validacie dat. Struktura dynamickeho retazca obsahuje klasicke funkcie \textit{dyn\_str\_init, dyn\_str\_grow, dyn\_str\_append, dyn\_str\_append\_str a dyn\_str\_free}.  
+\paragraph{\large \underline{Dynamic String} \\ Implementovane v súboroch \textit{dyn\_str.c, dyn\_str.h}. \\ \newline
+Implementácia dynamického reťazca je využitá hlavne v Scanner časti programu, kde sprostredkuvava validaciu a uschovavanie dať, neskôr je použitá aj v časti Codegen, kde slúži na uľahčenie validacie dať. Štruktúra dynamického reťazca obsahuje klasické funkcie \textit{dyn\_str\_init, dyn\_str\_grow, dyn\_str\_append, dyn\_str\_append\_str a dyn\_str\_free}.  
 \newline \\}
 
-\paragraph{\large \underline{Stack} \\ Implementovane v suboroch \textit{stack.c, stack.h}. \\ \newline
-Implementaciu nasho zasobniku vyuzivame  v Expression Parser casti programu. Struktura zasobniku je implementovana s klasickymi funkciami \textit{stackInit, stackPush, stackPop, stackIsEmpty, stackClear a stackGetTop}. Zasobnik sme zvolili pre jeho optimalny pristup k datam a zachovanie jednoduchosti kodu.
+\paragraph{\large \underline{Stack} \\ Implementovane v súboroch \textit{stack.c, stack.h}. \\ \newline
+Implementáciu nášho zásobníku využívame v Expression Parser časti programu. Štruktúra zásobníku je implementovana s klasickými funkciami \textit{stackInit, stackPush, stackPop, stackIsEmpty, stackClear a stackGetTop}. Zásobník sme zvolili pre jeho optimálny prístup k dátam a zachovanie jednoduchosti kódu.
 \newline \\}
 
 \end{document}
