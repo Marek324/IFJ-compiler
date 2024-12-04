@@ -113,7 +113,7 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         symtable_node_ptr key = symtable_search(*local_table, whileId->token->value.string_value);
         key->entry->type = T_WHILE_RET;
         key->entry->isConst = true;
-        key->entry->scopeLevel = scope;
+        key->entry->scopeLevel = scope-1;
     }
     symStatement(node->right, local_table, function);
     checkVarsAndConsts(*local_table);
