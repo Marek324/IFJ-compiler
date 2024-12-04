@@ -265,7 +265,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     }
     node = node->right->right; //P_EXPRESSION
 
-    // variable/constant or literal, sets isConvertable flag
+    // variable/constant or literal, sets isConvertable flag or isNull flag (variable is null)
     if(node->right != NULL) {
         if(node->right->type == TYPE_F64) {
             if(floatIsInt(node->right->token->value.float_value)) {
@@ -278,39 +278,56 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
                symtable_node_ptr expressionID = symtable_search(*local_table, node->right->token->value.string_value); 
                if(expressionID != NULL) {
                     key->entry->isConvertable = expressionID->entry->isConvertable;
-               }               
+                    if(expressionID->entry->isNull) {
+                        key->entry->isNull = true;
+                    }
+                }               
             }
         }
+        else if(node->right->type == T_NULL) {
+            key->entry->isNull = true;
+        }
     }
-    // end of isConvertable flag setting
+    // end of isConvertable/isNull flag setting
 
+    symtable_node_ptr expressionID = NULL;
     if (key->entry->hasExplicitType == true) {
         ret_type type = checkExpr(node->right,*local_table);
         if (type != T_NULL_RET) {
             if (key->entry->type == type) {
                 if (node->right->type == ID) {
-                symtable_node_ptr expressionID;
-                // functions
-                if(node->right->left != NULL) {
-                    if(node->right->left->type == P_EXPRESSION_LIST) {
-                        // built-in functions
-                        if(node->right->right != NULL) {
-                            if(node->right->right->type == ID) {
-                                // if the first ID isn't "ifj"
-                                if(strcmp(node->right->token->value.string_value, "ifj")) {
-                                    symtable_dispose(&SymFunctionTree);
-                                    freeAST(ASTRoot);
-                                    error_exit(3, "ERROR: Missing definition!\n");
+                    // functions
+                    if(node->right->left != NULL) {
+                        if(node->right->left->type == P_EXPRESSION_LIST) {
+                            // built-in functions
+                            if(node->right->right != NULL) {
+                                if(node->right->right->type == ID) {
+                                    // if the first ID isn't "ifj"
+                                    if(strcmp(node->right->token->value.string_value, "ifj")) {
+                                        symtable_dispose(&SymFunctionTree);
+                                        freeAST(ASTRoot);
+                                        error_exit(3, "ERROR: Missing definition!\n");
+                                    }
+                                    // if the 2nd part of the built-in function is too long
+                                    if (strlen(node->right->right->token->value.string_value) > 9) {
+                                        symtable_dispose(&SymFunctionTree);
+                                        freeAST(ASTRoot);
+                                        error_exit(3, "ERROR: Missing definition!\n");
+                                    }
+                                    char builtinFun[14] = "ifj.";
+                                    strcpy(builtinFun+4, node->right->right->token->value.string_value);
+                                    expressionID = symtable_search(SymFunctionTree, builtinFun);
+                                    if(expressionID == NULL) {
+                                        symtable_dispose(&SymFunctionTree);
+                                        freeAST(ASTRoot);
+                                        error_exit(3, "ERROR: Undefined identifier!\n");
+                                    }
+                                    checkArguments(local_table, node->right->left, expressionID);
                                 }
-                                // if the 2nd part of the built-in function is too long
-                                if (strlen(node->right->right->token->value.string_value) > 9) {
-                                    symtable_dispose(&SymFunctionTree);
-                                    freeAST(ASTRoot);
-                                    error_exit(3, "ERROR: Missing definition!\n");
-                                }
-                                char builtinFun[14] = "ifj.";
-                                strcpy(builtinFun+4, node->right->right->token->value.string_value);
-                                expressionID = symtable_search(SymFunctionTree, builtinFun);
+                            }
+                            // normal functions
+                            else {
+                                expressionID = symtable_search(SymFunctionTree, node->right->token->value.string_value);
                                 if(expressionID == NULL) {
                                     symtable_dispose(&SymFunctionTree);
                                     freeAST(ASTRoot);
@@ -319,29 +336,18 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
                                 checkArguments(local_table, node->right->left, expressionID);
                             }
                         }
-                        // normal functions
-                        else {
-                            expressionID = symtable_search(SymFunctionTree, node->right->token->value.string_value);
-                            if(expressionID == NULL) {
-                                symtable_dispose(&SymFunctionTree);
-                                freeAST(ASTRoot);
-                                error_exit(3, "ERROR: Undefined identifier!\n");
-                            }
-                            checkArguments(local_table, node->right->left, expressionID);
-                        }
+                    }
+                    // variables
+                    else {
+                        expressionID = symtable_search(*local_table, node->right->token->value.string_value);
+                    }
+                    if (expressionID->entry->isNullable && !key->entry->isNullable) {
+                        freeAST(ASTRoot);
+                        symtable_dispose(&SymFunctionTree);        
+                        error_exit(7, "ERROR: assigning wrong type (symVarDec1)\n");
                     }
                 }
-                // variables
-                else {
-                    expressionID = symtable_search(*local_table, node->right->token->value.string_value);
-                }
-                if (expressionID->entry->isNullable && !key->entry->isNullable) {
-                    freeAST(ASTRoot);
-                    symtable_dispose(&SymFunctionTree);        
-                    error_exit(7, "ERROR: assigning wrong type (symVarDec1)\n");
-                }
-            }
-            return;
+                return;
             } 
         }
         else {
@@ -356,7 +362,6 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     else {
         key->entry->type = checkExpr(node->right, *local_table);
         if (node->right->type == ID) {
-            symtable_node_ptr expressionID;
             // functions
             if(node->right->left != NULL) {
                 if(node->right->left->type == P_EXPRESSION_LIST) {
@@ -410,6 +415,25 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
             error_exit(8, "ERROR: cannot get type\n");
         }
         return;
+    }
+    // sets isNullable if first operand in orelse is NULL and 2nd one is also NULL/NULLABLE
+    // probably won't work for variables containing null as the first operand
+    if(node->right != NULL) {
+        // orelse
+        if(node->right->type == T_ORELSE) {
+            if(node->right->left != NULL) {
+                // left operand is null
+                if(node->right->left->type == T_NULL) {
+                    if(node->right->right != NULL) {
+                        if(expressionID != NULL) {
+                            if(node->right->right->type == T_NULL || expressionID->entry->isNullable) {
+                                key->entry->isNullable = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -491,6 +515,22 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
                     freeAST(ASTRoot);
                     symtable_dispose(&SymFunctionTree);        
                     error_exit(7, "ERROR: assigning wrong type (symIdStatement2)\n");
+                }
+            }
+            if(node->right != NULL) {
+                if(node->right->type == ID) {
+                    // only variables
+                    if(node->right->left == NULL) {
+                        symtable_node_ptr temp_node = symtable_search(*local_table, node->right->token->value.string_value);
+                        if(temp_node != NULL) {
+                            if(temp_node->entry->isNull) {
+                                key->entry->isNull = true;
+                            }
+                        }
+                    }
+                }
+                else if(node->right->type == T_NULL) {
+                    key->entry->isNull = true;
                 }
             }
         }
@@ -2278,8 +2318,6 @@ ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
         return T_ERROR_RET;
     }
     else {
-        // TODO: how to acknowledge null in variable (unreachable.zig line 8)
-        // TODO: figure out how to pass back to semantic analyzer (isNullable)
         return left_type;
     }
 }
