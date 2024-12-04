@@ -129,6 +129,7 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
                 symtable_dispose(&SymFunctionTree); 
                 fprintf(stderr, "isUsed:%i, isChanged%i\n",local_table->entry->isUsed,local_table->entry->isChanged );     
                 error_exit(9, "ERROR: %s variable either not used or not modified\n", local_table->key);
+                symtable_dispose(&SymFunctionTree);
             }
         }
     }
