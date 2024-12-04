@@ -4,6 +4,8 @@
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage{graphicx}
 \usepackage{attachfile}
+\usepackage{multicol}
+
 
 \graphicspath{ {images/} }
  
@@ -87,8 +89,27 @@ FUNEXP\\
 
 \noindent \Large \textbf{Diagram konečného automatu :}
 \newline \\
-
 \includegraphics[width=0.8\textwidth,scale=0.5]{fsm}
+\newline \\
+
+\textbf{Legenda:}
+\small
+\begin{multicols}{2}
+\begin{itemize}
+\item \textbf{ws} - white space
+\item \textbf{id\_s} - znaky zaciatku identifikatora (\_a-zA-Z)
+\item \textbf{id} - znaky identifikatora (\_a-zA-Z0-9)
+\item \textbf{num} - cisla (0-9)
+\item \textbf{np} - cisla bez nuly (1-9)
+\item \textbf{hex} - hexa cisla (0-9a-fA-F)
+\item \textbf{e} - exponent (eE)
+\item \textbf{char} - lubovolny znak
+\item \textbf{e\_w} - znaky escape sekvencii bez x (n,t,r)
+\item \textbf{str\_n} - lubovolny znak bez $\backslash n$
+\end{itemize}
+\end{multicols}
+
+
 
 \newpage
 
@@ -166,9 +187,10 @@ FUNEXP\\
  \Large \textbf{LL-tabulka :}
 \newline \\
 
-\includegraphics[width=0.3\textwidth,scale=0.3]{LLtabulka}
+\includegraphics[scale=0.5]{LLtabulka}
+\newpage
 
- \Large \textbf{Precendecna-tabulka :}
+\Large \textbf{Precendecna-tabulka :}
 \newline \\
 
 \includegraphics[width=\textwidth,scale=0.3]{Ptabulka}
