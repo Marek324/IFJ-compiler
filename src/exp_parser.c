@@ -1,8 +1,8 @@
-/*
-file: exp_parser.h
-author: Adam Vesely
-Implementation of the expression parser.
-*/
+/**
+ * file: exp_parser.h
+ * author: Adam Vesely xvesela00
+ * Implementation of the expression parser.
+ */
 #include <stdbool.h>
 
 #include "exp_parser.h"
@@ -32,7 +32,7 @@ ASOC precedence_table[P_TABLE_SIZE][P_TABLE_SIZE] =
 };
 
 // Function to parse an expression
-ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
+ASTNode *parseExpression(Token **token, c_buff_ptr buff) {
 
     if (*token == NULL) {
         return NULL; // Error: unexpected end of input

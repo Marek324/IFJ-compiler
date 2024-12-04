@@ -1,16 +1,15 @@
-/*
-file: scanner.h
-author: Marek Hric xhricma00
-Header file for the scanner.
-*/
+/**
+ * file: scanner.h
+ * author: Marek Hric xhricma00
+ * Header file for the scanner.
+ */
 
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include "circ_buff.h"
+#include "c_buff.h"
 #include "token.h"
 #include "error.h"
-#include "circ_buff.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -49,7 +48,7 @@ enum State {
  * buffer - used for saving characters for later use
  * reads stdin and returns a token
  */
-Token *get_token(circ_buff_ptr buffer);
+Token *get_token(c_buff_ptr buffer);
 
 /**
  * frees a token
@@ -63,7 +62,7 @@ void free_token(Token* token);
  * reads character from buffer if not empty, stdin otherwise
  * returns a character
  */
-int read_char(circ_buff_ptr buffer);
+int read_char(c_buff_ptr buffer);
 
 /**
  * unget_char

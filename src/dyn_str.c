@@ -1,7 +1,7 @@
-/*
-file: dyn_str.c
-author: Mikuláš Lešiga
-Implementation of dynamic string functions from dyn_str.h.
+/**
+ * file: dyn_str.c
+ * author: Mikuláš Lešiga xlesigm00
+ * Implementation of dynamic string functions from dyn_str.h.
 */
 
 #include "dyn_str.h"

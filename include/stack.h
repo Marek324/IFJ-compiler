@@ -1,8 +1,8 @@
-/*
-file: stack.h
-author: Adam Vesely
-Header file for the stack.
-*/
+/**
+ * file: stack.h
+ * author: Adam Vesely xvesela00
+ * Header file for the stack.
+ */
 
 #ifndef STACK_H
 #define STACK_H

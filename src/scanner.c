@@ -1,8 +1,8 @@
-/*
-file: scanner.c
-author: Marek Hric xhricma00
-Implementation of scanner.
-*/
+/**
+ * file: scanner.c
+ * author: Marek Hric xhricma00
+ * Implementation of scanner.
+ */
 
 #include "scanner.h"
 
@@ -27,26 +27,26 @@ Implementation of scanner.
     if (c == '=') {                                                             \
         RETURN_TOKEN(T1);                                                       \
     } else {                                                                    \
-        circ_buff_enqueue(buffer, c);                                           \
+        c_buff_enqueue(buffer, c);                                           \
         RETURN_TOKEN(T2);                                                       \
     } break
 
 // Puts character back to buffer and changes state
 #define PUT_C_BACK_CHANGE_STATE(S) {                                            \
-    circ_buff_enqueue(buffer, c);                                               \
+    c_buff_enqueue(buffer, c);                                               \
     state = S;                                                                  \
     break; }
 
 // Reads until end of word or invalid id character
 #define READ_ID {                                                               \
-    circ_buff_enqueue(buffer, c);                                               \
+    c_buff_enqueue(buffer, c);                                               \
     while((c = read_char(buffer)) != EOF && (isalnum(c) || c == '_'))           \
         dyn_str_append(str, c);                                                 \
-    circ_buff_enqueue(buffer, c);}
+    c_buff_enqueue(buffer, c);}
 
 // Reads until end of number
 #define READ_NUM {                                                              \
-    circ_buff_enqueue(buffer, c);                                               \
+    c_buff_enqueue(buffer, c);                                               \
     while (isdigit(c = read_char(buffer)))                                      \
         dyn_str_append(str, c);}
 
@@ -60,7 +60,7 @@ Implementation of scanner.
     fprintf(stderr, "Error: %s\n",  MSG);                                       \
     exit(E) // add freeing of resources
 
-Token *get_token(circ_buff_ptr buffer) 
+Token *get_token(c_buff_ptr buffer) 
 {
     dyn_str *str = dyn_str_init();
     
@@ -107,7 +107,7 @@ Token *get_token(circ_buff_ptr buffer)
                                 continue;
                         } else {
                             // Store character back to buffer
-                            circ_buff_enqueue(buffer, c);
+                            c_buff_enqueue(buffer, c);
                             RETURN_TOKEN(T_DIV);
                         }
                         break;
@@ -139,7 +139,7 @@ Token *get_token(circ_buff_ptr buffer)
 
             case S_AT: // delete
                 {   
-                    circ_buff_enqueue(buffer, c); // put char after @ back to buffer
+                    c_buff_enqueue(buffer, c); // put char after @ back to buffer
                     while(isspace((c = read_char(buffer)))) {} // skip whitespaces
                     if (c == EOF || !(isalpha(c) || c == '_')) {
                         free(token);
@@ -182,7 +182,7 @@ Token *get_token(circ_buff_ptr buffer)
                     else if (isdigit(c)) {
                         ERROR(1, "Leading zero"); // Leading zero
                     }
-                    circ_buff_enqueue(buffer, '0');
+                    c_buff_enqueue(buffer, '0');
                 }
 
                 READ_NUM;
@@ -193,7 +193,7 @@ Token *get_token(circ_buff_ptr buffer)
                     state = S_FLOAT_EXP_SIGN;
                     break;
                 } else {
-                    circ_buff_enqueue(buffer, c);
+                    c_buff_enqueue(buffer, c);
                     token->value.int_value = atoi(str->str);
                     RETURN_TOKEN(T_INT);
                 }
@@ -202,7 +202,7 @@ Token *get_token(circ_buff_ptr buffer)
             case S_FLOAT_DOT:
                 if (isdigit(c)) {
                     dyn_str_append(str, '.');
-                    circ_buff_enqueue(buffer, c);
+                    c_buff_enqueue(buffer, c);
                     state = S_FLOAT;
                     break;
                 } else {
@@ -216,7 +216,7 @@ Token *get_token(circ_buff_ptr buffer)
                     state = S_FLOAT_EXP_SIGN;
                     break;
                 } else {
-                    circ_buff_enqueue(buffer, c);
+                    c_buff_enqueue(buffer, c);
                     token->value.float_value = strtod(str->str, NULL);
                     RETURN_TOKEN(T_FLOAT);
                 }
@@ -225,7 +225,7 @@ Token *get_token(circ_buff_ptr buffer)
             case S_FLOAT_EXP_SIGN:
                 if (isdigit(c)) {
                     dyn_str_append(str, 'e');
-                    circ_buff_enqueue(buffer, c);
+                    c_buff_enqueue(buffer, c);
                     state = S_FLOAT_EXP;
                     break;
                 } else if (c == '+' || c == '-') {
@@ -243,7 +243,7 @@ Token *get_token(circ_buff_ptr buffer)
 
             case S_FLOAT_EXP:
                 READ_NUM;
-                circ_buff_enqueue(buffer, c);
+                c_buff_enqueue(buffer, c);
                 token->value.float_value = strtod(str->str, NULL);
                 RETURN_TOKEN(T_FLOAT);
                 break; // S_FLOAT_EXP
@@ -279,7 +279,7 @@ Token *get_token(circ_buff_ptr buffer)
                         ERROR(1, "Invalid escape sequence"); // Invalid escape sequence
                 }
                 if (state != S_STR_HEX) state = S_STR;
-                circ_buff_enqueue(buffer, c);
+                c_buff_enqueue(buffer, c);
                 break; // S_STR_ESC
 
             case S_STR_HEX: {
@@ -295,11 +295,11 @@ Token *get_token(circ_buff_ptr buffer)
                 
                 dyn_str_append(str, (char)hex);
                 state = S_STR;           
-                circ_buff_enqueue(buffer, c);     
+                c_buff_enqueue(buffer, c);     
                 } break; // S_STR_HEX
 
             case S_STR_MLINE:
-                circ_buff_enqueue(buffer, c);
+                c_buff_enqueue(buffer, c);
                 while((c = read_char(buffer)) != EOF && c != '\n') 
                     dyn_str_append(str, c);
 
@@ -311,7 +311,7 @@ Token *get_token(circ_buff_ptr buffer)
                 break; // S_STR_MLINE
 
             case S_STR_MLINE_NEWLINE:
-                circ_buff_enqueue(buffer, c);
+                c_buff_enqueue(buffer, c);
                 while(isblank(c = read_char(buffer))) {} // skip whitespaces
                 if (c == '\\') {
                     c = read_char(buffer);
@@ -323,7 +323,7 @@ Token *get_token(circ_buff_ptr buffer)
                         ERROR(1, "Standalone backslash"); // Standalone backslash
                     }
                 } else {
-                    circ_buff_enqueue(buffer, c);
+                    c_buff_enqueue(buffer, c);
                     RETURN_STR_TOKEN(T_STR);
                 }
                 break; // S_STR_MLINE_NEWLINE
@@ -369,10 +369,10 @@ void free_token(Token* token)
     free(token);
 }
 
-int read_char(circ_buff_ptr buffer)
+int read_char(c_buff_ptr buffer)
 {
-    if (!circ_buff_is_empty(buffer)) 
-        return circ_buff_dequeue(buffer);
+    if (!c_buff_is_empty(buffer)) 
+        return c_buff_dequeue(buffer);
     else 
         return getc(INPUT);
     

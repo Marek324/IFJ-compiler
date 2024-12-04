@@ -1,8 +1,8 @@
-/*
-file: exp_parser.h
-author: Adam Vesely
-Header file for the expression parser.
-*/
+/**
+ * file: exp_parser.h
+ * author: Adam Vesely xvesela00
+ * Header file for the expression parser.
+ */
 
 #ifndef EXP_PARSER_H
 #define EXP_PARSER_H
@@ -13,7 +13,7 @@ Header file for the expression parser.
 #include "stack.h"
 #include "token.h"
 #include "parser.h"
-#include "circ_buff.h"
+#include "c_buff.h"
 #include "error.h"
 
 // the associativity of operators (operator on top of stack vs new operator)
@@ -42,7 +42,7 @@ typedef enum {
 } PREC_TABLE_INDEX;
 
 // main expression parser function
-ASTNode* parseExpression(Token** token, circ_buff_ptr buffer);
+ASTNode* parseExpression(Token** token, c_buff_ptr buffer);
 
 // pops the top operator and the needed amount of operands to link them together, creating a tree
 // pushes the newly created tree (root of tree) onto the operand stack 

@@ -1,6 +1,7 @@
 /**
- * linked_list_priv.h - Private functions for linked list
+ * linked_list_priv.h
  * Author: Marek Hric xhricma00
+ * Private functions for linked list
  */
 
 #include "linked_list.h"

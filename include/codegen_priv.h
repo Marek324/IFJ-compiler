@@ -1,24 +1,24 @@
-/*
-file: codegen_priv.h
-author: Marek Hric xhricma00
-Header file for generator private functions.
-*/
+/**
+ * file: codegen_priv.h
+ * author: Marek Hric xhricma00
+ * Header file for generator private functions.
+ */
 
 #include "codegen.h"
 #include "linked_list.h"
 
 // macro used for variable declaraton  
-#define VARDEC(N) do{\
-if(!LLFind(var_list, N)){\
-            int err = LLInsert(var_list, N);\
-            if (err){\
-                fprintf(stderr, "Error: Allocation error in code generation\n"); \ 
-                LLDispose(var_list);\
-                free(var_list);\
-                free(curr_func);\
-                return 99;\
-            }\
-            printf("DEFVAR TF@%s\n", N);\
+#define VARDEC(N) do{                                                               \
+if(!LLFind(var_list, N)){                                                           \
+            int err = LLInsert(var_list, N);                                        \
+            if (err){                                                               \
+                fprintf(stderr, "Error: Allocation error in code generation\n");    \
+                LLDispose(var_list);                                                \
+                free(var_list);                                                     \
+                free(curr_func);                                                    \
+                return 99;                                                          \
+            }                                                                       \
+            printf("DEFVAR TF@%s\n", N);                                            \
         }} while (0)
 
 

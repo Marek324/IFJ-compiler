@@ -1,8 +1,8 @@
-/*
-file: codegen_priv.h
-author: Marek Hric xhricma00
-Header file for generator public functions.
-*/
+/**
+ * file: codegen.h
+ * author: Marek Hric xhricma00
+ * Header file for generator public functions.
+ */
 
 
 #include <stdio.h>

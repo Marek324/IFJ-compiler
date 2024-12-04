@@ -1,3 +1,10 @@
+/**
+ * file: linked_list.c
+ * author: Marek Hric xhricma00
+ * Implementation of linked list
+ * Used in code generator
+ */
+
 #include "linked_list_priv.h"
 
 

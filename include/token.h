@@ -1,8 +1,8 @@
-/*
-file: token.h
-authors: Marek Hric, Adam Veselý
-Header file for tokens.
-*/
+/**
+ * file: token.h
+ * author: Marek Hric xhricma00
+ * Header file for tokens.
+ */
 
 #ifndef TOKEN_H
 #define TOKEN_H

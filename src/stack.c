@@ -1,8 +1,8 @@
-/*
-file: stack.c
-author: Adam Vesely
-Implementation of the stack.
-*/
+/**
+ * file: stack.c
+ * author: Adam Vesely xvesela00
+ * Implementation of the stack.
+ */
 
 #include <stdbool.h>
 #include "stack.h"

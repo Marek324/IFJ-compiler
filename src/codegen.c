@@ -1,3 +1,10 @@
+/**
+ * file: codegen.c
+ * author: Marek Hric xhricma00
+ * Implementation of code generator.
+ */
+
+
 #include "codegen_priv.h"
 #include "linked_list.h"
 

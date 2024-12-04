@@ -1,6 +1,7 @@
 /**
- * linked_list.h - Public functions for linked list
+ * linked_list.h
  * Author: Marek Hric xhricma00
+ * Public functions for linked list
  */
 
 #include <stdlib.h>
