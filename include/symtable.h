@@ -1,3 +1,8 @@
+/**
+ * file: symtable.h
+ * author: Roman Andraščík xandrar00
+ * Header file for symtable.
+ */
 #include <stdlib.h>
 #include <stdbool.h>
 #include "ast.h"
@@ -63,23 +68,23 @@ typedef struct symtable_node_s{
     symtable_entry_ptr entry;
     int balance_factor;
 } symtable_node_t;
-
+// Creates new node
 symtable_node_ptr symtable_node_create(char *key, symtable_entry_type type);
-
+// Frees the tree in param
 void symtable_dispose(symtable_tree_ptr tree);
-
+// Create new string, copy old string(param) into new and return it
 char* my_str_dup(char* key);
-
+// Returns higher int
 int max(int a, int b);
-
+// Returns height of node
 int height(symtable_node_ptr node);
-
+// Searches for key in tree
 symtable_node_ptr symtable_search(symtable_node_ptr tree, char *key);
-
+// Returns balance
 int get_balance (symtable_node_ptr node);
 
 void symtable_free_entry(symtable_entry_ptr entry);
-
+// Initializes symtable to null
 void symtable_init(symtable_tree_ptr tree);
 
 void symtable_insert(symtable_tree_ptr tree, char* key, symtable_entry_type type);
@@ -92,15 +97,11 @@ void left_right_rot(symtable_tree_ptr tree);
 
 void right_left_rot(symtable_tree_ptr tree);
 
-// updates balances of all nodes and returns a bool (true->rebalance, false->all ok)
+// Updates balances of all nodes and returns a bool (true->rebalance, false->all ok)
 bool update_balances(symtable_tree_ptr tree);
-
+// Rebalances tree based on balance factor
 void rebalance(symtable_tree_ptr root);
-
+// Initializes new entry variable
 symtable_entry_ptr symtable_entry_init();
-
-// symtable_entry_var_modify();
-
-// symtable_entry_fun_modify();
 
 #endif // SYMTABLE_H
