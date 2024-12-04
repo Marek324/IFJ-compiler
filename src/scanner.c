@@ -1,6 +1,6 @@
 /*
 file: scanner.c
-author: Marek Hric
+author: Marek Hric xhricma00
 Implementation of scanner.
 */
 
@@ -60,12 +60,6 @@ Implementation of scanner.
     fprintf(stderr, "Error: %s\n",  MSG);                                       \
     exit(E) // add freeing of resources
 
-// Function prototypes
-KeyWordType check_keyword(char *str);
-int read_char(circ_buff_ptr buffer);
-
-//char buffer
-//get_token(&buffer)
 Token *get_token(circ_buff_ptr buffer) 
 {
     dyn_str *str = dyn_str_init();
@@ -75,7 +69,6 @@ Token *get_token(circ_buff_ptr buffer)
         ERROR(99, "Memory allocation failed"); 
     }
     
-
     int state = S_START;
     int c; 
     while ((c = read_char(buffer)) != EOF) {

@@ -5,6 +5,7 @@ unsigned counter = 0;
 char *curr_func = NULL;
 LinkedList_ptr var_list = NULL;
 
+
 int codegen()
 {
     // IFJcode24 prolog
@@ -171,7 +172,7 @@ int function_def(ASTNode *node){
 
     // execute the function statements without declaring
     // no need to check for error as it can only be allocation error
-    statement(node->right, false, true, NULL); // nechyba tu return ?
+    statement(node->right, false, true, NULL);
 
     printf("POPFRAME\n");
     printf("RETURN\n");
@@ -225,9 +226,10 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
             nextStatement = nextStatement->left;
             break;}
 
-        case P_IF_STATEMENT:
-            if_statement(node, dec_var, var_asgn, label);
-            break;
+        case P_IF_STATEMENT:{
+            int err = if_statement(node, dec_var, var_asgn, label);
+            if (err) return 99;
+            break;}
 
         case P_WHILE_LOOP: {
             char label_prefix[strlen(curr_func) + 12];
@@ -279,18 +281,7 @@ int statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){
 int var_dec(ASTNode *node, bool dec_var, bool var_asgn){
     node = node->right->left; // ID
     if (dec_var){
-        if(!LLFind(var_list, node->token->value.string_value)){
-            int err = LLInsert(var_list, node->token->value.string_value);
-            if (err){
-                fprintf(stderr, "Error: Allocation error in code generation\n");  
-                LLDispose(var_list);
-                free(var_list);
-                free(curr_func);
-                return 99;
-            }
-                
-            printf("DEFVAR TF@%s\n", node->token->value.string_value);
-        } 
+        VARDEC(node->token->value.string_value);
     }
     ASTNode *idNode = node;
 
@@ -520,7 +511,6 @@ void expression(ASTNode *node){ // @as
 }
 
 /**
- * expression - true if this function is called from expression(), 
  * func_call in expressions = id --left-> P_EXPRESSION_LIST
  * func_call in statements = id --left-> P_ID_FOUND --right-> L_PAREN --left-> P_EXPRESSION_LIST
  */
@@ -591,7 +581,7 @@ int id_statement(ASTNode *node, bool dec_var, bool var_asgn){
 
 }   
 
-void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){ 
+int if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label){ 
     int if_count;
     if (var_asgn)
         if_count = counter++;
@@ -602,17 +592,7 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
     node = node->left->right; // P_BLOCK | P_OPTIONAL_VALUE
     if (node->type == P_OPTIONAL_VALUE){
         if (dec_var){
-            if(!LLFind(var_list, node->right->token->value.string_value)){
-                int err = LLInsert(var_list, node->right->token->value.string_value);
-                if (err){
-                    fprintf(stderr, "Error: Allocation error in code generation\n");  
-                    LLDispose(var_list);
-                    free(var_list);
-                    free(curr_func);
-                    exit(99);
-                }
-                printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
-            }
+            VARDEC(node->right->token->value.string_value);
         }
 
         if (var_asgn){
@@ -628,8 +608,9 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
         }
     }
 
-    statement(node->right, dec_var, var_asgn, label);
-    
+    int err = statement(node->right, dec_var, var_asgn, label);
+    if (err) return 99;
+
     if (var_asgn){
         printf("JUMP &if_%d_end\n", if_count);
         printf("LABEL &if_%d_else\n", if_count);
@@ -638,10 +619,13 @@ void if_statement(ASTNode *node, bool dec_var, bool var_asgn, const char *label)
         node = node->left; // P_ELSE_STATEMENT
         if(node->right->type == P_BLOCK)
             node = node->right->right;
-        statement(node, dec_var, var_asgn, label);
+        int err = statement(node, dec_var, var_asgn, label);
+        if (err) return 99;
     }
     if (var_asgn)
         printf("LABEL &if_%d_end\n", if_count);
+
+    return 0;
 }
 
 int while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
@@ -656,10 +640,7 @@ int while_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
     
     if (node->type == P_OPTIONAL_VALUE) {
         if (dec_var){
-            if(!LLFind(var_list, node->right->token->value.string_value)){
-                LLInsert(var_list, node->right->token->value.string_value);
-                printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
-            }
+            VARDEC(node->right->token->value.string_value);
         }
         
         if (var_asgn) {
@@ -730,21 +711,12 @@ int for_loop(ASTNode *node, const char* label, bool dec_var, bool var_asgn){
    
 
     if (dec_var){
-        if(!LLFind(var_list, node->right->token->value.string_value)){
-            LLInsert(var_list, node->right->token->value.string_value);
-            printf("DEFVAR TF@%s\n", node->right->token->value.string_value);
-        }
+        VARDEC(node->right->token->value.string_value);
         char *var = malloc(sizeof(char) * strlen(node->right->token->value.string_value) + 5);
         sprintf(var, "%s_var", label); // string storage
-        if(!LLFind(var_list, var)){
-            LLInsert(var_list, var);
-            printf("DEFVAR TF@%s\n", var);
-        }
+        VARDEC(var);
         sprintf(var, "%s_itr", label); // iterator for for loop
-        if(!LLFind(var_list, var)){
-            LLInsert(var_list, var);
-            printf("DEFVAR TF@%s\n", var);
-        }
+        VARDEC(var);
         free(var);
     }
     
