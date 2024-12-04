@@ -13,14 +13,7 @@
 #include "symtable.h"
 #include "stack.h"
 
-typedef enum {
-    FUNCTION_SCOPE,
-    WHILE_SCOPE,
-    FOR_SCOPE,
-    NULL_SCOPE
-} scopeLevel;
-    
-
+// Global variable for stack
 extern stack_t *SCOPEStack;
 // main semantic analyzer function
 void analyse(ASTNode* node);
@@ -52,49 +45,46 @@ void getFunctionParamInfo(symtable_node_ptr tree, char *key, ASTNode *ParamList,
 void getFunctionType(symtable_node_ptr tree, char *key, ASTNode *FunctionType);
 // check for main
 void checkForMain();
-// check for function
+// check for function or var
 void checkIfIdExits(symtable_node_ptr tree, char *key);
-
+// check if var/const has been used / changed
 void checkVarsAndConsts(symtable_node_ptr local_table);
-
+// finds return in main function block
 void findReturn(ASTNode *root);
-
+// check return 
 void checkForReturn(symtable_node_ptr function);
-
+// starting semantic control for function
 void symFuncDef(ASTNode* node);
-
+// semantic control for Params
 void symParamList(ASTNode* node, symtable_tree_ptr local_table);
-
+// creates a block and its sub-blocks
 void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId, symtable_node_ptr function);
-
+// semantic control for statements
 void symStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
-
+// semantic control for varDec
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table);
-
+// semantic control for every possible ID operation
 void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
-
 // pass in ID node of function (2nd ID of built-in) and P_EXPRESSION_LIST node
 void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key);
-
+// semantic control for every possible if 
 void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
-
+// inserts built-in functions
 void insertBuiltInFun();
-
+// semantic control for every possible while
 void symWhileLoop(ASTNode* node, symtable_tree_ptr local_table, ASTNode* id, symtable_node_ptr function);
 // check types for boolean operation
 ret_type checkBool(ASTNode* node, symtable_node_ptr local_table);
 // true if relation operation, false otherwise. (EQ, NEQ, MORE, LESS, MEQ, LEQ)
 bool isRel(ASTNodeType type);
-
+// semantic control for return
 void symReturnStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
-
+// semantic control for break
 void symBreakStatement(ASTNode* node, symtable_tree_ptr local_table);
-
+// semantic control for continue
 void symContinueStatement(ASTNode* node, symtable_tree_ptr local_table);
-
+// semantic control for for_loop
 void symForLoop(ASTNode* node, symtable_tree_ptr local_table, symtable_node_ptr function);
-
-void funcDef(ASTNode* node);
 // returns T_ERROR_RET as default, converts node types to return types
 ret_type convertToRetType(ASTNodeType node_type);
 // returns true if float can be converted to int (decimal part is 0)
