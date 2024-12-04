@@ -18,8 +18,6 @@ typedef enum {
 extern stack_t *SCOPEStack;
 // main semantic analyzer function
 void analyse(ASTNode* node);
-// checks if the variable or function was already declared
-void checkDec();
 // checks the type of a function or variable
 ret_type checkType();
 // check expression, check for P_EXPRESSION and pass in its right child (the expression itself)

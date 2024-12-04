@@ -26,6 +26,7 @@ symtable_entry_ptr symtable_entry_init(symtable_entry_type type) {
     // Initialize fields
     entry->entry_type = type;
     entry->param_count = 0;
+    entry->isConvertable = false;
     entry->param_nullable = NULL;
     entry->param_types = NULL;
     entry->isUsed = false;

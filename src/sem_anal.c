@@ -277,6 +277,26 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
         node = node->left; // ASSGN
     }
     node = node->right->right; //P_EXPRESSION
+
+    // variable/constant or literal, sets isConvertable flag
+    if(node->right != NULL) {
+        if(node->right->type == TYPE_F64) {
+            if(floatIsInt(node->right->token->value.float_value)) {
+                key->entry->isConvertable = true;
+            }
+        }
+        else if(node->right->type == ID) {
+            // only variables/constants
+            if(node->right->left == NULL) {
+               symtable_node_ptr expressionID = symtable_search(*local_table, node->right->token->value.string_value); 
+               if(expressionID != NULL) {
+                    key->entry->isConvertable = expressionID->entry->isConvertable;
+               }               
+            }
+        }
+    }
+    // end of isConvertable flag setting
+
     if (key->entry->hasExplicitType == true) {
         ret_type type = checkExpr(node->right,*local_table);
         if (type != T_NULL_RET) {
@@ -1288,8 +1308,12 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         // f64 to i32 if the decimal part is 0 (only literals and constants)
         if(left_type == T_FLOAT_RET) {
             if(node->left->type == ID) {
+                // variables/constants
                 if(node->left->left == NULL) {
                     if(!left_id->entry->isConst) {
+                        return T_ERROR_RET;
+                    }
+                    if(!left_id->entry->isConvertable) {
                         return T_ERROR_RET;
                     }
                 }
@@ -1319,8 +1343,12 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table) {
         }
         if(right_type == T_FLOAT_RET) {
             if(node->right->type == ID) {
+                // variables/constants
                 if(node->right->left == NULL) {
                     if(!right_id->entry->isConst) {
+                        return T_ERROR_RET;
+                    }
+                    if(!right_id->entry->isConvertable) {
                         return T_ERROR_RET;
                     }
                 }

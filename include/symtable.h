@@ -41,7 +41,8 @@ typedef struct symtable_entry_s {
     bool isNullable;
 
     // variables
-    bool isConst; 
+    bool isConst;
+    bool isConvertable;
     bool hasExplicitType;
     bool isChanged;
     int scopeLevel;
