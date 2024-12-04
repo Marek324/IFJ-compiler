@@ -98,7 +98,7 @@ FUNEXP\\
 \item $<prog>\text{ }\to \text{ }<prolog> <function\_def> <end>$
 \item $<prolog> \text{ }\to \text{ } const ID = @import ( <expression> ) ;$
 \item $<end> \text{ }\to \text{ } EOF$
-\item $<function\_def> \text{ }\to \text{ } pub fn ID (<param\_list>) <function\_type> <block> <function\_def>$
+\item $<function\_def> \text{ }\to \text{ pub fn ID}  (<param\_list>) <function\_type> <block> <function\_def>$
 \item $<function\_def> \text{ }\to \text{ } \varepsilon$
 \item $<param\_list> \text{ }\to \text{ } ID : <type\_complete> <comma\_par\_found>$
 \item $<param\_list> \text{ }\to \text{ } \varepsilon$
@@ -118,8 +118,8 @@ FUNEXP\\
 \item $<ID\_found> \text{ }\to \text{ } = <asgn\_found> ;$
 \item $<ID\_found> \text{ }\to \text{ } ( <expression\_list> );$
 \item $<ID\_found> \text{ }\to \text{ } : <while\_loop>$
-\item $<var\_declaration> \text{ }\to \text{ } const ID : <type\_complete> = <asgn\_found> ;$
-\item $<var\_declaration> \text{ }\to \text{ } var ID : <type\_complete> = <asgn\_found> ;$
+\item $<var\_declaration> \text{ }\to \text{ const ID} : <type\_complete> = <asgn\_found> ;$
+\item $<var\_declaration> \text{ }\to \text{ var ID} : <type\_complete> = <asgn\_found> ;$
 \item $<if\_statement> \text{ }\to \text{ } if ( <expression> ) <if\_found>$
 \item $<if\_found> \text{ }\to \text{ } <optional\_value> <block> <else\_statement>$
 \item $<if\_found> \text{ }\to \text{ } <single\_statement> else <single\_statement>$
