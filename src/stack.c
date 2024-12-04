@@ -1,6 +1,6 @@
 /**
  * file: stack.c
- * author: Adam Vesely xvesela00
+ * author: Adam Veselý xvesela00
  * Implementation of the stack.
  */
 

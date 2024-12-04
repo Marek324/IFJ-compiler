@@ -1,6 +1,6 @@
 /**
  * file: exp_parser.h
- * author: Adam Vesely xvesela00
+ * author: Adam Veselý xvesela00
  * Header file for the expression parser.
  */
 

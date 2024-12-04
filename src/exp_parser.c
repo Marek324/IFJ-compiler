@@ -1,6 +1,6 @@
 /**
  * file: exp_parser.h
- * author: Adam Vesely xvesela00
+ * author: Adam Veselý xvesela00
  * Implementation of the expression parser.
  */
 #include <stdbool.h>

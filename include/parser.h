@@ -1,3 +1,8 @@
+/**
+ * file: parser.h
+ * author: Mikuláš Lešiga xlesigm00
+ * Header file for the parser.
+ */
 #ifndef PARSER__H_
 #define PARSER__H_
 

@@ -1,3 +1,8 @@
+/**
+ * file: ast.h
+ * author: Mikuláš Lešiga xlesigm00
+ * Header file for the AST.
+ */
 #ifndef AST_H__
 #define AST_H__
 
@@ -106,15 +111,15 @@ typedef struct ASTNode {
 
 //ASTRoot globally initialized in case of internal or scanner errors 
 extern ASTNode *ASTRoot;
-
+// creates an AST node
 ASTNode *nodeCreate(ASTNodeType type, Token *token);
-
+// inserts an AST node into the tree to the left of the parent
 void insertLeft(ASTNode *parent, ASTNode *leftChild);
-
+// inserts an AST node into the tree to the right of the parent
 void insertRight(ASTNode *parent,ASTNode *rightChild);
-
+// frees the AST and all of its components
 void freeAST(ASTNode *ptr);
-
+// converts the TokenType into its respective ASTNodeType
 ASTNodeType convertToASTType(TokenType type, KeyWordType keyword);
 
 

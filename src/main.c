@@ -1,7 +1,7 @@
 /**
  * main.c
  * author: Marek Hric xhricma00
- * author: Adam Vesely xvesela00
+ * author: Adam Veselý xvesela00
  * author: Mikuláš Lešiga xlesigm00
  * author: Roman Andraščík xandrar00
  */

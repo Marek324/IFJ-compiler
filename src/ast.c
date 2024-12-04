@@ -1,3 +1,8 @@
+/**
+ * file: ast.c
+ * author: Mikuláš Lešiga xlesigm00
+ * Implementation of the AST.
+ */
 #include "ast.h"
 
 ASTNode *ASTRoot = NULL;

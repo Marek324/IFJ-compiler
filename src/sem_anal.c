@@ -1,3 +1,9 @@
+/**
+ * file: sem_anal.c
+ * author: Adam Veselý xvesela00
+ * author: Mikuláš Lešiga xlesigm00
+ * Implementation of the semantic analyzer.
+ */
 #include <math.h>
 
 #include "sem_anal.h"

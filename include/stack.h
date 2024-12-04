@@ -1,6 +1,6 @@
 /**
  * file: stack.h
- * author: Adam Vesely xvesela00
+ * author: Adam Veselý xvesela00
  * Header file for the stack.
  */
 

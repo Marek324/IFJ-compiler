@@ -1,3 +1,8 @@
+/**
+ * file: parser.c
+ * author: Mikuláš Lešiga xlesigm00
+ * Implementation of the parser.
+ */
 #include "parser.h"
 #include "exp_parser.h"
 #include "sem_anal.h"

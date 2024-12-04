@@ -1,3 +1,9 @@
+/**
+ * file: sem_anal.h
+ * author: Adam Veselý xvesela00
+ * author: Mikuláš Lešiga xlesigm00
+ * Header file for the semantic analyzer.
+ */
 #ifndef SEM_ANAL_H
 #define SEM_ANAL_H
 
@@ -93,11 +99,6 @@ void funcDef(ASTNode* node);
 ret_type convertToRetType(ASTNodeType node_type);
 // returns true if float can be converted to int (decimal part is 0)
 bool floatIsInt(float value);
-
-
-
-
-
 
 
 #endif // SEM_ANAL_H
