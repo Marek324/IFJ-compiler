@@ -517,6 +517,7 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
                     error_exit(7, "ERROR: assigning wrong type (symIdStatement2)\n");
                 }
             }
+            // setting isNull
             if(node->right != NULL) {
                 if(node->right->type == ID) {
                     // only variables
@@ -2309,10 +2310,21 @@ ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table) {
     else {
         right_type = convertToRetType(node->right->type);
     }
-    if(left_type == T_NULL_RET && right_type == T_UNREACHABLE_RET) {
-        symtable_dispose(&SymFunctionTree);
-        freeAST(ASTRoot);
-        error_exit(57, "panic: reached unreachable code");
+    if((left_type == T_NULL_RET || node->left->type == ID) && right_type == T_UNREACHABLE_RET) {
+        if(node->left->type == ID) {
+            if(sym_node_left->entry->entry_type == T_VAR_SYM) {
+                if(sym_node_left->entry->isNull) {
+                    symtable_dispose(&SymFunctionTree);
+                    freeAST(ASTRoot);
+                    error_exit(57, "panic: reached unreachable code\n");
+                }
+            }
+        }
+        else {
+            symtable_dispose(&SymFunctionTree);
+            freeAST(ASTRoot);
+            error_exit(57, "panic: reached unreachable code\n");
+        }
     }
     if(left_type != right_type && right_type != T_UNREACHABLE_RET) {
         return T_ERROR_RET;
