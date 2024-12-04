@@ -553,6 +553,11 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
                         // variables
                         else {
                             expressionID = symtable_search(*tree, node->right->token->value.string_value);
+                            if(expressionID == NULL) {
+                                symtable_dispose(&SymFunctionTree);
+                                freeAST(ASTRoot);
+                                error_exit(3, "ERROR: Undefined identifier!\n");
+                            }
                         }
                         expressionID->entry->isUsed = true;
                     }
