@@ -56,30 +56,31 @@ FUNEXP\\
 \large Marek Hric : 
 \normalsize
 \begin{itemize}
-\item a
-\item b
-\item c
+\item Lexikálna analýza
+\item Generovanie kodu
 \end{itemize}
 \large Mikuláš Lešiga :
 \normalsize
 \begin{itemize}
-\item a
-\item b
-\item c
+\item Syntaktická analýza
+\item Semantická analýza
+\item LL Gramatika
+\item Tabulky
 \end{itemize}
 \large Roman Andraščík :
 \normalsize
 \begin{itemize}
-\item a
-\item b
-\item c
+\item Testy
+\item Pomocné funkcie
+\item Symtable
+\item Dokumentácia
 \end{itemize}
 \large Adam Veselý :
 \normalsize
 \begin{itemize}
-\item a
-\item b
-\item c
+\item Syntaktická analýza
+\item Semantická analýza
+\item Dátové štruktúry
 \end{itemize}
  
 \newpage
@@ -172,17 +173,17 @@ FUNEXP\\
 
 \newpage
 
- \Large \textbf{Lexikalna analyza} \normalsize \\
+ \Large \textbf{Lexikálna analýza} \normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
 \paragraph{\indent Riešenie lexikálnej analýzy sme začali vytvorením diagramu deterministického konečného automatu. Následne sme na jeho základe začali vypracovávať implementáciu. Implementácia sa nachádza v súbore \textit{scanner.c,} ktorý pracuje s tokenmi deklarovanymi v súbore \textit{token.h}. Hlavnou funkciou \textit{scanner.c} je funkcia \textit{get\_token}. Pre uľahčenie práce a prehľadnosti kódu sme si deklarovali niekoľko makier, ktoré sú extensivne používané v hlavnej funkcii. Funkcia \textit{get\_token} berie postupne znaky zo štandardného vstupu a vytvára token. Tokenu je priradeny jeho typ a hodnota, ktorá mu odpovedá. Funkcia začína určovaním jednoznakovych tokenov, ktoré vie určite hneď na začiatku. Pokračuje identifikáciou komentárov, ktoré následne ignoruje. Po identifikácii komentárov zisťuje či sa jedna o ID alebo Keyword, pri kľúčových slovách sa následne určuje aj ich typ. Ak sa nejedna ani o jedno pokračuje kontrolou dátových typov, pri ktorých ukladá aj ich hodnoty.  \newline \\}
 
- \Large \textbf{Syntakticka analyza}\normalsize \\
+ \Large \textbf{Syntaktická analýza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
 \paragraph{Riešenie syntaktickej analýzy sme započali vytvorením LL gramatiky, LL tabuľky a precendecnej tabuľky. Následne na ich základe sme vypracovali súbor \textit{parser.c a exp\_parser.c}.Tieto súbory pracujú s uzlami deklarovanymi v súbore \textit{ast.h}. Spustenie syntaktickej analýzy započne zavolanim funkcie \textit{Parse()}. Tato funkcia postupne prechádza cez tokeny a priradzuje ich do uzlov, pomocou ktorých postupne tvorí abstraktný syntakticky strom na základe LL gramatiky. Súbor \textit{parser.c} ďalej riadi aj precedencnu analýzu volaním funkcii zo súboru \textit{exp\_parser.c}. Tento súbor vytvorí strom výrazov, ktorý je následne pripojení do syntaktického stromu.  \newline \\}
 
- \Large \textbf{Semanticka analyza}\normalsize \\
+ \Large \textbf{Semantická analýza}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
 \paragraph{Sémantická analýza je implementovana v súboroch \textit{sem\_anal.c , symtable.c, sem\_anal.h a symtable.h}. Spustenie sémantickej analýzy započne zavolanim funkcie \textit{analyse()}. Sémantická analýza je založená na rekurzivnom prechode AST stromu, ktorý je prevzatí od funkcie \textit{parse()}, ktorá ho vygenerovala. Funkcia ďalej využíva globálne deklarovany AST strom, v ktorom sa nachádzajú built in funkcie. Pri generácií nového AST stromu sa do neho vkladajú built in funkcie práve z tohto globálneho stromu. Funkcia \textit{analyse()} po spustení hľadá \textit{main} a následne postupne rekurzivne prechádza cez AST strom, kde kontroluje validitu dátových typov uložených v ASTNode štruktúrach. Po tejto kontrole započne aj kontrola navratovych hodnôt. Po úspešnej validacii dát predáva nový AST strom funkcii \textit{codegen()}, ktorá začína generaciu kódu. Ak validacia neprebehne úspešne, vyhlási sematicku chybu. \newline \\
@@ -196,7 +197,7 @@ Symtable, ktorý tato funkcia využíva je implementovany ako AVL strom.  \newli
 
 \newpage
 
- \Large \textbf{Datove struktury}\normalsize \\
+ \Large \textbf{Dátové štruktúry}\normalsize \\
 \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
 \paragraph{\large \underline{Circular Buffer}\normalsize \\ Implementovane v súboroch \textit{circ\_buff.c circ\_buff.h}. \\ \newline
