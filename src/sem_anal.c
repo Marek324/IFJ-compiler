@@ -690,7 +690,7 @@ void symIfStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
         if(node->right->type == P_BLOCK) {
                 node = node->right; //P_BLOCK
             }
-        fprintf(stderr,"ELSE\n");
+        //fprintf(stderr,"ELSE\n");
         symBlock(node, local_table, NULL, T_ANY, NULL, function);
     }
 }
