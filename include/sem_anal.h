@@ -34,6 +34,8 @@ ret_type checkDiv(ASTNode* node, symtable_node_ptr local_table);
 ret_type checkRel(ASTNode* node, symtable_node_ptr local_table);
 // check types in an orelse operation
 ret_type checkOrElse(ASTNode* node, symtable_node_ptr local_table);
+// check type in @as
+ret_type checkAtAs(ASTNode* node, symtable_node_ptr local_table);
 // gets ret_type
 ret_type getRetType(ASTNodeType type);
 // gets function
