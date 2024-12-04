@@ -248,7 +248,7 @@ void Type(Token **token, ASTNode *ptr, circ_buff_ptr buffer) {
         insertRight(ptr, u8Found);
     }
     else {
-        if ((*token)->type == T_KW && (*token)->value.keyword != KW_VOID) {
+        if ((*token)->type == T_KW && (*token)->value.keyword != KW_VOID && ((*token)->value.keyword == KW_I32 || (*token)->value.keyword == KW_F64 || (*token)->value.keyword == KW_BOOL)) {
             if ((*token)->value.keyword == KW_I32) {
                 ASTNode *i32Found = checkToken(token, T_KW, KW_I32, "SYNTAX ERROR: Type expected i32");
                 insertRight(ptr, i32Found);
