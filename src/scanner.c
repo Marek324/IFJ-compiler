@@ -11,7 +11,8 @@ Implementation of scanner.
 
 #define RETURN_TOKEN(T)                                                         \
     token->type = T;                                                            \
-    dyn_str_free(str);                                                          \
+    dyn_str_free(str); \
+                    fprintf(stderr, "%d\n", token->type);                                        \
     return token
 
 // Returns token with string value, type can be T_ID or T_STR
@@ -89,7 +90,6 @@ Token *get_token(circ_buff_ptr buffer)
                     case '+': RETURN_TOKEN(T_PLUS);
                     case '-': RETURN_TOKEN(T_MINUS);
                     case '*': RETURN_TOKEN(T_MUL);
-                    // case '@': RETURN_TOKEN(T_AT);
                     case '?': RETURN_TOKEN(T_QMARK);
                     case '.': RETURN_TOKEN(T_DOT);
                     case ',': RETURN_TOKEN(T_COMMA);
@@ -147,6 +147,15 @@ Token *get_token(circ_buff_ptr buffer)
 
             case S_AT: // delete
                 {   
+                    circ_buff_enqueue(buffer, c); // put char after @ back to buffer
+                    while(isspace((c = read_char(buffer)))) {} // skip whitespaces
+                    if (c == EOF || !(isalpha(c) || c == '_')) {
+                        free(token);
+                        dyn_str_free(str);
+                        fprintf(stderr, "Expected ID after \'@\'\n");
+                        exit(2);
+                    }
+                    // is ID
                     READ_ID;
                     int import = !strcmp(str->str, "@import");
                     int as = !strcmp(str->str, "@as");
@@ -155,7 +164,7 @@ Token *get_token(circ_buff_ptr buffer)
                     } else if (as) {
                         RETURN_TOKEN(T_AT_AS);
                     } else {
-                        ERROR(1, "Invalid @ keyword"); // Invalid @ keyword
+                        ERROR(3, "Invalid @ function"); 
                     }
                 }
                 break; // S_AT_IMPORT
