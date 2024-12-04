@@ -360,6 +360,7 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
     ASTNode* root = reduceAll(paren_depth, operand_stack, operator_stack);
     if(!stackIsEmpty(operand_stack) || !stackIsEmpty(operator_stack)) {
         freeAll(paren_depth, operand_stack, operator_stack);
+        freeAST(ASTRoot);
         symtable_dispose(&SymFunctionTree);
         error_exit(2, "ERROR: Unable to reduce!\n");
     }
