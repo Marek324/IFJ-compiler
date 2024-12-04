@@ -15,12 +15,12 @@ pub fn main() void {
     const lightY: f64 = 10.0;
 
     // Initialize loop variables
-    var y: f64 = (0-1) * viewportHeight / 2;
+    var y: f64 = (0-1) * viewportHeight / 2.0 ;
 
     while (y <= viewportHeight / 2) {
         var x: f64 = (0-1) * viewportWidth / 2.0;
 
-        while (x <= viewportWidth / 2) {
+        while (x <= viewportWidth / 2.0 ) {
             // Calculate ray direction
             const rayX: f64 = x * 1.0; // Convert to f64
             const rayY: f64 = y * 1.0; // Convert to f64

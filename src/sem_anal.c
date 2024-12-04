@@ -97,8 +97,8 @@ void symFuncDef(ASTNode* node){
     symtable_dispose(&local_table);
 }
 void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalValue, ret_type type, ASTNode* whileId, symtable_node_ptr function) {
-    if (local_table != NULL) {
     scope++;
+    if (local_table != NULL) {
     stackPush(SCOPEStack, (long)(*local_table));
     *local_table = stackUtilCopy(*local_table);
     }
@@ -128,12 +128,12 @@ void symBlock(ASTNode* node, symtable_tree_ptr local_table, ASTNode* optionalVal
         symtable_node_ptr old_table = *local_table; // Store old table for cleanup
         *local_table = stackUtilPop(SCOPEStack); //POP FROM STACK
         updateTableBySameKey(old_table, local_table);
-        symtable_dispose(&old_table); // Free the previous scope's memory
         scope--;
+        symtable_dispose(&old_table); // Free the previous scope's memory
         fprintf(stderr, "SUB_BLOCK_END\n");
         print_AVL(*local_table);
         fprintf(stderr, "\n");
-        fprintf(stderr, "%i\n", scope);
+        fprintf(stderr, "scope : %i\n", scope);
     }
 }
 
@@ -142,8 +142,8 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
 
     checkVarsAndConsts(local_table->right);
     checkVarsAndConsts(local_table->left);
-
     if (scope == local_table->entry->scopeLevel) {
+        fprintf(stderr,"VarAndConst check failed in scope : %i\n", local_table->entry->scopeLevel);
         if (local_table->entry->isConst == true) {
             if (local_table->entry->isUsed != true) {
                 freeAST(ASTRoot);
@@ -154,7 +154,8 @@ void checkVarsAndConsts(symtable_node_ptr local_table) {
         else {
             if (local_table->entry->isUsed != true || local_table->entry->isChanged != true) {
                 freeAST(ASTRoot);
-                symtable_dispose(&SymFunctionTree);        
+                symtable_dispose(&SymFunctionTree); 
+                fprintf(stderr, "isUsed:%i, isChanged%i\n",local_table->entry->isUsed,local_table->entry->isChanged );     
                 error_exit(9, "ERROR: %s variable either not used or not modified\n", local_table->key);
             }
         }
@@ -242,7 +243,7 @@ void symParamList(ASTNode* node, symtable_tree_ptr local_table) {
 }
 
 void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
-    fprintf(stderr, "V\n");
+    fprintf(stderr, "V = ");
     node = node->right; // const or var
     bool isconst = node->token->value.keyword == KW_CONST ? true : false;
     node = node->left; // ID
@@ -261,7 +262,9 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
     key->entry->hasExplicitType = false;
     key->entry->isNullable = false;
     key->entry->scopeLevel = scope;
-
+    fprintf(stderr,"%s,",key->key);
+    fprintf(stderr," scope = %i\n",key->entry->scopeLevel);
+    // 
     ASTNode *Jozef = node->right;
     if (node->type == P_TYPE_COMPLETE) {
         key->entry->hasExplicitType = true;

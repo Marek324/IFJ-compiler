@@ -35,6 +35,7 @@ symtable_node_ptr stackUtilCopy(symtable_node_ptr tree){
     tree_copy->entry->isNullable = tree->entry->isNullable;
     tree_copy->entry->isUsed = tree->entry->isUsed;
     tree_copy->entry->type = tree->entry->type;
+    tree_copy->entry->scopeLevel = tree->entry->scopeLevel;
 
     // copy next node
     tree_copy->left = stackUtilCopy(tree->left);
@@ -52,22 +53,18 @@ symtable_node_ptr stackUtilPop(stack_t* stack){
     return tree_copy;
 }
 
-void updateTableBySameKey(symtable_node_ptr oldTable, symtable_tree_ptr localTable){
+void updateTableBySameKey(symtable_node_ptr oldTable, symtable_tree_ptr localTable) {
     if (oldTable == NULL || *localTable == NULL) return;
 
-    if (strcmp(oldTable->key, (*localTable)->key) == 0) {
-        if (oldTable->entry->isChanged) {
-            ((*localTable)->entry->isChanged) = oldTable->entry->isChanged;
-        }
-        if (oldTable->entry->isUsed) {
-            ((*localTable)->entry->isUsed) = oldTable->entry->isUsed;
-        }
+    // Search for the same key in the local table
+    symtable_node_ptr localNode = symtable_search(*localTable, oldTable->key);
+    if (localNode != NULL) {
+        // Propagate changes
+        localNode->entry->isChanged |= oldTable->entry->isChanged;
+        localNode->entry->isUsed |= oldTable->entry->isUsed;
     }
-    // traverse old table
+
+    // Continue traversing the old table
     updateTableBySameKey(oldTable->left, localTable);
     updateTableBySameKey(oldTable->right, localTable);
-    // traverse local table
-    updateTableBySameKey(oldTable,&((*localTable)->left));
-    updateTableBySameKey(oldTable,&((*localTable)->right));
-
 }
