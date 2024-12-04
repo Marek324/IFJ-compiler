@@ -351,7 +351,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
                 if (expressionID->entry->isNullable && !key->entry->isNullable) {
                     freeAST(ASTRoot);
                     symtable_dispose(&SymFunctionTree);        
-                    error_exit(7, "ERROR: assigning wrong type\n");
+                    error_exit(7, "ERROR: assigning wrong type (symVarDec1)\n");
                 }
             }
             return;
@@ -364,7 +364,7 @@ void symVarDec(ASTNode* node, symtable_tree_ptr local_table){
         }
         freeAST(ASTRoot);
         symtable_dispose(&SymFunctionTree);        
-        error_exit(7, "ERROR: assigning wrong type\n");
+        error_exit(7, "ERROR: assigning wrong type (symVarDec2)\n");
     }
     else {
         key->entry->type = checkExpr(node->right, *local_table);
@@ -497,14 +497,14 @@ void symIdStatement(ASTNode* node, symtable_tree_ptr local_table, symtable_node_
                 if (!(key->entry->type == type)) {
                     freeAST(ASTRoot);
                     symtable_dispose(&SymFunctionTree);        
-                    error_exit(7, "ERROR: assigning wrong type\n");
+                    error_exit(7, "ERROR: assigning wrong type (symIdStatement1)\n");
                 }
             }
             else {
                 if(!(key->entry->isNullable == true)) {
                     freeAST(ASTRoot);
                     symtable_dispose(&SymFunctionTree);        
-                    error_exit(7, "ERROR: assigning wrong type\n");
+                    error_exit(7, "ERROR: assigning wrong type (symIdStatement2)\n");
                 }
             }
         }
@@ -630,7 +630,7 @@ void checkArguments(symtable_tree_ptr tree, ASTNode* node, symtable_node_ptr key
                             fprintf(stderr,"%i", i);
                             freeAST(ASTRoot);
                             symtable_dispose(&SymFunctionTree);
-                            error_exit(4, "ERROR: assigning wrong type!\n");
+                            error_exit(4, "ERROR: assigning wrong type! (checkArguments)\n");
                         }
                 }
                 else {
