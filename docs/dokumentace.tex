@@ -97,7 +97,7 @@ FUNEXP\\
 
 \begin{enumerate}
 \item $<prog>\text{ }\to \text{ }<prolog> <function\_def> <end>$
-\item $<prolog> \text{ }\to \text{ } const ID = @import ( <expression> ) ;$
+\item $<prolog> \text{ }\to \text{ const ID} = @import ( <expression> ) ;$
 \item $<end> \text{ }\to \text{ } EOF$
 \item $<function\_def> \text{ }\to \text{ pub fn ID}  (<param\_list>) <function\_type> <block> <function\_def>$
 \item $<function\_def> \text{ }\to \text{ } \varepsilon$
@@ -106,15 +106,14 @@ FUNEXP\\
 \item $<comma\_par\_found> \text{ }\to \text{ } , <param\_list>$
 \item $<comma\_par\_found> \text{ }\to \text{ } \varepsilon$
 \item $<block> \text{ }\to \text{ } \{ <statement> \}$
-\item $<block> \text{ }\to \text{ } <single\_statement>$
 \item $<statement> \text{ }\to \text{ } <var\_declaration> <statement>$
 \item $<statement> \text{ }\to \text{ } ID <ID\_found> <statement>$
 \item $<statement> \text{ }\to \text{ } <if\_statement> <statement>$
 \item $<statement> \text{ }\to \text{ } <for\_loop> <statement>$
 \item $<statement> \text{ }\to \text{ } <while\_loop> <statement> $
 \item $<statement> \text{ }\to \text{ } <return\_statement> <statement>$
-\item $<statement> \text{ }\to \text{ } <break> <statemet>$
-\item $<statement> \text{ }\to \text{ } <continue> <statemet>$
+\item $<statement> \text{ }\to \text{ } <break> <statement>$
+\item $<statement> \text{ }\to \text{ } <continue> <statement>$
 \item $<statement> \text{ }\to \text{ } \varepsilon$
 \item $<ID\_found> \text{ }\to \text{ } = <asgn\_found> ;$
 \item $<ID\_found> \text{ }\to \text{ } ( <expression\_list> );$
@@ -123,7 +122,6 @@ FUNEXP\\
 \item $<var\_declaration> \text{ }\to \text{ var ID} : <type\_complete> = <asgn\_found> ;$
 \item $<if\_statement> \text{ }\to \text{ } if ( <expression> ) <if\_found>$
 \item $<if\_found> \text{ }\to \text{ } <optional\_value> <block> <else\_statement>$
-\item $<if\_found> \text{ }\to \text{ } <single\_statement> else <single\_statement>$
 \item $<else\_statement> \text{ }\to \text{ } else <block>$
 \item $<else\_statement> \text{ }\to \text{ } \varepsilon$
 \item $<optional\_value> \text{ }\to \text{ } | ID |$
@@ -150,6 +148,8 @@ FUNEXP\\
 \item $ <single\_statement> \text{ }\to \text{ } <for\_loop>$
 \item $<single\_statement> \text{ }\to \text{ } <while\_loop>$
 \item $<single\_statement> \text{ }\to \text{ } <return\_statement>$
+\item $<single\_statement> \text{ }\to \text{ }  continue ;$
+\item $<single\_statement> \text{ }\to \text{ }  break ;$
 \item $<function\_type> \text{ }\to \text{ } <type>$
 \item $<function\_type> \text{ }\to \text{ } void$
 \item $<asgn\_found> \text{ }\to \text{ } <expression> $
