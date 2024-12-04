@@ -97,6 +97,8 @@ ASTNode *parseExpression(Token **token, circ_buff_ptr buff) {
             free_token(*token);
             ASTNode* expressionList = ruleNode(P_EXPRESSION_LIST);
             insertLeft(node, expressionList);
+            // get token after comma (should be expression)
+            *token = get_token(buff);
             ExpressionList(token, expressionList, buff);
             stackPush(operand_stack, (long)node);
             // get token after expression (should be RPAREN)
