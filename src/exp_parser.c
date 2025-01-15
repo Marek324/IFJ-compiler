@@ -29,7 +29,7 @@ ASOC precedence_table[P_TABLE_SIZE][P_TABLE_SIZE] =
     { H, H, H, H,   H,   H, H, H, U, H, U, H }, // R_PAR ")"
     { H, U, H, H,   H,   H, H, H, U, H, U, H }, // LIT_ID "i"
     { L, L, L, L,   L,   L, L, L, L, U, L, U }  // END "$"
-};
+};                                              // This column is the first symbol compared to the row (2nd symbol). x and y graph -> x comes after y -> y > x, x < y ...
 
 // Function to parse an expression
 ASTNode *parseExpression(Token **token, c_buff_ptr buff) {
